@@ -1,5 +1,5 @@
 {
-  "title": "The Bear and the Fireflies",
+  "title": "Still Out There",
   "_help": {
     "images": "Put image files in /public/story/ and refer to them as /story/yourfile.png",
     "layer": "Layers are drawn back to front. z = depth (0 back, 50 front). factor = how much the layer shifts with the mouse. wiggle = leaf-sway amount (0 = none). fit = 'wide' or 'narrow'. scaleFactor = extra size multiplier.",
@@ -7,10 +7,10 @@
   },
   "pages": [
     {
-      "id": "page-1",
+      "id": "prologue-1",
       "focus": 30,
       "parallax": 1,
-      "fireflies": { "count": 20, "radius": 80, "colors": ["orange"] },
+      "fireflies": { "count": 20, "radius": 80, "colors": ["yellow"] },
       "layers": [
         { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
         { "image": "/story/stars.png", "z": 10, "factor": 0.005 },
@@ -20,14 +20,44 @@
         { "image": "/story/leaves2.png", "x": -20, "y": -20, "z": 49, "factor": 0.04, "scaleFactor": 1.3, "wiggle": 1 }
       ],
       "bubbles": [
-        { "text": "Once upon a quiet night, deep in the forest...", "style": "narration", "x": 50, "y": 10 },
-        { "text": "Who is there?", "style": "speech", "tail": "left", "x": 68, "y": 38, "speaker": "Bear", "delay": 1.2 }
+        { "text": "It's your first night as a Signal Keeper.", "style": "narration", "x": 50, "y": 8 },
+        { "text": "The big dish listens to the sky. Most nights it hears only a soft hiss. Tonight, Echo's antenna starts to blink.", "style": "narration", "x": 50, "y": 90, "delay": 1.5 }
       ]
     },
     {
-      "id": "page-2",
+      "id": "prologue-2",
       "focus": 30,
-      "fireflies": { "count": 40, "radius": 80, "colors": ["yellow", "orange"] },
+      "parallax": 1,
+      "layers": [
+        { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
+        { "image": "/story/ground.png", "z": 20 },
+        { "image": "/story/bear.png", "z": 30, "scaleFactor": 0.83, "fit": "narrow" },
+        { "image": "/story/leaves1.png", "z": 40, "factor": 0.03, "wiggle": 0.6 }
+      ],
+      "bubbles": [
+        { "text": "Beep... beep... Someone is calling.", "style": "narration", "x": 50, "y": 8 },
+        { "text": "The signal is faint, but it's real. It comes from Voyager 1, the farthest machine people have ever built.", "style": "narration", "x": 50, "y": 90, "delay": 1.5 },
+        { "text": "Beep beep!", "style": "shout", "x": 30, "y": 35, "speaker": "Echo", "delay": 2.5 }
+      ]
+    },
+    {
+      "id": "prologue-3",
+      "focus": 30,
+      "parallax": 1,
+      "layers": [
+        { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
+        { "image": "/story/stars.png", "z": 10, "factor": 0.005 },
+        { "image": "/story/bear.png", "z": 30, "scaleFactor": 0.6, "fit": "narrow" }
+      ],
+      "bubbles": [
+        { "text": "Hello, Keeper.", "style": "narration", "x": 50, "y": 8 },
+        { "text": "I am almost one light-day from home. Before you answer me, visit my friends. They went first. Wake their memories, and you'll understand why I'm still out here.", "style": "speech", "tail": "left", "x": 65, "y": 40, "speaker": "Voyager 1", "delay": 1.5 }
+      ]
+    },
+    {
+      "id": "moon-1",
+      "focus": 30,
+      "parallax": 1,
       "layers": [
         { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
         { "image": "/story/stars.png", "z": 10, "factor": 0.005 },
@@ -36,8 +66,596 @@
         { "image": "/story/leaves1.png", "z": 40, "factor": 0.03, "wiggle": 0.6 }
       ],
       "bubbles": [
-        { "text": "Hmm... the lights are dancing.", "style": "thought", "x": 35, "y": 30, "delay": 0.5 },
-        { "text": "Wait for me!", "style": "shout", "x": 70, "y": 22, "delay": 2 }
+        { "text": "Welcome to the Moon. No air. No sound. Lots of dust.", "style": "narration", "x": 50, "y": 8 },
+        { "text": "Long before people walked here, robots came first. One of them is standing right over there.", "style": "narration", "x": 50, "y": 90, "delay": 1.5 }
+      ]
+    },
+    {
+      "id": "moon-2",
+      "focus": 30,
+      "parallax": 1,
+      "layers": [
+        { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
+        { "image": "/story/stars.png", "z": 10, "factor": 0.005 },
+        { "image": "/story/ground.png", "z": 20 },
+        { "image": "/story/bear.png", "z": 30, "scaleFactor": 0.83, "fit": "narrow" }
+      ],
+      "bubbles": [
+        { "text": "I bounced twice before I settled.", "style": "shout", "x": 68, "y": 25, "speaker": "Surveyor 3" },
+        { "text": "My job was to check whether the Moon's ground could hold a spaceship. My engine didn't shut off in time, so I hopped across the dust.", "style": "speech", "tail": "left", "x": 68, "y": 45, "speaker": "Surveyor 3", "delay": 1.5 }
+      ]
+    },
+    {
+      "id": "moon-3",
+      "focus": 30,
+      "parallax": 1,
+      "layers": [
+        { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
+        { "image": "/story/ground.png", "z": 20 },
+        { "image": "/story/bear.png", "z": 30, "scaleFactor": 0.83, "fit": "narrow" }
+      ],
+      "bubbles": [
+        { "text": "A little scoop. A big answer.", "style": "narration", "x": 50, "y": 8 },
+        { "text": "I dug trenches and pushed on the soil. It felt like wet sand, strong enough to hold a lunar module. People could come!", "style": "speech", "tail": "left", "x": 68, "y": 40, "speaker": "Surveyor 3", "delay": 1.5 }
+      ]
+    },
+    {
+      "id": "moon-4",
+      "focus": 30,
+      "parallax": 1,
+      "layers": [
+        { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
+        { "image": "/story/stars.png", "z": 10, "factor": 0.005 },
+        { "image": "/story/ground.png", "z": 20 },
+        { "image": "/story/bear.png", "z": 30, "scaleFactor": 0.83, "fit": "narrow" },
+        { "image": "/story/leaves1.png", "z": 40, "factor": 0.03, "wiggle": 0.6 }
+      ],
+      "bubbles": [
+        { "text": "Half of me flew home. Half stayed as a launch pad.", "style": "narration", "x": 50, "y": 8 },
+        { "text": "In July 1969, two astronauts landed in me. When they left, my top half blasted off from my back. I've stood here ever since.", "style": "speech", "tail": "left", "x": 68, "y": 40, "speaker": "Eagle", "delay": 1.5 }
+      ]
+    },
+    {
+      "id": "moon-5",
+      "focus": 30,
+      "parallax": 1,
+      "layers": [
+        { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
+        { "image": "/story/stars.png", "z": 10, "factor": 0.005 },
+        { "image": "/story/ground.png", "z": 20 },
+        { "image": "/story/bear.png", "z": 30, "scaleFactor": 0.83, "fit": "narrow" }
+      ],
+      "bubbles": [
+        { "text": "I'm a mirror that scientists still use.", "style": "narration", "x": 50, "y": 8 },
+        { "text": "People on Earth still shine lasers at my mirrors and time the bounce. That's how they know the Moon drifts about 3.8 cm farther away every year, as fast as your fingernails grow.", "style": "speech", "tail": "left", "x": 68, "y": 40, "speaker": "Laser reflector", "delay": 1.5 }
+      ]
+    },
+    {
+      "id": "moon-6",
+      "focus": 30,
+      "parallax": 1,
+      "layers": [
+        { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
+        { "image": "/story/stars.png", "z": 10, "factor": 0.005 },
+        { "image": "/story/ground.png", "z": 20 },
+        { "image": "/story/bear.png", "z": 30, "scaleFactor": 0.83, "fit": "narrow" }
+      ],
+      "bubbles": [
+        { "text": "Two years later, I had visitors!", "style": "shout", "x": 68, "y": 25, "speaker": "Surveyor 3" },
+        { "text": "In 1969, Apollo 12 landed about 180 meters from me. The astronauts took pieces of me home, so scientists could see how I survived on the Moon.", "style": "speech", "tail": "left", "x": 68, "y": 45, "speaker": "Surveyor 3", "delay": 1.5 }
+      ]
+    },
+    {
+      "id": "moon-7",
+      "focus": 30,
+      "parallax": 1,
+      "layers": [
+        { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
+        { "image": "/story/stars.png", "z": 10, "factor": 0.005 },
+        { "image": "/story/ground.png", "z": 20 },
+        { "image": "/story/bear.png", "z": 30, "scaleFactor": 0.83, "fit": "narrow" }
+      ],
+      "bubbles": [
+        { "text": "Listen... the Moon is ringing.", "style": "narration", "x": 50, "y": 8 },
+        { "text": "The crew crashed their empty ascent stage into the Moon on purpose, and I felt it shake. It was the first recorded artificial moonquake.", "style": "speech", "tail": "left", "x": 68, "y": 40, "speaker": "Science station", "delay": 1.5 }
+      ]
+    },
+    {
+      "id": "moon-8",
+      "focus": 30,
+      "parallax": 1,
+      "layers": [
+        { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
+        { "image": "/story/stars.png", "z": 10, "factor": 0.005 },
+        { "image": "/story/ground.png", "z": 20 },
+        { "image": "/story/bear.png", "z": 30, "scaleFactor": 0.83, "fit": "narrow" },
+        { "image": "/story/leaves1.png", "z": 40, "factor": 0.03, "wiggle": 0.6 }
+      ],
+      "bubbles": [
+        { "text": "I'm a car parked on the Moon. Forever.", "style": "shout", "x": 68, "y": 25, "speaker": "Rover" },
+        { "text": "I rode folded up inside the lander. On Apollo 15, the astronauts drove me to explore far from their landing site. Together they covered 27.9 km.", "style": "speech", "tail": "left", "x": 68, "y": 45, "speaker": "Rover", "delay": 1.5 }
+      ]
+    },
+    {
+      "id": "moon-9",
+      "focus": 30,
+      "parallax": 1,
+      "layers": [
+        { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
+        { "image": "/story/stars.png", "z": 10, "factor": 0.005 },
+        { "image": "/story/ground.png", "z": 20 },
+        { "image": "/story/bear.png", "z": 30, "scaleFactor": 0.83, "fit": "narrow" }
+      ],
+      "bubbles": [
+        { "text": "The Moon is quiet now. But we're still here.", "style": "narration", "x": 50, "y": 8 },
+        { "text": "On September 30, 1977, the science stations were switched off. Footprints, wheels and mirrors still wait under the black sky.", "style": "narration", "x": 50, "y": 90, "delay": 1.5 },
+        { "text": "They proved we could land. Now watch where that led.", "style": "speech", "tail": "left", "x": 68, "y": 35, "speaker": "Voyager 1", "delay": 4 }
+      ]
+    },
+    {
+      "id": "mars1-1",
+      "focus": 30,
+      "parallax": 1,
+      "layers": [
+        { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
+        { "image": "/story/ground.png", "z": 20 },
+        { "image": "/story/bear.png", "z": 30, "scaleFactor": 0.83, "fit": "narrow" },
+        { "image": "/story/leaves1.png", "z": 40, "factor": 0.03, "wiggle": 0.6 }
+      ],
+      "bubbles": [
+        { "text": "Mars is red, dusty, and very cold.", "style": "narration", "x": 50, "y": 8 },
+        { "text": "Reaching Mars takes months. And landing is the hardest part of all.", "style": "narration", "x": 50, "y": 90, "delay": 1.5 }
+      ]
+    },
+    {
+      "id": "mars1-2",
+      "focus": 30,
+      "parallax": 1,
+      "layers": [
+        { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
+        { "image": "/story/ground.png", "z": 20 },
+        { "image": "/story/bear.png", "z": 30, "scaleFactor": 0.83, "fit": "narrow" }
+      ],
+      "bubbles": [
+        { "text": "I took the first picture ever on Mars.", "style": "shout", "x": 68, "y": 25, "speaker": "Viking 1" },
+        { "text": "I landed on July 20, 1976. Minutes later, I sent home a picture of the rocky ground beside my foot.", "style": "speech", "tail": "left", "x": 68, "y": 45, "speaker": "Viking 1", "delay": 1.5 }
+      ]
+    },
+    {
+      "id": "mars1-3",
+      "focus": 30,
+      "parallax": 1,
+      "layers": [
+        { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
+        { "image": "/story/ground.png", "z": 20 },
+        { "image": "/story/bear.png", "z": 30, "scaleFactor": 0.83, "fit": "narrow" }
+      ],
+      "bubbles": [
+        { "text": "Is anything alive in here?", "style": "thought", "x": 35, "y": 25, "delay": 0.5 },
+        { "text": "Some of my tests looked a bit like life. Another test found no carbon-based chemicals at all. Scientists still argue about what it meant.", "style": "speech", "tail": "left", "x": 68, "y": 45, "speaker": "Viking 1", "delay": 1.5 }
+      ]
+    },
+    {
+      "id": "mars1-4",
+      "focus": 30,
+      "parallax": 1,
+      "layers": [
+        { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
+        { "image": "/story/ground.png", "z": 20 },
+        { "image": "/story/bear.png", "z": 30, "scaleFactor": 0.83, "fit": "narrow" },
+        { "image": "/story/leaves1.png", "z": 40, "factor": 0.03, "wiggle": 0.6 }
+      ],
+      "bubbles": [
+        { "text": "I landed inside a giant bouncy ball!", "style": "shout", "x": 68, "y": 25, "speaker": "Sojourner" },
+        { "text": "In July 1997, my lander fell wrapped in huge airbags. We bounced as high as 15 meters before rolling to a stop.", "style": "speech", "tail": "left", "x": 68, "y": 45, "speaker": "Sojourner", "delay": 1.5 }
+      ]
+    },
+    {
+      "id": "mars1-5",
+      "focus": 30,
+      "parallax": 1,
+      "layers": [
+        { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
+        { "image": "/story/ground.png", "z": 20 },
+        { "image": "/story/bear.png", "z": 30, "scaleFactor": 0.83, "fit": "narrow" }
+      ],
+      "bubbles": [
+        { "text": "I'm only 30 cm tall, but I was first!", "style": "shout", "x": 68, "y": 25, "speaker": "Sojourner" },
+        { "text": "I was the first rover on Mars. I drove up to rocks to study them. Rounded pebbles showed that water once rushed through this valley.", "style": "speech", "tail": "left", "x": 68, "y": 45, "speaker": "Sojourner", "delay": 1.5 }
+      ]
+    },
+    {
+      "id": "mars1-6",
+      "focus": 30,
+      "parallax": 1,
+      "layers": [
+        { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
+        { "image": "/story/ground.png", "z": 20 },
+        { "image": "/story/bear.png", "z": 30, "scaleFactor": 0.83, "fit": "narrow" }
+      ],
+      "bubbles": [
+        { "text": "Now you see it... now you don't!", "style": "shout", "x": 68, "y": 25, "speaker": "Phoenix" },
+        { "text": "I landed near the north pole on May 25, 2008. I dug a trench and found white bits. Four days later they were gone. They were ice, turning straight into vapor in the thin, dry air!", "style": "speech", "tail": "left", "x": 68, "y": 48, "speaker": "Phoenix", "delay": 1.5 }
+      ]
+    },
+    {
+      "id": "mars1-7",
+      "focus": 30,
+      "parallax": 1,
+      "layers": [
+        { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
+        { "image": "/story/stars.png", "z": 10, "factor": 0.005 },
+        { "image": "/story/ground.png", "z": 20 },
+        { "image": "/story/bear.png", "z": 30, "scaleFactor": 0.83, "fit": "narrow" }
+      ],
+      "bubbles": [
+        { "text": "Winter came, and the Sun went away.", "style": "narration", "x": 50, "y": 8 },
+        { "text": "I was built for one summer. In November 2008, the long winter came and my solar panels stopped, just as planned.", "style": "speech", "tail": "left", "x": 68, "y": 40, "speaker": "Phoenix", "delay": 1.5 },
+        { "text": "They were the first visitors. Each one made the next one possible.", "style": "speech", "tail": "left", "x": 68, "y": 65, "speaker": "Voyager 1", "delay": 4 }
+      ]
+    },
+    {
+      "id": "mars2-1",
+      "focus": 30,
+      "parallax": 1,
+      "layers": [
+        { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
+        { "image": "/story/ground.png", "z": 20 },
+        { "image": "/story/bear.png", "z": 30, "scaleFactor": 0.83, "fit": "narrow" },
+        { "image": "/story/leaves1.png", "z": 40, "factor": 0.03, "wiggle": 0.6 }
+      ],
+      "bubbles": [
+        { "text": "We were twins, sent to opposite sides of Mars.", "style": "narration", "x": 50, "y": 8 },
+        { "text": "Spirit landed on January 3, 2004, and Opportunity three weeks later. They were built for about 90 days. Their mission: find clues about water from long ago.", "style": "narration", "x": 50, "y": 90, "delay": 1.5 }
+      ]
+    },
+    {
+      "id": "mars2-2",
+      "focus": 30,
+      "parallax": 1,
+      "layers": [
+        { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
+        { "image": "/story/ground.png", "z": 20 },
+        { "image": "/story/bear.png", "z": 30, "scaleFactor": 0.83, "fit": "narrow" }
+      ],
+      "bubbles": [
+        { "text": "Dusty panels? Catch the wind!", "style": "shout", "x": 68, "y": 25, "speaker": "Opportunity" },
+        { "text": "Dust slowly covered my solar panels, and my power dropped. But sometimes Martian winds swept them clean, and I woke up with fresh energy.", "style": "speech", "tail": "left", "x": 68, "y": 45, "speaker": "Opportunity", "delay": 1.5 }
+      ]
+    },
+    {
+      "id": "mars2-3",
+      "focus": 30,
+      "parallax": 1,
+      "layers": [
+        { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
+        { "image": "/story/ground.png", "z": 20 },
+        { "image": "/story/leaves1.png", "z": 40, "factor": 0.03, "wiggle": 0.6 }
+      ],
+      "bubbles": [
+        { "text": "The rocks remembered water.", "style": "narration", "x": 50, "y": 8 },
+        { "text": "The twins found rocks that could only form where water stayed for a long time. Long ago, Mars was a wetter world.", "style": "narration", "x": 50, "y": 90, "delay": 1.5 }
+      ]
+    },
+    {
+      "id": "mars2-4",
+      "focus": 30,
+      "parallax": 1,
+      "layers": [
+        { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
+        { "image": "/story/ground.png", "z": 20 },
+        { "image": "/story/bear.png", "z": 30, "scaleFactor": 0.83, "fit": "narrow" }
+      ],
+      "bubbles": [
+        { "text": "Spirit's wheels got stuck.", "style": "narration", "x": 50, "y": 8 },
+        { "text": "After driving 7.7 km, Spirit sank into soft sand. It kept studying the ground right where it stood, until its mission ended in 2010.", "style": "narration", "x": 50, "y": 90, "delay": 1.5 }
+      ]
+    },
+    {
+      "id": "mars2-5",
+      "focus": 30,
+      "parallax": 1,
+      "layers": [
+        { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
+        { "image": "/story/ground.png", "z": 20 },
+        { "image": "/story/bear.png", "z": 30, "scaleFactor": 0.83, "fit": "narrow" }
+      ],
+      "bubbles": [
+        { "text": "I listened to the heartbeat of Mars.", "style": "shout", "x": 68, "y": 25, "speaker": "InSight" },
+        { "text": "I landed in November 2018. My robot arm placed a super-sensitive seismometer on the ground. Then I listened, very carefully.", "style": "speech", "tail": "left", "x": 68, "y": 45, "speaker": "InSight", "delay": 1.5 }
+      ]
+    },
+    {
+      "id": "mars2-6",
+      "focus": 30,
+      "parallax": 1,
+      "layers": [
+        { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
+        { "image": "/story/ground.png", "z": 20 },
+        { "image": "/story/bear.png", "z": 30, "scaleFactor": 0.83, "fit": "narrow" }
+      ],
+      "bubbles": [
+        { "text": "Quakes showed what hides inside Mars.", "style": "narration", "x": 50, "y": 8 },
+        { "text": "Marsquake waves traveled through the planet and showed scientists its crust, mantle and core. Slowly, dust covered my panels. My mission ended in December 2022.", "style": "speech", "tail": "left", "x": 68, "y": 42, "speaker": "InSight", "delay": 1.5 }
+      ]
+    },
+    {
+      "id": "mars2-7",
+      "focus": 30,
+      "parallax": 1,
+      "layers": [
+        { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
+        { "image": "/story/ground.png", "z": 20 },
+        { "image": "/story/bear.png", "z": 30, "scaleFactor": 0.83, "fit": "narrow" },
+        { "image": "/story/leaves1.png", "z": 40, "factor": 0.03, "wiggle": 0.6 }
+      ],
+      "bubbles": [
+        { "text": "They said five flights. I flew seventy-two.", "style": "shout", "x": 68, "y": 25, "speaker": "Ingenuity" },
+        { "text": "I rode to Mars under Perseverance's belly. On April 19, 2021, I made the first powered flight on another planet, in air less than 1% as thick as Earth's.", "style": "speech", "tail": "left", "x": 68, "y": 48, "speaker": "Ingenuity", "delay": 1.5 }
+      ]
+    },
+    {
+      "id": "mars2-8",
+      "focus": 30,
+      "parallax": 1,
+      "layers": [
+        { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
+        { "image": "/story/ground.png", "z": 20 },
+        { "image": "/story/bear.png", "z": 30, "scaleFactor": 0.83, "fit": "narrow" }
+      ],
+      "bubbles": [
+        { "text": "Opportunity, the other twin, kept driving. Then came the storm.", "style": "narration", "x": 50, "y": 8 },
+        { "text": "For almost 15 years, Opportunity rolled on, 45.16 km in all. In 2018, a dust storm wrapped the whole planet. Its last signal came on June 10, 2018.", "style": "narration", "x": 50, "y": 90, "delay": 1.5 }
+      ]
+    },
+    {
+      "id": "mars2-9",
+      "focus": 30,
+      "parallax": 1,
+      "layers": [
+        { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
+        { "image": "/story/ground.png", "z": 20 },
+        { "image": "/story/bear.png", "z": 30, "scaleFactor": 0.83, "fit": "narrow" },
+        { "image": "/story/leaves1.png", "z": 40, "factor": 0.03, "wiggle": 0.6 }
+      ],
+      "bubbles": [
+        { "text": "A new rover passes the old record.", "style": "narration", "x": 50, "y": 8 },
+        { "text": "On October 11, 2026, Perseverance drove farther than Opportunity ever had. The old record was finally broken.", "style": "narration", "x": 50, "y": 90, "delay": 1.5 },
+        { "text": "Records are made to be passed. That's how explorers say thank you.", "style": "speech", "tail": "left", "x": 68, "y": 35, "speaker": "Voyager 1", "delay": 3.5 }
+      ]
+    },
+    {
+      "id": "small-1",
+      "focus": 30,
+      "parallax": 1,
+      "layers": [
+        { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
+        { "image": "/story/stars.png", "z": 10, "factor": 0.005 },
+        { "image": "/story/bear.png", "z": 30, "scaleFactor": 0.6, "fit": "narrow" }
+      ],
+      "bubbles": [
+        { "text": "Out here, the worlds are small and lumpy.", "style": "narration", "x": 50, "y": 8 },
+        { "text": "Some small worlds wander near Earth. Others crowd together in a belt between Mars and Jupiter. Two brave explorers visited them.", "style": "narration", "x": 50, "y": 90, "delay": 1.5 }
+      ]
+    },
+    {
+      "id": "small-2",
+      "focus": 30,
+      "parallax": 1,
+      "layers": [
+        { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
+        { "image": "/story/stars.png", "z": 10, "factor": 0.005 },
+        { "image": "/story/ground.png", "z": 20 },
+        { "image": "/story/bear.png", "z": 30, "scaleFactor": 0.83, "fit": "narrow" }
+      ],
+      "bubbles": [
+        { "text": "Nobody built me to land. I landed anyway.", "style": "shout", "x": 68, "y": 25, "speaker": "NEAR Shoemaker" },
+        { "text": "I was the first spacecraft to orbit an asteroid. At the end of my mission, on February 12, 2001, my team lowered me gently onto Eros, about as fast as you walk.", "style": "speech", "tail": "left", "x": 68, "y": 48, "speaker": "NEAR Shoemaker", "delay": 1.5 }
+      ]
+    },
+    {
+      "id": "small-3",
+      "focus": 30,
+      "parallax": 1,
+      "layers": [
+        { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
+        { "image": "/story/stars.png", "z": 10, "factor": 0.005 },
+        { "image": "/story/ground.png", "z": 20 },
+        { "image": "/story/bear.png", "z": 30, "scaleFactor": 0.83, "fit": "narrow" }
+      ],
+      "bubbles": [
+        { "text": "Still talking, from the surface of an asteroid!", "style": "shout", "x": 68, "y": 25, "speaker": "NEAR Shoemaker" },
+        { "text": "I wasn't built to survive landing, but I did, and I kept sending data for about two weeks. In all, I took 160,000 pictures. Then the deep cold, about -173 °C, quieted me.", "style": "speech", "tail": "left", "x": 68, "y": 50, "speaker": "NEAR Shoemaker", "delay": 1.5 }
+      ]
+    },
+    {
+      "id": "small-4",
+      "focus": 30,
+      "parallax": 1,
+      "layers": [
+        { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
+        { "image": "/story/stars.png", "z": 10, "factor": 0.005 },
+        { "image": "/story/bear.png", "z": 30, "scaleFactor": 0.6, "fit": "narrow" }
+      ],
+      "bubbles": [
+        { "text": "I visited two worlds and stayed with both.", "style": "shout", "x": 68, "y": 22, "speaker": "Dawn" },
+        { "text": "My ion engine gave the gentlest push, like a breath. But it kept pushing for weeks at a time. That let me orbit the giant asteroid Vesta, then fly on to the dwarf planet Ceres.", "style": "speech", "tail": "left", "x": 68, "y": 48, "speaker": "Dawn", "delay": 1.5 }
+      ]
+    },
+    {
+      "id": "small-5",
+      "focus": 30,
+      "parallax": 1,
+      "layers": [
+        { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
+        { "image": "/story/stars.png", "z": 10, "factor": 0.005 },
+        { "image": "/story/bear.png", "z": 30, "scaleFactor": 0.6, "fit": "narrow" }
+      ],
+      "bubbles": [
+        { "text": "What were those bright spots?", "style": "thought", "x": 35, "y": 25, "delay": 0.5 },
+        { "text": "Ceres had shining spots inside a crater. They turned out to be salt, left behind when salty ice from below turned to vapor.", "style": "speech", "tail": "left", "x": 68, "y": 45, "speaker": "Dawn", "delay": 1.5 }
+      ]
+    },
+    {
+      "id": "small-6",
+      "focus": 30,
+      "parallax": 1,
+      "layers": [
+        { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
+        { "image": "/story/stars.png", "z": 10, "factor": 0.005 },
+        { "image": "/story/bear.png", "z": 30, "scaleFactor": 0.5, "fit": "narrow" }
+      ],
+      "bubbles": [
+        { "text": "Out of fuel, but still circling.", "style": "narration", "x": 50, "y": 8 },
+        { "text": "In 2018, I ran out of the fuel I used to point myself. I still circle Ceres today, quietly.", "style": "speech", "tail": "left", "x": 68, "y": 40, "speaker": "Dawn", "delay": 1.5 },
+        { "text": "Small worlds. Big firsts. Keep going, Keeper.", "style": "speech", "tail": "left", "x": 68, "y": 65, "speaker": "Voyager 1", "delay": 4 }
+      ]
+    },
+    {
+      "id": "beyond-1",
+      "focus": 30,
+      "parallax": 1,
+      "layers": [
+        { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
+        { "image": "/story/stars.png", "z": 10, "factor": 0.008 },
+        { "image": "/story/bear.png", "z": 30, "scaleFactor": 0.6, "fit": "narrow" }
+      ],
+      "bubbles": [
+        { "text": "I found planets by watching stars dim.", "style": "shout", "x": 68, "y": 22, "speaker": "Kepler" },
+        { "text": "I launched in 2009 and stared at one patch of sky. When a star dimmed just a tiny bit, it meant a planet was passing in front of it.", "style": "speech", "tail": "left", "x": 68, "y": 48, "speaker": "Kepler", "delay": 1.5 }
+      ]
+    },
+    {
+      "id": "beyond-2",
+      "focus": 30,
+      "parallax": 1,
+      "layers": [
+        { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
+        { "image": "/story/stars.png", "z": 10, "factor": 0.008 },
+        { "image": "/story/bear.png", "z": 30, "scaleFactor": 0.6, "fit": "narrow" }
+      ],
+      "bubbles": [
+        { "text": "A broken wheel. A clever fix.", "style": "shout", "x": 68, "y": 22, "speaker": "Kepler" },
+        { "text": "In 2013, I lost one of the wheels that kept me pointing steady. Engineers used the gentle push of sunlight to balance me, like a kayak steering into the current. My second life was called K2.", "style": "speech", "tail": "left", "x": 68, "y": 50, "speaker": "Kepler", "delay": 1.5 }
+      ]
+    },
+    {
+      "id": "beyond-3",
+      "focus": 30,
+      "parallax": 1,
+      "layers": [
+        { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
+        { "image": "/story/stars.png", "z": 10, "factor": 0.008 },
+        { "image": "/story/bear.png", "z": 30, "scaleFactor": 0.6, "fit": "narrow" }
+      ],
+      "bubbles": [
+        { "text": "More planets than stars!", "style": "shout", "x": 68, "y": 22, "speaker": "Kepler" },
+        { "text": "I found more than 2,600 planets and showed that there are more planets than stars in our sky. I ran out of fuel in 2018. Now I drift around the Sun, trailing behind Earth.", "style": "speech", "tail": "left", "x": 68, "y": 50, "speaker": "Kepler", "delay": 1.5 }
+      ]
+    },
+    {
+      "id": "beyond-4",
+      "focus": 30,
+      "parallax": 1,
+      "layers": [
+        { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
+        { "image": "/story/stars.png", "z": 10, "factor": 0.008 },
+        { "image": "/story/bear.png", "z": 30, "scaleFactor": 0.6, "fit": "narrow" }
+      ],
+      "bubbles": [
+        { "text": "I carry a picture of you to the stars.", "style": "shout", "x": 68, "y": 22, "speaker": "Pioneer 10" },
+        { "text": "I launched in 1972. I was the first spacecraft to cross the asteroid belt and fly past Jupiter. On my side is a plaque showing people and where Earth is.", "style": "speech", "tail": "left", "x": 68, "y": 50, "speaker": "Pioneer 10", "delay": 1.5 }
+      ]
+    },
+    {
+      "id": "beyond-5",
+      "focus": 30,
+      "parallax": 1,
+      "layers": [
+        { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
+        { "image": "/story/stars.png", "z": 10, "factor": 0.008 },
+        { "image": "/story/bear.png", "z": 30, "scaleFactor": 0.6, "fit": "narrow" }
+      ],
+      "bubbles": [
+        { "text": "My twin flew to Saturn first.", "style": "narration", "x": 50, "y": 8 },
+        { "text": "Pioneer 11 was the first spacecraft to fly past Saturn. It carries the same plaque, the same picture of us.", "style": "narration", "x": 50, "y": 90, "delay": 1.5 }
+      ]
+    },
+    {
+      "id": "beyond-6",
+      "focus": 30,
+      "parallax": 1,
+      "layers": [
+        { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
+        { "image": "/story/stars.png", "z": 10, "factor": 0.005 }
+      ],
+      "bubbles": [
+        { "text": "Quiet now, and very far away.", "style": "narration", "x": 50, "y": 8 },
+        { "text": "Pioneer 11 last spoke in 1995. Pioneer 10's last faint signal came on January 23, 2003, from 12.23 billion km away. In about two million years, it will pass a red star called Aldebaran.", "style": "narration", "x": 50, "y": 90, "delay": 1.5 },
+        { "text": "They carried your picture. Now, Keeper, it's time for my story.", "style": "speech", "tail": "left", "x": 68, "y": 35, "speaker": "Voyager 1", "delay": 4 }
+      ]
+    },
+    {
+      "id": "finale-1",
+      "focus": 30,
+      "parallax": 1,
+      "layers": [
+        { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
+        { "image": "/story/stars.png", "z": 10, "factor": 0.008 },
+        { "image": "/story/bear.png", "z": 30, "scaleFactor": 0.6, "fit": "narrow" }
+      ],
+      "bubbles": [
+        { "text": "Now, my own story.", "style": "narration", "x": 50, "y": 8 },
+        { "text": "I launched in 1977. I flew past Jupiter and Saturn. In 2012, I became the first spacecraft in interstellar space.", "style": "speech", "tail": "left", "x": 68, "y": 42, "speaker": "Voyager 1", "delay": 1.5 }
+      ]
+    },
+    {
+      "id": "finale-2",
+      "focus": 30,
+      "parallax": 1,
+      "layers": [
+        { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
+        { "image": "/story/bear.png", "z": 30, "scaleFactor": 0.5, "fit": "narrow" }
+      ],
+      "bubbles": [
+        { "text": "I'll be honest with you, Keeper.", "style": "narration", "x": 50, "y": 8 },
+        { "text": "My power is low. Only a couple of my instruments are still on. But I'm still out here, still sending my signal home.", "style": "speech", "tail": "left", "x": 68, "y": 42, "speaker": "Voyager 1", "delay": 1.5 }
+      ]
+    },
+    {
+      "id": "finale-3",
+      "focus": 30,
+      "parallax": 1,
+      "fireflies": { "count": 30, "radius": 80, "colors": ["yellow", "orange"] },
+      "layers": [
+        { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
+        { "image": "/story/stars.png", "z": 10, "factor": 0.005 },
+        { "image": "/story/ground.png", "z": 20 },
+        { "image": "/story/bear.png", "z": 30, "scaleFactor": 0.83, "fit": "narrow" },
+        { "image": "/story/leaves1.png", "z": 40, "factor": 0.03, "wiggle": 0.6 },
+        { "image": "/story/leaves2.png", "x": -20, "y": -20, "z": 49, "factor": 0.04, "scaleFactor": 1.3, "wiggle": 1 }
+      ],
+      "bubbles": [
+        { "text": "Now you can answer me.", "style": "narration", "x": 50, "y": 8 },
+        { "text": "On November 18, 2026, I reach one light-day from Earth, about 25.9 billion km. Your message will take a whole day to reach me. Send me one, Keeper.", "style": "speech", "tail": "left", "x": 68, "y": 40, "speaker": "Voyager 1", "delay": 1.5 }
+      ]
+    },
+    {
+      "id": "finale-4",
+      "focus": 30,
+      "parallax": 1,
+      "fireflies": { "count": 40, "radius": 80, "colors": ["yellow", "orange"] },
+      "layers": [
+        { "image": "/story/bg.jpg", "z": 0, "factor": 0.005 },
+        { "image": "/story/stars.png", "z": 10, "factor": 0.005 },
+        { "image": "/story/ground.png", "z": 20 },
+        { "image": "/story/bear.png", "z": 30, "scaleFactor": 0.83, "fit": "narrow" },
+        { "image": "/story/leaves1.png", "z": 40, "factor": 0.03, "wiggle": 0.6 },
+        { "image": "/story/leaves2.png", "x": -20, "y": -20, "z": 49, "factor": 0.04, "scaleFactor": 1.3, "wiggle": 1 }
+      ],
+      "bubbles": [
+        { "text": "They're quiet now. But they're still out there.", "style": "narration", "x": 50, "y": 8 },
+        { "text": "And so is the next explorer: you.", "style": "narration", "x": 50, "y": 90, "delay": 2 }
       ]
     }
   ]
