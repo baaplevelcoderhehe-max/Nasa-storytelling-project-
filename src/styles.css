@@ -1,35 +1,67 @@
-* {
-  box-sizing: border-box;
+* { box-sizing: border-box; }
+html, body, #root { margin: 0; width: 100%; height: 100%; overflow: hidden; background: #010101; }
+body { font-family: 'Georgia', 'Times New Roman', serif; color: #fff; }
+
+.scene { position: absolute; inset: 0; }
+.scene canvas { display: block; }
+
+.status {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  color: #ccc; font-style: italic; pointer-events: none;
 }
 
-html,
-body,
-#root {
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  -webkit-touch-callout: none;
-  overflow: hidden;
-  background: #010101;
+.title {
+  position: absolute; top: 16px; left: 20px; font-size: 14px; letter-spacing: 0.15em;
+  text-transform: uppercase; opacity: 0.6; pointer-events: none;
 }
 
-#root {
-  overflow: hidden;
+.nav {
+  position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 16px; font-size: 14px;
+  background: rgba(0, 0, 0, 0.45); backdrop-filter: blur(6px);
+  padding: 6px 14px; border-radius: 999px;
+}
+.nav button {
+  background: none; border: 0; color: #fff; font-size: 28px; line-height: 1;
+  cursor: pointer; padding: 0 6px;
+}
+.nav button:disabled { opacity: 0.25; cursor: default; }
+
+/* ---------- speech bubbles ---------- */
+.bubbles { position: absolute; inset: 0; pointer-events: none; }
+
+.bubble {
+  position: absolute; transform: translate(-50%, -50%);
+  max-width: min(280px, 60vw); padding: 12px 18px;
+  background: #fff; color: #1a1a1a; border-radius: 22px;
+  font-size: clamp(14px, 1.6vw, 20px); line-height: 1.35; text-align: center;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+  opacity: 0; animation: pop 0.5s cubic-bezier(0.3, 1.5, 0.5, 1) forwards;
+}
+.speaker {
+  display: block; font-size: 0.65em; font-weight: bold; letter-spacing: 0.1em;
+  text-transform: uppercase; opacity: 0.55; margin-bottom: 2px;
 }
 
-body {
-  font-family:
-    -apple-system,
-    BlinkMacSystemFont,
-    avenir next,
-    avenir,
-    helvetica neue,
-    helvetica,
-    ubuntu,
-    roboto,
-    noto,
-    segoe ui,
-    arial,
-    sans-serif;
+.bubble::after { content: ''; position: absolute; bottom: -12px; border: 10px solid transparent; border-top-color: #fff; border-bottom: 0; }
+.tail-left::after { left: 24px; }
+.tail-right::after { right: 24px; }
+.tail-none::after { display: none; }
+
+.bubble.thought { border-radius: 50px; border: 2px dashed #888; background: rgba(255, 255, 255, 0.92); font-style: italic; }
+
+.bubble.shout {
+  background: #ffe14d; border: 3px solid #1a1a1a; font-weight: bold; text-transform: uppercase;
+  border-radius: 8px; transform: translate(-50%, -50%) rotate(-3deg);
+}
+.bubble.shout::after { border-top-color: #1a1a1a; }
+
+.bubble.narration {
+  background: rgba(10, 10, 20, 0.7); color: #f3e9d0; border-radius: 4px; font-style: italic;
+  border: 1px solid rgba(243, 233, 208, 0.35); max-width: min(560px, 80vw);
+}
+
+@keyframes pop {
+  from { opacity: 0; scale: 0.6; }
+  to { opacity: 1; scale: 1; }
 }

@@ -2,7 +2,7 @@ import { Vector3, CatmullRomCurve3 } from 'three'
 import { useRef, useMemo } from 'react'
 import { extend, useFrame } from '@react-three/fiber'
 import * as meshline from 'meshline'
-
+import React from 'react'
 extend(meshline)
 
 const r = () => Math.max(0.2, Math.random())
