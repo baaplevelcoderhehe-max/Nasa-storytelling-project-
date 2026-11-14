@@ -6,7 +6,7 @@ import { extend } from '@react-three/fiber'
 // Credit: Gianmarco Simone https://twitter.com/ggsimm
 
 const LayerMaterial = shaderMaterial(
-  { textr: null, movement: [0, 0, 0], scale: 1, factor: 0, wiggle: 0, time: 0, dim: 1 },
+  { textr: null, movement: [0, 0, 0], scale: 1, factor: 0, wiggle: 0, time: 0, dim: 1, uvRepeat: [1, 1], uvOffset: [0, 0] },
   ` uniform float time;
     uniform vec2 resolution;
     uniform float wiggle;
@@ -31,10 +31,12 @@ const LayerMaterial = shaderMaterial(
     uniform float scale;
     uniform vec3 movement;
     uniform sampler2D textr;
-    uniform float dim; // 1 = normal, lower = darker (quiet pages)
+    uniform float dim; // 1 = normal, lower = darker (quiet pages), higher = brighter
+    uniform vec2 uvRepeat; // which part of the picture is shown (split pages)
+    uniform vec2 uvOffset;
     varying vec2 vUv;
     void main()	{
-      vec2 uv = vUv / scale + movement.xy * factor;
+      vec2 uv = uvOffset + (vUv / scale) * uvRepeat + movement.xy * factor;
       vec4 color = texture2D(textr, uv);
       if (color.a < 0.1) discard;
       gl_FragColor = vec4(color.rgb * dim, .1);

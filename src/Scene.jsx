@@ -10,6 +10,7 @@ import './materials/spriteMaterial'
 import { art } from './data/art'
 import { useReducedMotion, useSmallScreen } from './motion'
 import { publishSpriteRects } from './layoutBus'
+import { Ambient, Divider, glowTexture } from './sceneExtras'
 
 // ---------------------------------------------------------------------------
 // A story page is a stack of layers (see "_help" in public/story.json):
@@ -109,9 +110,13 @@ function useStage(page) {
   const vh = viewport.height
   const aspect = vw / vh
   const bg = page?.layers?.find(isBg)
+  const split = !!page?.layers?.some((l) => isBg(l) && l.half)
   let bgW = vw
   let bgH = vh
-  if (bg) {
+  if (split) {
+    // A split page: two pictures side by side; the stage is the screen.
+    bgH = vh * BG_MARGIN
+  } else if (bg) {
     const [iw, ih] = sizeOf(bg.image)
     const s = Math.max(vw / iw, vh / ih)
     // The drawn size, margin included, so x/y line up with what is painted in it.
@@ -125,7 +130,7 @@ function useStage(page) {
   // (0.5 = middle). Clamped so the picture always covers the screen.
   const bgo = bg && portrait && bg.mobile ? { ...bg, ...bg.mobile } : bg
   const focusX = bgo?.focusX ?? 0.5
-  const room = Math.max(0, (bgW - vw) / 2)
+  const room = split ? 0 : Math.max(0, (bgW - vw) / 2)
   const bgOffsetX = Math.max(-room, Math.min(room, (0.5 - focusX) * bgW))
   return { vw, vh, bgW, bgH, bgOffsetX, sceneH: bgH, visibleW: Math.min(vw, bgW), portrait, sizeScale }
 }
@@ -179,10 +184,24 @@ const hash = (text) => [...text].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) |
 const QUIET_DIM = 0.72
 const QUIET_SPEED = 0.5
 
+/**
+ * Where Echo's antenna tip is in each Echo picture (share of width from the left,
+ * share of height from the top), measured from the art. Echo's tip blinks softly.
+ */
+const ANTENNA_TIPS = {
+  echo_curious: [0.719, 0.041],
+  echo_idle: [0.306, 0.047],
+  echo_excited: [0.71, 0.038],
+  echo_happy: [0.673, 0.059],
+  echo_sad: [0.896, 0.067],
+}
+
 function Sprite({ layer, place, textures, still, index, quiet }) {
   const mesh = useRef()
   const material = useRef()
   const shadow = useRef()
+  const tipRef = useRef()
+  const tip = layer.blink === false ? null : ANTENNA_TIPS[layer.image]
   const anim = layer.anim ?? 'boil'
   const rand = useMemo(() => seeded(Math.abs(hash(`${layer.image}:${index}`)) + 1), [layer.image, index])
   const phase = useMemo(() => rand() * 10, [rand])
@@ -244,6 +263,20 @@ function Sprite({ layer, place, textures, still, index, quiet }) {
       }
     }
     m.position.set(place.x + dx, place.centerY + dy, place.z)
+    if (tipRef.current && tip) {
+      // Echo's antenna: two quick soft blinks every few seconds (steady in reduced motion).
+      const tx = (layer.flip ? 0.5 - tip[0] : tip[0] - 0.5) * place.w * sc
+      const ty = (0.5 - tip[1]) * place.h * sc
+      tipRef.current.position.set(place.x + dx + tx, place.centerY + dy + ty, place.z + 0.1)
+      let on = 0.55
+      if (!still) {
+        const cycle = (clock + phase) % 3.4
+        on = cycle < 0.18 || (cycle > 0.36 && cycle < 0.54) ? 1 : 0.18
+      }
+      tipRef.current.material.opacity = on * (quiet ? 0.6 : 1)
+      const s = place.h * (0.07 + 0.05 * on)
+      tipRef.current.scale.set(s, s, 1)
+    }
     m.rotation.z = baseRotation + rot + (m.userData.spin ?? 0)
     m.scale.set(place.w * sc, place.h * sc, 1)
     if (shadow.current) {
@@ -263,6 +296,18 @@ function Sprite({ layer, place, textures, still, index, quiet }) {
           <meshBasicMaterial map={getShadowTexture()} transparent depthWrite={false} toneMapped={false} />
         </mesh>
       )}
+      {tip && (
+        <mesh ref={tipRef} position={[place.x, place.centerY, place.z + 0.1]}>
+          <planeGeometry args={[1, 1]} />
+          <meshBasicMaterial
+            map={glowTexture('255, 196, 90')}
+            transparent
+            depthWrite={false}
+            toneMapped={false}
+            blending={THREE.AdditiveBlending}
+          />
+        </mesh>
+      )}
       <mesh ref={mesh} position={[place.x, place.centerY, place.z]} scale={[place.w, place.h, 1]}>
         <planeGeometry args={[1, 1]} />
         <cutoutMaterial
@@ -280,7 +325,47 @@ function Sprite({ layer, place, textures, still, index, quiet }) {
   )
 }
 
+/**
+ * A background. "half": "left" | "right" draws it in one half of the screen
+ * (split pages), cover-cropped to that half; focusX picks the part that shows.
+ * "brightness" lightens (above 1) or darkens it.
+ */
 function Background({ layer, stage, texture, movement, quiet }) {
+  const dim = (quiet ? QUIET_DIM : 1) * (layer.brightness ?? 1)
+  if (layer.half) {
+    const o = stage.portrait && layer.mobile ? { ...layer, ...layer.mobile } : layer
+    const side = layer.half === 'left' ? -1 : 1
+    // Reach past the outer screen edge so parallax never shows a gap; the inner edge
+    // sits exactly on the centre line.
+    const w = (stage.vw / 2) * BG_MARGIN
+    const h = stage.vh * BG_MARGIN
+    const [iw, ih] = sizeOf(layer.image)
+    const planeAspect = w / h
+    const imageAspect = iw / ih
+    let repeat = [1, 1]
+    let offset = [0, 0]
+    if (imageAspect > planeAspect) {
+      repeat = [planeAspect / imageAspect, 1]
+      offset = [(1 - repeat[0]) * (o.focusX ?? 0.5), 0]
+    } else {
+      repeat = [1, imageAspect / planeAspect]
+      offset = [0, (1 - repeat[1]) * 0.5]
+    }
+    return (
+      <Plane scale={[w, h, 1]} args={[1, 1, 1, 1]} position={[side * (w / 2), 0, layer.z ?? 0]}>
+        <layerMaterial
+          movement={movement}
+          textr={texture}
+          factor={0}
+          wiggle={0}
+          scale={1}
+          dim={dim}
+          uvRepeat={repeat}
+          uvOffset={offset}
+        />
+      </Plane>
+    )
+  }
   return (
     <Plane
       scale={[stage.bgW, stage.bgH, 1]}
@@ -293,7 +378,7 @@ function Background({ layer, stage, texture, movement, quiet }) {
         factor={layer.factor ?? 0.004}
         wiggle={0}
         scale={1}
-        dim={quiet ? QUIET_DIM : 1}
+        dim={dim}
       />
     </Plane>
   )
@@ -370,6 +455,7 @@ function useSpriteRects(layers, places) {
 }
 
 function Experience({ page, cover, play, still, lowPower }) {
+  const pushRef = useRef(1)
   const scaleN = useAspect(1600, 1000, 1.05)
   const scaleW = useAspect(2200, 1000, 1.05)
   const shown = play ? page : (cover ?? { layers: [{ type: 'bg', image: TITLE_BG }] })
@@ -405,6 +491,10 @@ function Experience({ page, cover, play, still, lowPower }) {
     g.position.x = THREE.MathUtils.lerp(g.position.x, state.pointer.x * 2 * amount, 0.05)
     g.rotation.x = THREE.MathUtils.lerp(g.rotation.x, (state.pointer.y / 60) * amount, 0.05)
     g.rotation.y = THREE.MathUtils.lerp(g.rotation.y, (-state.pointer.x / 18) * amount, 0.05)
+    // pushIn: once the book opens on the cover scene, the camera eases in a little.
+    const target = play && shown.pushIn && !still ? shown.pushIn : 1
+    pushRef.current = THREE.MathUtils.damp(pushRef.current, target, 0.9, delta)
+    g.scale.setScalar(pushRef.current)
     if (!still) {
       layersRef.current.forEach((m, i) => {
         if (m && shown.layers[i]?.wiggle) m.uniforms.time.value += delta
@@ -419,6 +509,8 @@ function Experience({ page, cover, play, still, lowPower }) {
       {showFireflies && (
         <Fireflies count={fx.count ?? 20} radius={fx.radius ?? 80} colors={fx.colors ?? ['orange']} />
       )}
+      <Ambient ambient={shown.ambient} stage={stage} still={still} />
+      {shown.layers.some((l) => isBg(l) && l.half) && <Divider stage={stage} />}
       {shown.layers.map((l, i) => {
         if (isBg(l))
           return <Background key={i} layer={l} stage={stage} texture={textures[srcOf(l.image)]} movement={movement} quiet={!!shown.quiet} />
@@ -492,7 +584,7 @@ export default function Scene({ page, cover, isPlaying, upcoming }) {
     >
       {/* Turn the expensive effects off if the frame rate drops. */}
       {FREEZE_AT === null && <PerformanceMonitor onDecline={() => setLowFps(true)} />}
-      <Experience key={isPlaying ? page.id : 'title'} page={page} cover={cover} play={isPlaying} still={still} lowPower={lowPower} />
+      <Experience key={isPlaying ? (page.sceneKey ?? page.id) : (cover?.sceneKey ?? 'title')} page={page} cover={cover} play={isPlaying} still={still} lowPower={lowPower} />
       <Effects focus={focus ?? 0} blur={blur} />
       <Preload pages={upcoming} />
     </Canvas>

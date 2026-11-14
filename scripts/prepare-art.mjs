@@ -341,6 +341,44 @@ async function prepareSprite(file, name, outDir, group) {
   return { width: size.width, height: size.height, bytes: buffer.length, coverage: found.coverage, premultiplied: premultiply, note: notes.join(', ') }
 }
 
+// ---------- background variants ----------
+
+/**
+ * Variants of a prepared background with something painted out. Each patch covers a
+ * circle (cx, cy, r, in prepared-file pixels; optional maxY) with sky copied from dx pixels to the
+ * side, blended in with a soft edge, so the painted Earth can't double up with a
+ * placed Earth sprite or peek out from behind the words.
+ */
+const VARIANTS = [
+  { from: 'bg_moon_mountains', name: 'bg_moon_mountains_noearth', patches: [{ cx: 1001, cy: 128, r: 100, dx: 330, maxY: 222 }] },
+]
+
+async function makeVariant(variant, outDir) {
+  const source = path.join(outDir, `${variant.from}.webp`)
+  const { data, info } = await sharp(source).removeAlpha().raw().toBuffer({ resolveWithObject: true })
+  const { width: w, height: h } = info
+  const out = Buffer.from(data)
+  for (const { cx, cy, r, dx, maxY = h } of variant.patches) {
+    const feather = r * 0.35
+    // maxY: rows below it are left alone (keeps the mountains), fading out over 12 px.
+    for (let y = Math.max(0, Math.floor(cy - r - feather)); y < Math.min(h, cy + r + feather, maxY); y++) {
+      for (let x = Math.max(0, Math.floor(cx - r - feather)); x < Math.min(w, cx + r + feather); x++) {
+        const d = Math.hypot(x - cx, y - cy)
+        const kr = d <= r ? 1 : d >= r + feather ? 0 : 1 - (d - r) / feather
+        const k = kr * Math.min(1, (maxY - y) / 12)
+        if (k === 0) continue
+        const sx = Math.min(w - 1, Math.max(0, x + dx))
+        const i = (y * w + x) * 3
+        const j = (y * w + sx) * 3
+        for (let c = 0; c < 3; c++) out[i + c] = Math.round(out[i + c] * (1 - k) + data[j + c] * k)
+      }
+    }
+  }
+  const buffer = await sharp(out, { raw: { width: w, height: h, channels: 3 } }).webp({ quality: BG_QUALITY, effort: 6 }).toBuffer()
+  await writeFile(path.join(outDir, `${variant.name}.webp`), buffer)
+  return { width: w, height: h, bytes: buffer.length }
+}
+
 // ---------- main ----------
 
 async function main() {
@@ -387,6 +425,14 @@ async function main() {
         }`,
       )
     }
+  }
+
+  for (const variant of VARIANTS) {
+    const outDir = path.join(OUT, 'backgrounds')
+    const result = await makeVariant(variant, outDir)
+    art[variant.name] = { src: `/art/backgrounds/${variant.name}.webp`, width: result.width, height: result.height, group: 'backgrounds' }
+    total += result.bytes
+    report.push(`  ${String(Math.round(result.bytes / 1024)).padStart(4)} KB  backgrounds/${variant.name}  (variant of ${variant.from}, painted out)`)
   }
 
   const names = Object.keys(art).sort()

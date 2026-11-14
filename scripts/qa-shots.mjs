@@ -128,7 +128,7 @@ async function shoot(browser, size, id, { start, reduced, file, errors }) {
     // The first page: press Begin like a reader does.
     await page.getByRole('button', { name: /begin/i }).click()
     // Make sure the title screen has really gone before going on.
-    await page.waitForFunction(() => !document.querySelector('.ts'), null, { timeout: 30000 }).catch(() => {
+    await page.waitForFunction(() => !document.querySelector('.cover'), null, { timeout: 30000 }).catch(() => {
       errors.add(`${tag}: the title screen was still showing 30 s after pressing Begin`)
     })
   }

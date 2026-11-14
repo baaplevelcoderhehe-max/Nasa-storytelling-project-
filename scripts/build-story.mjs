@@ -86,6 +86,21 @@ const hilltop = () => bg('bg_hilltop_night', { mobile: { focusX: 0.66 } })
 // On bg_moon_plain the painted Earth is right of centre and high up, so hardware stands
 // on the LEFT there and Kit and Echo on the right: tall masts never reach the Earth.
 
+// The opening scene: the cover AND prologue-1 use exactly this, so pressing Begin only
+// fades the words away and the story starts in the same scene (no cut). Kit and Echo
+// stand small on the hill; the dish sends out a faint signal ring every ~6 s.
+const OPENING = {
+  sceneKey: 'opening',
+  pushIn: 1.05,
+  ambient: { stars: 18, rings: { x: 22.5, y: 20, every: 6, size: 0.42 }, shootingStars: 11 },
+  layers: () => [
+    bg('bg_hilltop_night', { brightness: 1.12, mobile: { focusX: 0.66 } }),
+    kit('kit_idle', 'left', { x: -24, y: -33, height: 28, main: true, m: { x: -20, y: -33, height: 17 } }),
+    echo('echo_curious', 'left', { x: -13, y: -34, height: 9, m: { x: -2, y: -34, height: 6.5 } }),
+  ],
+}
+const opening = () => ({ sceneKey: OPENING.sceneKey, pushIn: OPENING.pushIn, ambient: OPENING.ambient, layers: OPENING.layers() })
+
 // ---------- text helpers ----------
 
 const spark = (text) => ({ text, style: 'spark' })
@@ -120,8 +135,7 @@ const spreads = [
     script: 'P.1',
     part: 'prologue',
     alt: 'A grassy hilltop at night. A giant radio dish points at the stars. Kit stands below it with a flashlight; Echo rolls beside them.',
-    fireflies: { count: 18, radius: 80, colors: ['yellow'] },
-    layers: [hilltop(), kit('kit_idle', 'left', { x: -24, y: -31, main: true, m: { x: -22, y: -27, height: 24 } }), echo('echo_idle', 'left', { x: -11, y: -32, m: { x: -3, y: -28, height: 8.5 } })],
+    ...opening(),
     bubbles: [
       spark("It's your first night as a Signal Keeper."),
       told("The big dish listens to the sky. Most nights it hears only a soft hiss. Tonight, Echo's antenna starts to blink."),
@@ -265,7 +279,9 @@ const spreads = [
     id: 'moon-8',
     script: '1.8',
     alt: 'The Apollo 15 Lunar Roving Vehicle near tall, rounded mountains.',
-    layers: [bg('bg_moon_mountains'), hardware('lrv', { x: 16, y: -18, height: 34, main: true, speaking: true, m: { x: 14, y: -15, height: 20 } }), kit('kit_helmet_idle'), echo('echo_happy')],
+    // bg_moon_mountains has an Earth painted in that peeked out above the words; this
+    // variant has it painted out (made by scripts/prepare-art.mjs).
+    layers: [bg('bg_moon_mountains_noearth'), hardware('lrv', { x: 16, y: -18, height: 34, main: true, speaking: true, m: { x: 14, y: -15, height: 20 } }), kit('kit_helmet_idle'), echo('echo_happy')],
     bubbles: [
       spark("I'm a car parked on the Moon. Forever."),
       told('I rode folded up inside the lander. On Apollo 15, the astronauts drove me to explore far from their landing site. Together they covered 27.9 km.', 'Lunar rover'),
@@ -374,11 +390,18 @@ const spreads = [
     alt: "The frosty plain at dusk. Frost creeps over Phoenix's panels. Echo pulls its arms in, cold.",
     onEnter: { set: { mars1: true } },
     next: 'hub',
-    layers: [bg('bg_mars_arctic'), hardware('phoenix', { x: 14, height: 36, main: true, speaking: true }), kit('kit_helmet_idle'), echo('echo_sad')],
+    layers: [
+      bg('bg_mars_arctic'),
+      hardware('phoenix', { x: 14, height: 36, main: true, speaking: true, m: { x: 14, y: -9, height: 22 } }),
+      // avoid: bubbles never cover Kit on this page (the Voyager panel used to sit on the helmet)
+      kit('kit_helmet_idle', 'left', { avoid: true, m: { x: -24, y: -37, height: 21 } }),
+      echo('echo_sad', 'left', { m: { x: -6, y: -37.5 } }),
+    ],
     bubbles: [
       spark('Winter came, and the Sun went away.'),
       told('I was built for one summer. In November 2008, the long winter came and my solar panels stopped, just as planned.', 'Phoenix'),
-      voyagerSignoff('They were the first visitors. Each one made the next one possible.'),
+      // Narrower and on the right, so it fits beside Kit on phones.
+      { ...voyagerSignoff('They were the first visitors. Each one made the next one possible.'), side: 'right', width: 210 },
     ],
   },
 
@@ -388,12 +411,15 @@ const spreads = [
     script: '3.1',
     part: 'mars2',
     alt: 'The twins: Spirit in a crater on one side, Opportunity on the other side of Mars. Both rovers raise their camera masts and look around.',
+    // A split page: Spirit in its crater on the left, Opportunity on the flat plain on
+    // the right, with a soft crayon line between them.
     layers: [
-      bg('bg_mars_crater'),
-      hardware('mer_rover', { x: -26, y: -14, height: 34, z: 14, m: { x: -26, y: -10, height: 16 } }),
-      hardware('mer_rover', { x: 26, y: -14, height: 34, z: 14, flip: true, m: { x: 26, y: -10, height: 16 } }),
-      kit('kit_helmet_idle', 'left', { x: -2, y: -36, height: 34, main: true, m: { x: -6, y: -36, height: 21 } }),
-      echo('echo_curious', 'left', { x: 11, y: -37, m: { x: 12, y: -37.5 } }),
+      bg('bg_mars_crater', { half: 'left', focusX: 0.45 }),
+      bg('bg_mars_meridiani', { half: 'right', focusX: 0.4 }),
+      hardware('mer_rover', { x: -25, y: -15, height: 30, z: 14, main: true, m: { x: -25, y: -14, height: 14 } }),
+      hardware('mer_rover', { x: 25, y: -15, height: 30, z: 14, flip: true, avoid: true, m: { x: 25, y: -14, height: 14 } }),
+      kit('kit_helmet_idle', 'left', { x: -36, y: -38, height: 26, m: { x: -36, y: -38, height: 15 } }),
+      echo('echo_curious', 'right', { x: 36, y: -38, height: 9, flip: true, m: { x: 36, y: -38.5, height: 6 } }),
     ],
     bubbles: [
       spark('We were twins, sent to opposite sides of Mars.'),
@@ -805,7 +831,7 @@ async function main() {
       spread:
         'Spread fields: chapter { title, subtitle } (first spread of a part: shows the banner), quiet (quiet page: dimmer, slower, no fireflies, no sound effects), alt (what the picture shows, for screen readers), tap (the tap moment from the script, built in Phase D), missionLog [facts], badge, _script (spread number in docs/script.md). Bubbles without x/y flow from the top and keep clear of the main sprite. Bubble styles: spark | narration | speech | voyager | thought | shout. Sprite field speaking: true makes the explorer glow softly while it talks; rotate: degrees.',
     },
-    cover: old.cover,
+    cover: { ...opening(), alt: 'The cover: a grassy hilltop at night with a giant radio dish. Kit and Echo stand on the hill, looking up at the stars.' },
     states,
   }
   await writeFile(STORY, JSON.stringify(story, null, 2) + '\n')

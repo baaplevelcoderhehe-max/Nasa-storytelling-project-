@@ -21,6 +21,7 @@ export const art = {
   bg_mars_rock_closeup: { src: '/art/backgrounds/bg_mars_rock_closeup.webp', width: 1920, height: 1072, group: 'backgrounds' },
   bg_mars_valley: { src: '/art/backgrounds/bg_mars_valley.webp', width: 1920, height: 1072, group: 'backgrounds' },
   bg_moon_mountains: { src: '/art/backgrounds/bg_moon_mountains.webp', width: 1920, height: 1147, group: 'backgrounds' },
+  bg_moon_mountains_noearth: { src: '/art/backgrounds/bg_moon_mountains_noearth.webp', width: 1920, height: 1147, group: 'backgrounds' },
   bg_moon_plain: { src: '/art/backgrounds/bg_moon_plain.webp', width: 1920, height: 1072, group: 'backgrounds' },
   bg_space_stars: { src: '/art/backgrounds/bg_space_stars.webp', width: 1920, height: 1072, group: 'backgrounds' },
   ceres: { src: '/art/planets/ceres.webp', width: 302, height: 300, group: 'planets', premultiplied: true },

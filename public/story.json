@@ -65,44 +65,58 @@
     "spread": "Spread fields: chapter { title, subtitle } (first spread of a part: shows the banner), quiet (quiet page: dimmer, slower, no fireflies, no sound effects), alt (what the picture shows, for screen readers), tap (the tap moment from the script, built in Phase D), missionLog [facts], badge, _script (spread number in docs/script.md). Bubbles without x/y flow from the top and keep clear of the main sprite. Bubble styles: spark | narration | speech | voyager | thought | shout. Sprite field speaking: true makes the explorer glow softly while it talks; rotate: degrees."
   },
   "cover": {
+    "sceneKey": "opening",
+    "pushIn": 1.05,
+    "ambient": {
+      "stars": 18,
+      "rings": {
+        "x": 22.5,
+        "y": 20,
+        "every": 6,
+        "size": 0.42
+      },
+      "shootingStars": 11
+    },
     "layers": [
       {
         "type": "bg",
         "image": "bg_hilltop_night",
+        "brightness": 1.12,
         "mobile": {
           "focusX": 0.66
         }
       },
       {
         "type": "sprite",
-        "image": "kit_point",
-        "x": -24,
-        "y": -31,
-        "height": 34,
-        "z": 26,
+        "image": "kit_idle",
         "anim": "boil",
+        "x": -24,
+        "y": -33,
+        "height": 28,
+        "z": 26,
         "main": true,
         "mobile": {
-          "x": -22,
-          "y": -26,
-          "height": 24
+          "x": -20,
+          "y": -33,
+          "height": 17
         }
       },
       {
         "type": "sprite",
-        "image": "echo_excited",
-        "x": -10,
-        "y": -32,
-        "height": 12,
-        "z": 27,
+        "image": "echo_curious",
         "anim": "bob",
+        "x": -13,
+        "y": -34,
+        "height": 9,
+        "z": 27,
         "mobile": {
           "x": -2,
-          "y": -27,
-          "height": 8.5
+          "y": -34,
+          "height": 6.5
         }
       }
-    ]
+    ],
+    "alt": "The cover: a grassy hilltop at night with a giant radio dish. Kit and Echo stand on the hill, looking up at the stars."
   },
   "states": {
     "prologue-1": {
@@ -112,17 +126,23 @@
         "subtitle": "The Faint Signal"
       },
       "alt": "A grassy hilltop at night. A giant radio dish points at the stars. Kit stands below it with a flashlight; Echo rolls beside them.",
-      "fireflies": {
-        "count": 18,
-        "radius": 80,
-        "colors": [
-          "yellow"
-        ]
+      "sceneKey": "opening",
+      "pushIn": 1.05,
+      "ambient": {
+        "stars": 18,
+        "rings": {
+          "x": 22.5,
+          "y": 20,
+          "every": 6,
+          "size": 0.42
+        },
+        "shootingStars": 11
       },
       "layers": [
         {
           "type": "bg",
           "image": "bg_hilltop_night",
+          "brightness": 1.12,
           "mobile": {
             "focusX": 0.66
           }
@@ -132,28 +152,28 @@
           "image": "kit_idle",
           "anim": "boil",
           "x": -24,
-          "y": -31,
-          "height": 36,
+          "y": -33,
+          "height": 28,
           "z": 26,
           "main": true,
           "mobile": {
-            "x": -22,
-            "y": -27,
-            "height": 24
+            "x": -20,
+            "y": -33,
+            "height": 17
           }
         },
         {
           "type": "sprite",
-          "image": "echo_idle",
+          "image": "echo_curious",
           "anim": "bob",
-          "x": -11,
-          "y": -32,
-          "height": 11,
+          "x": -13,
+          "y": -34,
+          "height": 9,
           "z": 27,
           "mobile": {
-            "x": -3,
-            "y": -28,
-            "height": 8.5
+            "x": -2,
+            "y": -34,
+            "height": 6.5
           }
         }
       ],
@@ -975,7 +995,7 @@
       "layers": [
         {
           "type": "bg",
-          "image": "bg_moon_mountains"
+          "image": "bg_moon_mountains_noearth"
         },
         {
           "type": "sprite",
@@ -1624,7 +1644,7 @@
           "speaking": true,
           "mobile": {
             "x": 14,
-            "y": -13,
+            "y": -9,
             "height": 21.2
           }
         },
@@ -1636,10 +1656,11 @@
           "y": -34,
           "height": 36,
           "z": 26,
+          "avoid": true,
           "mobile": {
-            "x": -25,
-            "y": -34,
-            "height": 23
+            "x": -24,
+            "y": -37,
+            "height": 21
           }
         },
         {
@@ -1652,7 +1673,7 @@
           "z": 27,
           "mobile": {
             "x": -6,
-            "y": -35.5,
+            "y": -37.5,
             "height": 7.5
           }
         }
@@ -1679,7 +1700,9 @@
             "dots2",
             "dots3"
           ],
-          "emoteSpeed": 450
+          "emoteSpeed": 450,
+          "side": "right",
+          "width": 210
         }
       ]
     },
@@ -1693,64 +1716,74 @@
       "layers": [
         {
           "type": "bg",
-          "image": "bg_mars_crater"
+          "image": "bg_mars_crater",
+          "half": "left",
+          "focusX": 0.45
+        },
+        {
+          "type": "bg",
+          "image": "bg_mars_meridiani",
+          "half": "right",
+          "focusX": 0.4
         },
         {
           "type": "sprite",
           "image": "mer_rover",
-          "x": -26,
-          "y": -14,
-          "height": 34,
+          "x": -25,
+          "y": -15,
+          "height": 30,
           "z": 14,
           "anim": "boil",
+          "main": true,
           "mobile": {
-            "x": -26,
-            "y": -10,
-            "height": 16
+            "x": -25,
+            "y": -14,
+            "height": 14
           }
         },
         {
           "type": "sprite",
           "image": "mer_rover",
-          "x": 26,
-          "y": -14,
-          "height": 34,
+          "x": 25,
+          "y": -15,
+          "height": 30,
           "z": 14,
           "anim": "boil",
           "flip": true,
+          "avoid": true,
           "mobile": {
-            "x": 26,
-            "y": -10,
-            "height": 16
+            "x": 25,
+            "y": -14,
+            "height": 14
           }
         },
         {
           "type": "sprite",
           "image": "kit_helmet_idle",
           "anim": "boil",
-          "x": -2,
-          "y": -36,
-          "height": 34,
+          "x": -36,
+          "y": -38,
+          "height": 26,
           "z": 26,
-          "main": true,
           "mobile": {
-            "x": -6,
-            "y": -36,
-            "height": 21
+            "x": -36,
+            "y": -38,
+            "height": 15
           }
         },
         {
           "type": "sprite",
           "image": "echo_curious",
           "anim": "bob",
-          "x": 11,
-          "y": -37,
-          "height": 11,
+          "x": 36,
+          "y": -38,
+          "height": 9,
           "z": 27,
+          "flip": true,
           "mobile": {
-            "x": 12,
-            "y": -37.5,
-            "height": 7.5
+            "x": 36,
+            "y": -38.5,
+            "height": 6
           }
         }
       ],
