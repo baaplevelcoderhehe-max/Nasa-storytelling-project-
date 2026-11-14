@@ -1,35 +1,106 @@
-* {
-  box-sizing: border-box;
+* { box-sizing: border-box; }
+html, body, #root { margin: 0; width: 100%; height: 100%; overflow: hidden; background: #010101; }
+body { font-family: 'Georgia', 'Times New Roman', serif; color: #fff; }
+
+.scene { position: absolute; inset: 0; }
+.scene canvas { display: block; }
+
+.status {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  color: #ccc; font-style: italic; pointer-events: none;
 }
 
-html,
-body,
-#root {
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  -webkit-touch-callout: none;
-  overflow: hidden;
-  background: #010101;
+.title {
+  position: absolute; top: 16px; left: 20px; font-size: 14px; letter-spacing: 0.15em;
+  text-transform: uppercase; opacity: 0.6; pointer-events: none;
 }
 
-#root {
-  overflow: hidden;
+.nav {
+  position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 16px; font-size: 14px;
+  background: rgba(0, 0, 0, 0.45); backdrop-filter: blur(6px);
+  padding: 6px 14px; border-radius: 999px;
+}
+.nav button {
+  background: none; border: 0; color: #fff; font-size: 28px; line-height: 1;
+  cursor: pointer; padding: 0 6px;
+}
+.nav button:disabled { opacity: 0.25; cursor: default; }
+
+/* ---------- speech bubbles ---------- */
+.bubbles { position: absolute; inset: 0; pointer-events: none; }
+
+.bubble {
+  position: absolute; transform: translate(-50%, -50%);
+  max-width: min(280px, 60vw); padding: 12px 18px;
+  background: #fff; color: #1a1a1a; border-radius: 22px;
+  font-size: clamp(14px, 1.6vw, 20px); line-height: 1.35; text-align: center;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+  opacity: 0; animation: pop 0.5s cubic-bezier(0.3, 1.5, 0.5, 1) forwards;
+}
+.speaker {
+  display: block; font-size: 0.65em; font-weight: bold; letter-spacing: 0.1em;
+  text-transform: uppercase; opacity: 0.55; margin-bottom: 2px;
 }
 
-body {
-  font-family:
-    -apple-system,
-    BlinkMacSystemFont,
-    avenir next,
-    avenir,
-    helvetica neue,
-    helvetica,
-    ubuntu,
-    roboto,
-    noto,
-    segoe ui,
-    arial,
-    sans-serif;
+.bubble::after { content: ''; position: absolute; bottom: -12px; border: 10px solid transparent; border-top-color: #fff; border-bottom: 0; }
+.tail-left::after { left: 24px; }
+.tail-right::after { right: 24px; }
+.tail-none::after { display: none; }
+
+.bubble.thought { border-radius: 50px; border: 2px dashed #888; background: rgba(255, 255, 255, 0.92); font-style: italic; }
+
+.bubble.shout {
+  background: #ffe14d; border: 3px solid #1a1a1a; font-weight: bold; text-transform: uppercase;
+  border-radius: 8px; transform: translate(-50%, -50%) rotate(-3deg);
+}
+.bubble.shout::after { border-top-color: #1a1a1a; }
+
+.bubble.narration {
+  background: rgba(10, 10, 20, 0.7); color: #f3e9d0; border-radius: 4px; font-style: italic;
+  border: 1px solid rgba(243, 233, 208, 0.35); max-width: min(560px, 80vw);
+}
+
+@keyframes pop {
+  from { opacity: 0; scale: 0.6; }
+  to { opacity: 1; scale: 1; }
+}
+
+/* ---------- emotes (32x38 art, upscaled 1-2x) ----------
+   The art is a smooth anti-aliased illustration, NOT pixel art — so never use
+   image-rendering: pixelated/crisp-edges (it quantizes the soft edges into blocks).
+   The source is only 32x38, so every step above 1x is an upscale: keep the default
+   at 1 (native, crispest) on bubbles and 2 for standalone emotes. Both dimensions
+   are pinned to the integer size and the pop animation touches only
+   opacity/translate/rotate, so the bitmap is never rescaled. */
+.emote {
+  position: absolute;
+  display: block;
+  line-height: 0;
+  pointer-events: none;
+  transform-origin: 50% 100%;
+  animation: emote-pop 0.5s cubic-bezier(0.2, 1.6, 0.4, 1) both;
+}
+.emote img {
+  display: block;
+  /* integer scale keeps the upscale clean; bilinear smoothing softens the rest */
+  image-rendering: auto;
+}
+/* centering uses `transform`, not `translate`, so the emote-pop keyframes
+   (which animate translate/rotate) don't override it */
+.emote--solo { transform: translate(-50%, -100%); }
+.bubbles .bubble .emote--right { right: -2px; bottom: calc(100% + 10px); }
+.bubbles .bubble .emote--left  { left: -2px;  bottom: calc(100% + 10px); }
+.bubbles .bubble.has-speaker .emote--left { bottom: calc(100% + 40px); }
+
+/* scale is baked into the width/height attrs, so the pop animates transform only
+   during the transform-free part and never rescales the bitmap itself */
+@keyframes emote-pop {
+  0%   { opacity: 0; translate: 0 12px; rotate: -14deg; }
+  55%  { opacity: 1; translate: 0 -4px; rotate: 5deg; }
+  100% { opacity: 1; translate: 0 0;     rotate: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .emote { animation-duration: 0.01s !important; animation-iteration-count: 1 !important; }
 }
