@@ -48,15 +48,21 @@ let volume = 0.6
 // Must be called from a user gesture (click / keydown) at least once.
 export function initSound() {
   if (ctx) {
-    if (ctx.state === 'suspended') ctx.resume()
+    if (ctx.state === 'suspended') ctx.resume()?.catch?.(() => {})
     return
   }
   const AC = window.AudioContext || window.webkitAudioContext
   if (!AC) return
-  ctx = new AC()
-  master = ctx.createGain()
-  master.gain.value = enabled ? volume : 0
-  master.connect(ctx.destination)
+  try {
+    ctx = new AC()
+    master = ctx.createGain()
+    master.gain.value = enabled ? volume : 0
+    master.connect(ctx.destination)
+  } catch {
+    // No audio on this device: every play() stays a silent no-op.
+    ctx = null
+    master = null
+  }
 }
 
 export function setSoundEnabled(value) {
@@ -73,6 +79,20 @@ export function setSoundVolume(value) {
   }
 }
 
+// Decodes audio without ever throwing. Browsers that can't play a format (older
+// Safari and Ogg, for example) just get silence: no errors, nothing breaks.
+// Old Safari only has the callback form of decodeAudioData, so both forms are handled.
+function decode(arrayBuffer) {
+  return new Promise((resolve) => {
+    try {
+      const result = ctx.decodeAudioData(arrayBuffer, resolve, () => resolve(null))
+      if (result && typeof result.catch === 'function') result.catch(() => resolve(null))
+    } catch {
+      resolve(null)
+    }
+  })
+}
+
 function loadFile(url) {
   if (!ctx) return Promise.resolve(null)
   let pending = buffers.get(url)
@@ -82,7 +102,7 @@ function loadFile(url) {
         if (!r.ok) throw new Error(`${url}: ${r.status}`)
         return r.arrayBuffer()
       })
-      .then((ab) => ctx.decodeAudioData(ab))
+      .then(decode)
       .catch(() => null)
     buffers.set(url, pending)
   }

@@ -34,13 +34,18 @@ export default function App() {
       })
       .then((s) => {
         setStory(s)
-        setNav({ id: s.start, flags: {}, counters: {}, visited: [s.start], history: [] })
+        // ?page=<state id> opens that page straight away (for testing and screenshots).
+        const jump = new URLSearchParams(window.location.search).get('page')
+        const first = jump && s.states[jump] ? jump : s.start
+        setNav({ id: first, flags: {}, counters: {}, visited: [first], history: [] })
+        if (jump && s.states[jump]) setPlay(true)
       })
       .catch((e) => setError(e.message))
   }, [])
 
   const states = story?.states ?? {}
-  const total = Object.keys(states).length
+  // Test pages ("_test": true) are not part of the book, so they don't count.
+  const total = Object.values(states).filter((st) => !st._test).length
   const current = nav ? states[nav.id] : null
 
   const counters = useMemo(
@@ -117,6 +122,12 @@ export default function App() {
   const choices = current ? visibleChoices(current, nav.flags, counters) : []
   const seen = new Set(nav.visited).size
   const nextId = current?.next ?? null
+  // The pages a reader can turn to next, so their images load ahead of time.
+  const upcoming = current
+    ? [current.next, ...(current.choices ?? []).map((c) => c.to), current.input?.to]
+        .filter((id) => id && states[id])
+        .map((id) => states[id])
+    : []
 
   return (
     <>
@@ -130,7 +141,7 @@ export default function App() {
 
       <div className="scene">
         <Suspense fallback={<div className="status">Turning page…</div>}>
-          <Scene page={scene} isPlaying={play} />
+          <Scene page={scene} isPlaying={play} upcoming={upcoming} />
         </Suspense>
       </div>
 

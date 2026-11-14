@@ -9,8 +9,8 @@
     "beyond"
   ],
   "_help": {
-    "images": "Art lives in /public/art/<group>/ (made from /sprites by scripts/prepare-art.mjs). For now layers use paths like /art/backgrounds/bg_moon_plain.webp; Phase B switches to names from src/data/art.js.",
-    "layer": "Layers are drawn back to front. z = depth (0 back, 50 front). factor = how much the layer shifts with the mouse. wiggle = leaf-sway amount (0 = none). fit = 'wide' or 'narrow'. scaleFactor = extra size multiplier.",
+    "images": "Image names are keys of src/data/art.js (made from /sprites by scripts/prepare-art.mjs), e.g. \"bg_moon_plain\" or \"kit_helmet_idle\". A plain path like /art/backgrounds/bg_moon_plain.webp also works.",
+    "layer": "Layers are drawn back to front (by z).\nBACKGROUND { \"type\": \"bg\", \"image\": \"bg_moon_plain\" } fills the screen (cover-cropped for any aspect ratio). Optional: z (default 0), factor (tiny texture drift with the pointer, default 0.004).\nSPRITE { \"type\": \"sprite\", \"image\": \"kit_helmet_idle\", \"x\": -30, \"y\": -20, \"height\": 35, \"z\": 20, \"flip\": false, \"anim\": \"boil\" }\n  x: percent of the visible width from the centre (-50 = left edge, 50 = right edge).\n  y: percent of the scene height from the centre (up is positive, -50 = bottom edge). The scene height is the background's visible height, which is the screen height on nearly every screen, so feet line up with the painted ground on any device.\n  anchor: \"bottom\" (default: y is where the feet touch the ground) or \"center\". float and spin default to \"center\".\n  height: percent of the scene height. On portrait screens sprites shrink (down to 60%) so they fit; give \"mobile\" to place them by hand instead.\n  z: depth (0 = back, 50 = front). Depth of field focuses on the \"main\": true sprite (else the front-most one). A page with no sprites stays sharp.\n  anim: \"boil\" (default: hand-drawn line jitter at 8 fps) | \"bob\" (slow up and down) | \"float\" (slow drift and tilt, for things in space) | \"spin\" (slow turn, for planets) | \"none\".\n  walk: true swaps kit_walk_a / kit_walk_b as a 2-frame walk cycle (image is ignored).\n  shadow: soft painted shadow under the feet. On by default for standing sprites, off for float/spin. shadowWidth: share of the sprite width (default 0.85).\n  pin: \"bg\" measures x against the background picture instead of the screen, to line a sprite up with something painted in it.\n  mobile: { x, y, height, pin, anchor } overrides used on portrait screens (phones).\n  flip: true mirrors the sprite. opacity: 0-1. main: true marks the subject for depth of field.\nSize guide (height): Kit 34-36, Echo 11-12 (knee-high to Kit), Sojourner ~11, landers and rovers 30-45 (bigger than Kit), planets 8-15 (far-away discs), a planet you are orbiting up to ~45.\nOlder full-screen layers ({ \"image\": \"/path.png\", \"z\", \"factor\", \"wiggle\", \"fit\", \"scaleFactor\" }) still work.\nReduced motion (OS setting or ?reduce=1): no parallax, boil, bob, float, spin, walk or fireflies. Screens under 768 px and slow devices skip depth of field and fireflies.\nTesting: ?page=<state id> opens a page directly. States with \"_test\": true are not counted as book pages.",
     "bubble": "x and y are percentages of the screen (center of the bubble). style: speech | thought | shout | narration. tail: left | right | none (ignored for narration/thought). delay = seconds before it appears (optional).",
     "emote": "emote = a name from /public/emotes (emote_heart.png -> \"heart\"; \"blank\" = empty bubble) or a list of names to animate, e.g. [\"dots1\",\"dots2\",\"dots3\"]. With text it pops on the bubble's corner (emoteSide: right|left); with no text it's standalone and x/y is where its tail points. Optional: emoteScale (1-4), emoteDelay (s), emoteSpeed (ms per frame), emoteSound (sound name or false). Avoid emotes on narration at y=8 (they'd go off the top).",
     "state": "State graph: `start` is the first state id; `states` is keyed by id.\nState fields: scene fields (layers/bubbles/fireflies/focus/parallax) as before, plus:\n  next       id of the next state (null = end of this path)\n  choices[]  { text, to, if?, set?, reset? } — buttons shown instead of/in addition to next\n  input      { key, to, placeholder, submit, maxLength } — text answer; sets flag `key`\n  onEnter    { set?: {flag:value}, incr?: {counter:n} } — applied when the state is entered\n  if         condition to enter the state at all\nConditions: {flag:name} | {notFlag:name} | {all:[...]} | {any:[...]} | {counter:name, gte|gt|lte|lt|eq:n}\nText: {counter:name} and {flagName} are interpolated in bubble/choice text.\n`chapters` is a derived counter: how many of story.chapters flags are set."
@@ -848,6 +848,180 @@
           "if": {
             "counter": "chapters",
             "gte": 4
+          }
+        }
+      ]
+    },
+    "test-moon": {
+      "_test": true,
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_moon_plain"
+        },
+        {
+          "type": "sprite",
+          "image": "earth",
+          "pin": "bg",
+          "x": 22.25,
+          "y": 28.3,
+          "height": 14.8,
+          "z": 4,
+          "anim": "none",
+          "anchor": "center",
+          "mobile": {
+            "pin": "screen",
+            "x": 22,
+            "y": 33,
+            "height": 8
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "surveyor3",
+          "x": 20,
+          "y": -16,
+          "height": 44,
+          "z": 16,
+          "anim": "boil",
+          "mobile": {
+            "x": 20,
+            "y": -14,
+            "height": 27
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "kit_helmet_idle",
+          "x": -24,
+          "y": -34,
+          "height": 36,
+          "z": 26,
+          "anim": "boil",
+          "main": true,
+          "mobile": {
+            "x": -22,
+            "y": -32,
+            "height": 23
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "echo_curious",
+          "x": -9,
+          "y": -35,
+          "height": 11,
+          "z": 27,
+          "anim": "bob",
+          "mobile": {
+            "x": 4,
+            "y": -33,
+            "height": 7.5
+          }
+        }
+      ]
+    },
+    "test-mars": {
+      "_test": true,
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_mars_valley"
+        },
+        {
+          "type": "sprite",
+          "image": "pathfinder_open",
+          "x": 16,
+          "y": -14,
+          "height": 40,
+          "z": 14,
+          "anim": "boil",
+          "mobile": {
+            "x": 18,
+            "y": -12,
+            "height": 25
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "sojourner",
+          "x": -2,
+          "y": -24,
+          "height": 11,
+          "z": 18,
+          "anim": "boil",
+          "flip": true,
+          "mobile": {
+            "x": 30,
+            "y": -21,
+            "height": 7
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "kit_helmet_walk",
+          "x": -28,
+          "y": -34,
+          "height": 36,
+          "z": 26,
+          "anim": "boil",
+          "main": true,
+          "mobile": {
+            "x": -24,
+            "y": -33,
+            "height": 23
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "echo_happy",
+          "x": -12,
+          "y": -35,
+          "height": 11,
+          "z": 27,
+          "anim": "bob",
+          "mobile": {
+            "x": 2,
+            "y": -34,
+            "height": 7.5
+          }
+        }
+      ]
+    },
+    "test-space": {
+      "_test": true,
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_space_stars"
+        },
+        {
+          "type": "sprite",
+          "image": "ceres",
+          "x": -16,
+          "y": -6,
+          "height": 44,
+          "z": 10,
+          "anim": "spin",
+          "mobile": {
+            "x": -6,
+            "y": -14,
+            "height": 26
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "dawn",
+          "x": 20,
+          "y": 12,
+          "height": 28,
+          "z": 26,
+          "anim": "float",
+          "main": true,
+          "mobile": {
+            "x": 14,
+            "y": 18,
+            "height": 15
           }
         }
       ]
