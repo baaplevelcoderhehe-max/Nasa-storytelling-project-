@@ -12,3 +12,5 @@ qa/screenshots/*/phone/
 qa/screenshots/*/tablet/
 qa/screenshots/*/desktop/
 qa/screenshots/*/reduced-motion/
+# A zip of old review shots kept on disk only
+qa.zip
