@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><style>
+  body { background:#1a1d2e; color:#cdd3e0; font:12px/1.4 monospace; margin:0; padding:20px; }
+  h3 { margin:22px 0 10px; font-size:14px; letter-spacing:.08em; text-transform:uppercase; color:#7f8aa8; }
+  .row { display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end; }
+  .cell { background:#0e1019; border-radius:6px; padding:10px; }
+  .cell img { display:block; }
+  .lbl { opacity:.6; margin-top:5px; white-space:nowrap; }
+  .chk { background: repeating-conic-gradient(#2a2e40 0% 25%, #16182a 0% 50%) 50% / 16px 16px; }
+</style></head>
+<body>
+<h3>panels (Extra)</h3><div class="row chk" id="panels"></div>
+<h3>buttons (Extra)</h3><div class="row chk" id="btns"></div>
+<h3>blue blade buttons</h3><div class="row chk" id="blade"></div>
+<h3>grey bars + caps</h3><div class="row chk" id="bars"></div>
+<h3>composed bar: L + M repeat + R</h3><div class="row chk" id="composed"></div>
+
+<script>
+const P = '/ui/';
+function cell(src, label) {
+  const c = document.createElement('div'); c.className='cell';
+  const i = document.createElement('img'); i.src = src;
+  c.appendChild(i);
+  if (label) { const l=document.createElement('div'); l.className='lbl'; l.textContent=label; c.appendChild(l); }
+  return c;
+}
+function fill(id, files) {
+  const row = document.getElementById(id);
+  for (const f of files) row.appendChild(cell(P+f, f.split('/').pop()));
+}
+fill('panels', ['Extra/panel_rectangle.svg','Extra/panel_square.svg','Extra/panel_glass.svg',
+  'Extra/panel_glass_notches.svg','Extra/panel_glass_screws.svg','Extra/panel_glass_tab.svg',
+  'Extra/panel_glass_tab_blade.svg']);
+fill('btns', ['Extra/button_rectangle.svg','Extra/button_square.svg',
+  'Extra/button_rectangle_depth.svg','Extra/button_square_depth.svg']);
+fill('blade', ['Blue/button_square_header_blade_rectangle.svg','Blue/button_square_header_large_rectangle.svg',
+  'Blue/button_square_header_notch_rectangle.svg','Blue/button_square_header_small_rectangle.svg',
+  'Blue/button_square_header_large_square.svg']);
+fill('bars', ['Grey/bar_round_gloss_large.svg','Grey/bar_round_gloss_large_l.svg',
+  'Grey/bar_round_gloss_large_m.svg','Grey/bar_round_gloss_large_r.svg',
+  'Blue/bar_round_gloss_large.svg','Yellow/bar_round_gloss_large.svg',
+  'Green/bar_round_gloss_large.svg','Red/bar_round_gloss_large.svg']);
+
+// composed bars at 2x: left cap + repeated middle + right cap
+function composed(rowEl, name, l, m, r, w, h) {
+  const c = document.createElement('div'); c.className='cell chk';
+  const box = document.createElement('div');
+  box.style.cssText = `position:relative;width:${w}px;height:${h}px`;
+  const li = document.createElement('img');
+  li.src = P+l; li.style.cssText = `position:absolute;left:0;top:0;width:${h*0.5}px;height:${h}px`;
+  const ri = document.createElement('img');
+  ri.src = P+r; ri.style.cssText = `position:absolute;right:0;top:0;width:${h*0.5}px;height:${h}px`;
+  const mid = document.createElement('div');
+  mid.style.cssText = `position:absolute;left:${h*0.5}px;right:${h*0.5}px;top:0;height:${h}px;background:url(${P}${m}) repeat-x left top/auto ${h}px`;
+  box.append(li, mid, ri);
+  c.appendChild(box);
+  const lab = document.createElement('div'); lab.className='lbl'; lab.textContent = name;
+  c.appendChild(lab);
+  rowEl.appendChild(c);
+}
+const cw = document.getElementById('composed');
+composed(cw, 'grey 384x48', 'Grey/bar_round_gloss_large_l.svg', 'Grey/bar_round_gloss_large_m.svg', 'Grey/bar_round_gloss_large_r.svg', 384, 48);
+composed(cw, 'blue 384x48', 'Blue/bar_round_gloss_large_l.svg', 'Blue/bar_round_gloss_large_m.svg', 'Blue/bar_round_gloss_large_r.svg', 384, 48);
+</script>
+</body>
+</html>

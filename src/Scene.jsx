@@ -7,12 +7,23 @@ import { Vector3, MathUtils } from 'three'
 // Your existing files — adjust these two paths to wherever they live in your project
 import Fireflies from './Fireflies'
 import './materials/layerMaterial'
+import * as THREE from "three"
 
 // Renders one story page: the layer stack comes from story.json
-function Experience({ page }) {
+function Experience({ page, play }) {
   const scaleN = useAspect(1600, 1000, 1.05)
   const scaleW = useAspect(2200, 1000, 1.05)
-  const textures = useTexture(page.layers.map((l) => l.image))
+  const bgTexture = useTexture('/story/bg.jpg')
+  const textures = useTexture(
+  page.layers.map((l) => l.image),
+  (arr) => [].concat(arr).forEach((t) => { t.colorSpace = THREE.SRGBColorSpace }),
+)
+useLayoutEffect(() => {
+  [bgTexture, ...textures].forEach((t) => {
+    t.colorSpace = THREE.SRGBColorSpace
+    t.needsUpdate = true
+  })
+}, [bgTexture, textures])
   const group = useRef()
   const layersRef = useRef([])
   const [movement] = useState(() => new Vector3())
@@ -20,7 +31,7 @@ function Experience({ page }) {
   const amount = page.parallax ?? 1
 
   useFrame((state, delta) => {
-    movement.lerp(temp.set(state.pointer.x, state.pointer.y * 0.2, 0), 0.2)
+    movement.lerp(temp.set(state.pointer.x*0.5, state.pointer.y * 0.2, 0), 0.2)
     const g = group.current
     g.position.x = MathUtils.lerp(g.position.x, state.pointer.x * 20 * amount, 0.05)
     g.rotation.x = MathUtils.lerp(g.rotation.x, (state.pointer.y / 20) * amount, 0.05)
@@ -36,26 +47,39 @@ function Experience({ page }) {
       {fx && fx.count !== 0 && (
         <Fireflies count={fx.count ?? 20} radius={fx.radius ?? 80} colors={fx.colors ?? ['orange']} />
       )}
-      {page.layers.map((l, i) => {
-        const wiggle = l.wiggle ?? 0
-        return (
-          <Plane
-            key={i}
-            scale={l.fit === 'narrow' ? scaleN : scaleW}
-            args={[1, 1, wiggle ? 10 : 1, wiggle ? 10 : 1]}
-            position={[l.x ?? 0, l.y ?? 0, l.z ?? i * 10]}
-          >
-            <layerMaterial
-              movement={movement}
-              textr={textures[i]}
-              factor={l.factor ?? 0}
-              ref={(el) => (layersRef.current[i] = el)}
-              wiggle={wiggle}
-              scale={l.scaleFactor ?? 1}
-            />
-          </Plane>
-        )
-      })}
+
+      {play ? (
+  page.layers.map((l, i) => {
+    const wiggle = l.wiggle ?? 0
+    return (
+      <Plane
+        key={i}
+        scale={l.fit === 'narrow' ? scaleN : scaleW}
+        args={[1, 1, wiggle ? 10 : 1, wiggle ? 10 : 1]}
+        position={[l.x ?? 0, l.y ?? 0, l.z ?? i * 10]}
+      >
+        <layerMaterial
+          movement={movement}
+          textr={textures[i]}
+          factor={l.factor ?? 0}
+          ref={(el) => (layersRef.current[i] = el)}
+          wiggle={wiggle}
+          scale={l.scaleFactor ?? 1}
+        />
+      </Plane>
+    )
+  })
+) : (
+  <Plane scale={scaleW} args={[1, 1, 1, 1]} position={[0, 0, 0]}>
+    <layerMaterial
+      movement={movement}
+      textr={bgTexture}
+      factor={0}
+      wiggle={0}
+      scale={1}
+    />
+  </Plane>
+)}
     </group>
   )
 }
@@ -74,7 +98,7 @@ function Effects({ focus }) {
   )
 }
 
-export default function Scene({ page }) {
+export default function Scene({ page, isPlaying }) {
   return (
     <Canvas
       orthographic
@@ -83,7 +107,7 @@ export default function Scene({ page }) {
       eventSource={document.getElementById('root')}
       eventPrefix="client"
     >
-      <Experience key={page.id} page={page} />
+      <Experience key={page.id} page={page} play={isPlaying} />
       <Effects focus={page.focus ?? 30} />
     </Canvas>
   )

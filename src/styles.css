@@ -65,3 +65,42 @@ body { font-family: 'Georgia', 'Times New Roman', serif; color: #fff; }
   from { opacity: 0; scale: 0.6; }
   to { opacity: 1; scale: 1; }
 }
+
+/* ---------- emotes (32x38 art, upscaled 1-2x) ----------
+   The art is a smooth anti-aliased illustration, NOT pixel art — so never use
+   image-rendering: pixelated/crisp-edges (it quantizes the soft edges into blocks).
+   The source is only 32x38, so every step above 1x is an upscale: keep the default
+   at 1 (native, crispest) on bubbles and 2 for standalone emotes. Both dimensions
+   are pinned to the integer size and the pop animation touches only
+   opacity/translate/rotate, so the bitmap is never rescaled. */
+.emote {
+  position: absolute;
+  display: block;
+  line-height: 0;
+  pointer-events: none;
+  transform-origin: 50% 100%;
+  animation: emote-pop 0.5s cubic-bezier(0.2, 1.6, 0.4, 1) both;
+}
+.emote img {
+  display: block;
+  /* integer scale keeps the upscale clean; bilinear smoothing softens the rest */
+  image-rendering: auto;
+}
+/* centering uses `transform`, not `translate`, so the emote-pop keyframes
+   (which animate translate/rotate) don't override it */
+.emote--solo { transform: translate(-50%, -100%); }
+.bubbles .bubble .emote--right { right: -2px; bottom: calc(100% + 10px); }
+.bubbles .bubble .emote--left  { left: -2px;  bottom: calc(100% + 10px); }
+.bubbles .bubble.has-speaker .emote--left { bottom: calc(100% + 40px); }
+
+/* scale is baked into the width/height attrs, so the pop animates transform only
+   during the transform-free part and never rescales the bitmap itself */
+@keyframes emote-pop {
+  0%   { opacity: 0; translate: 0 12px; rotate: -14deg; }
+  55%  { opacity: 1; translate: 0 -4px; rotate: 5deg; }
+  100% { opacity: 1; translate: 0 0;     rotate: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .emote { animation-duration: 0.01s !important; animation-iteration-count: 1 !important; }
+}

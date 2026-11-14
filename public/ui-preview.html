@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><style>
+  body { background:#222; color:#eee; font:12px monospace; margin:0; padding:16px; }
+  .row { display:flex; flex-wrap:wrap; gap:18px; margin-bottom:18px; }
+  .cell { background:#111; padding:10px; border-radius:4px; }
+  .cell img { display:block; image-rendering:auto; }
+  .lbl { margin-top:6px; opacity:.7; }
+</style></head>
+<body>
+<div id="root"></div>
+<script>
+const groups = {
+  panels: ['Extra/panel_rectangle.svg','Extra/panel_square.svg','Extra/panel_glass.svg',
+           'Extra/panel_glass_notches.svg','Extra/panel_glass_screws.svg','Extra/panel_glass_tab.svg'],
+  buttons_extra: ['Extra/button_rectangle.svg','Extra/button_square.svg',
+                  'Extra/button_rectangle_depth.svg','Extra/button_square_depth.svg'],
+  buttons_blue: ['Blue/button_square_header_blade_rectangle.svg','Blue/button_square_header_large_rectangle.svg',
+                 'Blue/button_square_header_notch_rectangle.svg','Blue/button_square_header_large_square.svg'],
+  bars_grey: ['Grey/bar_round_gloss_large.svg','Grey/bar_round_gloss_large_l.svg',
+              'Grey/bar_round_gloss_large_m.svg','Grey/bar_round_gloss_large_r.svg'],
+  bars_blue: ['Blue/bar_round_gloss_large.svg','Blue/bar_round_gloss_large_l.svg',
+              'Blue/bar_round_gloss_large_m.svg','Blue/bar_round_gloss_large_r.svg'],
+  misc: ['Extra/crosshair_a.svg','Extra/cursor_a.svg','Grey/crosshair_color_a.svg',
+         'Extra/bar_shadow_round_outline_large.svg'],
+};
+const root = document.getElementById('root');
+for (const [name, files] of Object.entries(groups)) {
+  const row = document.createElement('div'); row.className='row';
+  const h = document.createElement('div'); h.textContent = name; h.style.width='100%'; h.style.fontSize='15px';
+  row.appendChild(h);
+  for (const f of files) {
+    const c = document.createElement('div'); c.className='cell';
+    const img = document.createElement('img'); img.src = '/ui/' + f;
+    c.appendChild(img);
+    const l = document.createElement('div'); l.className='lbl'; l.textContent = f;
+    c.appendChild(l);
+    row.appendChild(c);
+  }
+  root.appendChild(row);
+}
+</script>
+</body>
+</html>
