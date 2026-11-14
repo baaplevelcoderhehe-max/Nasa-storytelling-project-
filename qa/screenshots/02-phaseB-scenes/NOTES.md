@@ -15,10 +15,10 @@ Phase B (commit 376daef):
 
 ## Pages captured
 
-- `title`: [sheet](sheets/title.png) · [phone](phone/title.png) · [tablet](tablet/title.png) · [desktop](desktop/title.png) · [reduced motion](reduced-motion/title.png)
-- `test-moon`: [sheet](sheets/test-moon.png) · [phone](phone/test-moon.png) · [tablet](tablet/test-moon.png) · [desktop](desktop/test-moon.png) · [reduced motion](reduced-motion/test-moon.png)
-- `test-mars`: [sheet](sheets/test-mars.png) · [phone](phone/test-mars.png) · [tablet](tablet/test-mars.png) · [desktop](desktop/test-mars.png) · [reduced motion](reduced-motion/test-mars.png)
-- `test-space`: [sheet](sheets/test-space.png) · [phone](phone/test-space.png) · [tablet](tablet/test-space.png) · [desktop](desktop/test-space.png) · [reduced motion](reduced-motion/test-space.png)
+- `title`: [sheet](sheets/title.webp) · [phone](phone/title.png) · [tablet](tablet/title.png) · [desktop](desktop/title.png) · [reduced motion](reduced-motion/title.png)
+- `test-moon`: [sheet](sheets/test-moon.webp) · [phone](phone/test-moon.png) · [tablet](tablet/test-moon.png) · [desktop](desktop/test-moon.png) · [reduced motion](reduced-motion/test-moon.png)
+- `test-mars`: [sheet](sheets/test-mars.webp) · [phone](phone/test-mars.png) · [tablet](tablet/test-mars.png) · [desktop](desktop/test-mars.png) · [reduced motion](reduced-motion/test-mars.png)
+- `test-space`: [sheet](sheets/test-space.webp) · [phone](phone/test-space.png) · [tablet](tablet/test-space.png) · [desktop](desktop/test-space.png) · [reduced motion](reduced-motion/test-space.png)
 
 ## Console errors and failed requests
 

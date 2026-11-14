@@ -7,3 +7,8 @@ playwright-report
 # Review screenshots are kept in git; any other test output in qa/ is not.
 qa/*
 !qa/screenshots/
+# Per-device review shots stay on disk only; the WebP contact sheets and NOTES.md are kept.
+qa/screenshots/*/phone/
+qa/screenshots/*/tablet/
+qa/screenshots/*/desktop/
+qa/screenshots/*/reduced-motion/

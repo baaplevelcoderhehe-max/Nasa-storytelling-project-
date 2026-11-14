@@ -12,8 +12,8 @@ Phase A (commit c5f23cf), captured afterwards from that commit in a temporary wo
 
 ## Pages captured
 
-- `title`: [sheet](sheets/title.png) · [phone](phone/title.png) · [tablet](tablet/title.png) · [desktop](desktop/title.png) · [reduced motion](reduced-motion/title.png)
-- `prologue-1`: [sheet](sheets/prologue-1.png) · [phone](phone/prologue-1.png) · [tablet](tablet/prologue-1.png) · [desktop](desktop/prologue-1.png) · [reduced motion](reduced-motion/prologue-1.png)
+- `title`: [sheet](sheets/title.webp) · [phone](phone/title.png) · [tablet](tablet/title.png) · [desktop](desktop/title.png) · [reduced motion](reduced-motion/title.png)
+- `prologue-1`: [sheet](sheets/prologue-1.webp) · [phone](phone/prologue-1.png) · [tablet](tablet/prologue-1.png) · [desktop](desktop/prologue-1.png) · [reduced motion](reduced-motion/prologue-1.png)
 
 ## Animation not frozen
 

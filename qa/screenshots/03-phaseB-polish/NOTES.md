@@ -15,12 +15,12 @@ Captured 2026-11-14 21:15 UTC from http://localhost:5173/
 
 ## Pages captured
 
-- `title`: [sheet](sheets/title.png) · [phone](phone/title.png) · [tablet](tablet/title.png) · [desktop](desktop/title.png) · [reduced motion](reduced-motion/title.png)
-- `prologue-1`: [sheet](sheets/prologue-1.png) · [phone](phone/prologue-1.png) · [tablet](tablet/prologue-1.png) · [desktop](desktop/prologue-1.png) · [reduced motion](reduced-motion/prologue-1.png)
-- `test-moon`: [sheet](sheets/test-moon.png) · [phone](phone/test-moon.png) · [tablet](tablet/test-moon.png) · [desktop](desktop/test-moon.png) · [reduced motion](reduced-motion/test-moon.png)
-- `test-mars`: [sheet](sheets/test-mars.png) · [phone](phone/test-mars.png) · [tablet](tablet/test-mars.png) · [desktop](desktop/test-mars.png) · [reduced motion](reduced-motion/test-mars.png)
-- `test-space`: [sheet](sheets/test-space.png) · [phone](phone/test-space.png) · [tablet](tablet/test-space.png) · [desktop](desktop/test-space.png) · [reduced motion](reduced-motion/test-space.png)
-- `test-edges`: [sheet](sheets/test-edges.png) · [phone](phone/test-edges.png) · [tablet](tablet/test-edges.png) · [desktop](desktop/test-edges.png) · [reduced motion](reduced-motion/test-edges.png)
+- `title`: [sheet](sheets/title.webp) · [phone](phone/title.png) · [tablet](tablet/title.png) · [desktop](desktop/title.png) · [reduced motion](reduced-motion/title.png)
+- `prologue-1`: [sheet](sheets/prologue-1.webp) · [phone](phone/prologue-1.png) · [tablet](tablet/prologue-1.png) · [desktop](desktop/prologue-1.png) · [reduced motion](reduced-motion/prologue-1.png)
+- `test-moon`: [sheet](sheets/test-moon.webp) · [phone](phone/test-moon.png) · [tablet](tablet/test-moon.png) · [desktop](desktop/test-moon.png) · [reduced motion](reduced-motion/test-moon.png)
+- `test-mars`: [sheet](sheets/test-mars.webp) · [phone](phone/test-mars.png) · [tablet](tablet/test-mars.png) · [desktop](desktop/test-mars.png) · [reduced motion](reduced-motion/test-mars.png)
+- `test-space`: [sheet](sheets/test-space.webp) · [phone](phone/test-space.png) · [tablet](tablet/test-space.png) · [desktop](desktop/test-space.png) · [reduced motion](reduced-motion/test-space.png)
+- `test-edges`: [sheet](sheets/test-edges.webp) · [phone](phone/test-edges.png) · [tablet](tablet/test-edges.png) · [desktop](desktop/test-edges.png) · [reduced motion](reduced-motion/test-edges.png)
 
 ## Console errors and failed requests
 

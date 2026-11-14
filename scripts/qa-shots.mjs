@@ -13,7 +13,10 @@
 //   desktop/         1280x800, deviceScaleFactor 1
 //   reduced-motion/  one desktop shot per page with reduced motion on
 //   sheets/          one contact sheet per page: phone, tablet and desktop side by
-//                    side, labeled (PNG, at most 2400 px wide, under 2 MB)
+//                    side, labeled (WebP quality ~80, at most 2400 px wide, under 2 MB)
+//
+// Only sheets/ and NOTES.md are kept in git. The per-device folders stay on disk
+// for a closer look but are ignored (see .gitignore).
 //   NOTES.md         page list and any console errors, with sections to fill in
 //
 // An existing folder is never overwritten: pick the next number instead.
@@ -183,8 +186,8 @@ async function contactSheet(id, files, out) {
       x += widths[i] + PAD
     }
     const base = sharp({ create: { width: sheetW, height: sheetH, channels: 3, background: '#1b1a22' } }).composite(layers)
-    let buffer = await base.clone().png({ compressionLevel: 9 }).toBuffer()
-    if (buffer.length > SHEET_MAX_BYTES) buffer = await base.clone().png({ palette: true, quality: 90, compressionLevel: 9 }).toBuffer()
+    // WebP, quality ~80: only the contact sheets are kept in git.
+    const buffer = await base.clone().webp({ quality: 80, effort: 5 }).toBuffer()
     if (buffer.length <= SHEET_MAX_BYTES || height < 300) {
       await writeFile(out, buffer)
       return { width: sheetW, bytes: buffer.length }
@@ -225,7 +228,7 @@ async function main() {
       if (!process.env.QA_FAST) {
         await shoot(browser, 'desktop', id, { start, reduced: true, file: path.join(OUT, 'reduced-motion', `${id}.png`), errors })
       }
-      const sheet = path.join(OUT, 'sheets', `${id}.png`)
+      const sheet = path.join(OUT, 'sheets', `${id}.webp`)
       const info = await contactSheet(id, files, sheet)
       sheets.push(sheet)
       console.log(`  ${id}: sheet ${info.width}px, ${(info.bytes / 1024).toFixed(0)} KB`)
@@ -248,7 +251,7 @@ async function main() {
     '',
     '## Pages captured',
     '',
-    ...pages.map((p) => `- \`${p}\`: [sheet](sheets/${p}.png) · [phone](phone/${p}.png) · [tablet](tablet/${p}.png) · [desktop](desktop/${p}.png) · [reduced motion](reduced-motion/${p}.png)`),
+    ...pages.map((p) => `- \`${p}\`: [sheet](sheets/${p}.webp) · [phone](phone/${p}.png) · [tablet](tablet/${p}.png) · [desktop](desktop/${p}.png) · [reduced motion](reduced-motion/${p}.png)`),
     '',
     ...(unfrozen.size
       ? ['## Animation not frozen', '', `This build has no screenshot mode, so these were shot after a plain 2 s wait: ${[...unfrozen].join(', ')}.`, '']
