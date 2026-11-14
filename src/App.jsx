@@ -47,9 +47,17 @@ export default function App() {
   }, [])
 
   const states = story?.states ?? {}
-  // Test pages ("_test": true) are not part of the book, so they don't count.
-  const total = Object.values(states).filter((st) => !st._test).length
+  // story.order lists the book's spreads in reading order (the hub and the hidden
+  // test pages are not in it). Without it, every non-test state counts.
+  const order = story?.order ?? Object.keys(states).filter((id) => !states[id]._test)
+  const total = order.length
   const current = nav ? states[nav.id] : null
+
+  // Quiet pages: a class on <body> lets the CSS calm things down.
+  const quietPage = play && !!current?.quiet
+  useEffect(() => {
+    document.body.classList.toggle('quiet', quietPage)
+  }, [quietPage])
 
   const counters = useMemo(
     () => ({ ...derivedCounters(story, nav?.flags ?? {}), ...(nav?.counters ?? {}) }),
@@ -116,14 +124,20 @@ export default function App() {
   // States are keyed by id in the JSON but the objects themselves don't carry
   // one; Scene keys its renderer on page.id, so attach it here.
   const scene = current ? { ...current, id: nav.id } : null
+  // The first spread of a part shows its chapter banner first; its words wait for it.
+  const chapterDelay = current?.chapter ? 2.6 : 0
   const bubbles = current
     ? filterBubbles(current.bubbles, nav.flags, counters).map((b) => ({
         ...b,
         text: formatText(b.text, nav.flags, counters),
+        delay: (b.delay ?? 0) + chapterDelay,
       }))
     : []
   const choices = current ? visibleChoices(current, nav.flags, counters) : []
-  const seen = new Set(nav.visited).size
+  // Page number in the book: this spread's place in story.order (on the hub, the
+  // last spread read before it).
+  const lastInBook = [nav.id, ...nav.history.slice().reverse()].find((id) => order.includes(id))
+  const position = lastInBook ? order.indexOf(lastInBook) + 1 : 1
   const nextId = current?.next ?? null
   // The pages a reader can turn to next, so their images load ahead of time.
   const upcoming = current
@@ -151,17 +165,25 @@ export default function App() {
       {play && (
         <Bubbles
           key={`${nav.id}:${nav.history.length}`}
+          quiet={!!current?.quiet}
           bubbles={bubbles}
         />
       )}
 
+      {play && current?.chapter && (
+        <div key={`chapter:${nav.id}`} className="chapter" role="note">
+          <span className="chapter__title">{current.chapter.title}</span>
+          {current.chapter.subtitle && <span className="chapter__subtitle">{current.chapter.subtitle}</span>}
+        </div>
+      )}
+
       {play && (choices.length > 0 || current?.input) && (
-        <Choices key={nav.id} state={current} onChoose={choose} />
+        <Choices key={nav.id} state={{ ...current, choices }} onChoose={choose} />
       )}
 
       {play && (
         <PageControls
-          position={Math.min(seen, total)}
+          position={position}
           total={total}
           canBack={nav.history.length > 0}
           canNext={!!nextId}

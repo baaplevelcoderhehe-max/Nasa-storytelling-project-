@@ -4,23 +4,116 @@
   "start": "prologue-1",
   "chapters": [
     "moon",
-    "mars",
+    "mars1",
+    "mars2",
     "small",
     "beyond"
+  ],
+  "order": [
+    "prologue-1",
+    "prologue-2",
+    "prologue-3",
+    "moon-1",
+    "moon-2",
+    "moon-3",
+    "moon-4",
+    "moon-5",
+    "moon-6",
+    "moon-7",
+    "moon-8",
+    "moon-9",
+    "mars1-1",
+    "mars1-2",
+    "mars1-3",
+    "mars1-4",
+    "mars1-5",
+    "mars1-6",
+    "mars1-7",
+    "mars2-1",
+    "mars2-2",
+    "mars2-3",
+    "mars2-4",
+    "mars2-5",
+    "mars2-6",
+    "mars2-7",
+    "mars2-8",
+    "mars2-9",
+    "small-1",
+    "small-2",
+    "small-3",
+    "small-4",
+    "small-5",
+    "small-6",
+    "beyond-1",
+    "beyond-2",
+    "beyond-3",
+    "beyond-4",
+    "beyond-5",
+    "beyond-6",
+    "finale-1",
+    "finale-2",
+    "finale-3",
+    "finale-4"
   ],
   "_help": {
     "images": "Image names are keys of src/data/art.js (made from /sprites by scripts/prepare-art.mjs), e.g. \"bg_moon_plain\" or \"kit_helmet_idle\". A plain path like /art/backgrounds/bg_moon_plain.webp also works.",
     "layer": "Layers are drawn back to front (by z).\nBACKGROUND { \"type\": \"bg\", \"image\": \"bg_moon_plain\" } fills the screen (cover-cropped for any aspect ratio). Optional: z (default 0), factor (tiny texture drift with the pointer, default 0.004).\nSPRITE { \"type\": \"sprite\", \"image\": \"kit_helmet_idle\", \"x\": -30, \"y\": -20, \"height\": 35, \"z\": 20, \"flip\": false, \"anim\": \"boil\" }\n  x: percent of the visible width from the centre (-50 = left edge, 50 = right edge).\n  y: percent of the scene height from the centre (up is positive, -50 = bottom edge). The scene height is the background's visible height, which is the screen height on nearly every screen, so feet line up with the painted ground on any device.\n  anchor: \"bottom\" (default: y is where the feet touch the ground) or \"center\". float and spin default to \"center\".\n  height: percent of the scene height. On portrait screens sprites shrink (down to 60%) so they fit; give \"mobile\" to place them by hand instead.\n  z: depth (0 = back, 50 = front). Depth of field focuses on the \"main\": true sprite (else the front-most one). A page with no sprites stays sharp.\n  anim: \"boil\" (default: hand-drawn line jitter at 8 fps) | \"bob\" (slow up and down) | \"float\" (slow drift and tilt, for things in space) | \"spin\" (slow turn, for planets) | \"none\".\n  walk: true swaps kit_walk_a / kit_walk_b as a 2-frame walk cycle (image is ignored).\n  shadow: soft painted shadow under the feet. On by default for standing sprites, off for float/spin. shadowWidth: share of the sprite width (default 0.85).\n  pin: \"bg\" measures x against the background picture instead of the screen, to line a sprite up with something painted in it.\n  shadowHeight: shadow height as a share of its width; shadowLift: raise the shadow centre (share of the sprite height) so all footpads of wide hardware touch it.\nBACKGROUND option focusX (0-1): which part of the picture stays in view when the sides are cropped (0.5 = middle). Usually given in \"mobile\": { \"focusX\": 0.4 } to steer the phone crop.\nCOVER: story.cover is a scene (same layers) shown behind the title screen.\n  mobile: { x, y, height, pin, anchor } overrides used on portrait screens (phones).\n  on: { \"sprite\": \"<image of another sprite>\", \"x\": 0-1, \"y\": 0-1 } stands this sprite at a point on that sprite (x 0 = its left edge, 1 = right; y 0 = its bottom, 1 = top). Keeps the two together on every screen (e.g. a rover at the foot of a ramp). Its own x/y are then ignored.\n  flip: true mirrors the sprite. opacity: 0-1. main: true marks the subject for depth of field.\nSize guide (height): Kit 34-36, Echo 11-12 (knee-high to Kit), Sojourner ~11, landers and rovers 30-45 (bigger than Kit), planets 8-15 (far-away discs), a planet you are orbiting up to ~45.\nOlder full-screen layers ({ \"image\": \"/path.png\", \"z\", \"factor\", \"wiggle\", \"fit\", \"scaleFactor\" }) still work.\nReduced motion (OS setting or ?reduce=1): no parallax, boil, bob, float, spin, walk or fireflies. Screens under 768 px and slow devices skip depth of field and fireflies.\nTesting: ?page=<state id> opens a page directly. States with \"_test\": true are not counted as book pages.",
     "bubble": "x and y are percentages of the screen (center of the bubble). style: speech | thought | shout | narration. tail: left | right | none (ignored for narration/thought). delay = seconds before it appears (optional).",
     "emote": "emote = a name from /public/emotes (emote_heart.png -> \"heart\"; \"blank\" = empty bubble) or a list of names to animate, e.g. [\"dots1\",\"dots2\",\"dots3\"]. With text it pops on the bubble's corner (emoteSide: right|left); with no text it's standalone and x/y is where its tail points. Optional: emoteScale (1-4), emoteDelay (s), emoteSpeed (ms per frame), emoteSound (sound name or false). Avoid emotes on narration at y=8 (they'd go off the top).",
-    "state": "State graph: `start` is the first state id; `states` is keyed by id.\nState fields: scene fields (layers/bubbles/fireflies/focus/parallax) as before, plus:\n  next       id of the next state (null = end of this path)\n  choices[]  { text, to, if?, set?, reset? } — buttons shown instead of/in addition to next\n  input      { key, to, placeholder, submit, maxLength } — text answer; sets flag `key`\n  onEnter    { set?: {flag:value}, incr?: {counter:n} } — applied when the state is entered\n  if         condition to enter the state at all\nConditions: {flag:name} | {notFlag:name} | {all:[...]} | {any:[...]} | {counter:name, gte|gt|lte|lt|eq:n}\nText: {counter:name} and {flagName} are interpolated in bubble/choice text.\n`chapters` is a derived counter: how many of story.chapters flags are set."
+    "state": "State graph: `start` is the first state id; `states` is keyed by id.\nState fields: scene fields (layers/bubbles/fireflies/focus/parallax) as before, plus:\n  next       id of the next state (null = end of this path)\n  choices[]  { text, to, if?, set?, reset? } — buttons shown instead of/in addition to next\n  input      { key, to, placeholder, submit, maxLength } — text answer; sets flag `key`\n  onEnter    { set?: {flag:value}, incr?: {counter:n} } — applied when the state is entered\n  if         condition to enter the state at all\nConditions: {flag:name} | {notFlag:name} | {all:[...]} | {any:[...]} | {counter:name, gte|gt|lte|lt|eq:n}\nText: {counter:name} and {flagName} are interpolated in bubble/choice text.\n`chapters` is a derived counter: how many of story.chapters flags are set.",
+    "source": "The spreads are built by scripts/build-story.mjs from docs/script.md. Edit that file and run `node scripts/build-story.mjs`; edits made here by hand are overwritten.",
+    "spread": "Spread fields: chapter { title, subtitle } (first spread of a part: shows the banner), quiet (quiet page: dimmer, slower, no fireflies, no sound effects), alt (what the picture shows, for screen readers), tap (the tap moment from the script, built in Phase D), missionLog [facts], badge, _script (spread number in docs/script.md). Bubbles without x/y flow from the top and keep clear of the main sprite. Bubble styles: spark | narration | speech | voyager | thought | shout. Sprite field speaking: true makes the explorer glow softly while it talks; rotate: degrees."
+  },
+  "cover": {
+    "layers": [
+      {
+        "type": "bg",
+        "image": "bg_hilltop_night",
+        "mobile": {
+          "focusX": 0.66
+        }
+      },
+      {
+        "type": "sprite",
+        "image": "kit_point",
+        "x": -24,
+        "y": -31,
+        "height": 34,
+        "z": 26,
+        "anim": "boil",
+        "main": true,
+        "mobile": {
+          "x": -22,
+          "y": -26,
+          "height": 24
+        }
+      },
+      {
+        "type": "sprite",
+        "image": "echo_excited",
+        "x": -10,
+        "y": -32,
+        "height": 12,
+        "z": 27,
+        "anim": "bob",
+        "mobile": {
+          "x": -2,
+          "y": -27,
+          "height": 8.5
+        }
+      }
+    ]
   },
   "states": {
     "prologue-1": {
-      "focus": 30,
-      "parallax": 1,
+      "_script": "P.1",
+      "chapter": {
+        "title": "Prologue",
+        "subtitle": "The Faint Signal"
+      },
+      "alt": "A grassy hilltop at night. A giant radio dish points at the stars. Kit stands below it with a flashlight; Echo rolls beside them.",
       "fireflies": {
-        "count": 20,
+        "count": 18,
         "radius": 80,
         "colors": [
           "yellow"
@@ -28,69 +121,3374 @@
       },
       "layers": [
         {
-          "image": "/art/backgrounds/bg_hilltop_night.webp",
-          "z": 0,
-          "factor": 0.005
+          "type": "bg",
+          "image": "bg_hilltop_night",
+          "mobile": {
+            "focusX": 0.66
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "kit_idle",
+          "anim": "boil",
+          "x": -24,
+          "y": -31,
+          "height": 36,
+          "z": 26,
+          "main": true,
+          "mobile": {
+            "x": -22,
+            "y": -27,
+            "height": 24
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "echo_idle",
+          "anim": "bob",
+          "x": -11,
+          "y": -32,
+          "height": 11,
+          "z": 27,
+          "mobile": {
+            "x": -3,
+            "y": -28,
+            "height": 8.5
+          }
         }
       ],
       "bubbles": [
         {
           "text": "It's your first night as a Signal Keeper.",
-          "style": "narration",
-          "x": 50,
-          "y": 8
+          "style": "spark"
         },
         {
           "text": "The big dish listens to the sky. Most nights it hears only a soft hiss. Tonight, Echo's antenna starts to blink.",
           "style": "narration",
-          "x": 50,
-          "y": 90,
-          "delay": 1.5
-        },
-        {
-          "text": "Beep beep!",
-          "style": "shout",
-          "x": 30,
-          "y": 35,
-          "speaker": "Echo",
-          "delay": 3,
-          "emote": "exclamation"
+          "delay": 1.2
         }
       ],
       "next": "prologue-2"
     },
     "prologue-2": {
-      "focus": 30,
-      "parallax": 1,
+      "_script": "P.2",
+      "alt": "Inside the cozy control hut. A round crayon screen shows wild, fuzzy static.",
+      "tap": "Turn the big dial until the static smooths into a clear wave. Echo spins happily.",
       "layers": [
         {
-          "image": "/art/backgrounds/bg_hilltop_night.webp",
-          "z": 0,
-          "factor": 0.005
+          "type": "bg",
+          "image": "bg_control_hut",
+          "mobile": {
+            "focusX": 0.42
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "kit_surprised",
+          "anim": "boil",
+          "x": 28,
+          "y": -42,
+          "height": 44,
+          "z": 26,
+          "main": true,
+          "mobile": {
+            "x": 24,
+            "y": -38,
+            "height": 24
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "echo_excited",
+          "anim": "bob",
+          "x": 14,
+          "y": -40,
+          "height": 12,
+          "z": 27,
+          "mobile": {
+            "x": 4,
+            "y": -40,
+            "height": 8
+          }
         }
       ],
       "bubbles": [
         {
-          "text": "Beep... beep... Someone is calling.",
-          "style": "narration",
-          "x": 50,
-          "y": 8
+          "text": "Beep… beep… Someone is calling.",
+          "style": "spark"
         },
         {
           "text": "The signal is faint, but it's real. It comes from Voyager 1, the farthest machine people have ever built.",
           "style": "narration",
-          "x": 50,
-          "y": 90,
-          "delay": 1.5
+          "delay": 1.2
+        }
+      ],
+      "next": "prologue-3"
+    },
+    "prologue-3": {
+      "_script": "P.3",
+      "alt": "Deep space. Voyager 1 glides past, with the Sun as a tiny bright star behind it. Rings of signal ripple toward a faraway Earth.",
+      "next": "hub",
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_deep_space"
         },
         {
-          "text": "Hello, Keeper. I am almost one light-day from home. Before you answer me, visit my friends. They went first. Wake their memories, and you'll understand why I'm still out here.",
-          "style": "speech",
-          "x": 65,
-          "y": 40,
-          "tail": "left",
+          "type": "sprite",
+          "image": "voyager",
+          "x": -4,
+          "y": 2,
+          "height": 36,
+          "z": 20,
+          "anim": "float",
+          "anchor": "center",
+          "main": true,
+          "speaking": true,
+          "mobile": {
+            "x": 0,
+            "y": -8,
+            "height": 22
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "earth",
+          "x": 38,
+          "y": -20,
+          "height": 6,
+          "z": 6,
+          "anim": "none",
+          "anchor": "center",
+          "mobile": {
+            "x": 32,
+            "y": -32,
+            "height": 5
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "text": "Hello, Keeper.",
+          "style": "spark"
+        },
+        {
+          "text": "I am almost one light-day from home. Before you answer me, visit my friends. They went first. Wake their memories, and you'll understand why I'm still out here.",
+          "style": "voyager",
           "speaker": "Voyager 1",
-          "delay": 3.5,
+          "delay": 1.2,
+          "emote": [
+            "dots1",
+            "dots2",
+            "dots3"
+          ],
+          "emoteSpeed": 450
+        }
+      ]
+    },
+    "moon-1": {
+      "_script": "1.1",
+      "chapter": {
+        "title": "Chapter 1: The Moon",
+        "subtitle": "The Ones Who Proved It Was Possible"
+      },
+      "alt": "A gray, dusty plain under a black sky. Earth hangs blue and white above the horizon. Kit and Echo appear in a shimmer of signal light, wearing little bubble helmets.",
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_moon_plain",
+          "mobile": {
+            "focusX": 0.4
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "earth",
+          "pin": "bg",
+          "x": 22.25,
+          "y": 28.3,
+          "height": 14.8,
+          "z": 4,
+          "anim": "none",
+          "anchor": "center",
+          "keepClear": true,
+          "mobile": {
+            "pin": "screen",
+            "x": 32,
+            "y": 8,
+            "height": 6
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "surveyor3",
+          "x": -20,
+          "y": -12,
+          "height": 40,
+          "z": 14,
+          "anim": "boil",
+          "shadowWidth": 1,
+          "shadowHeight": 0.36,
+          "shadowLift": 0.06,
+          "mobile": {
+            "x": -18,
+            "y": -10,
+            "height": 22
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "kit_helmet_walk",
+          "anim": "boil",
+          "x": 30,
+          "y": -34,
+          "height": 36,
+          "z": 26,
+          "main": true,
+          "flip": true,
+          "mobile": {
+            "x": 25,
+            "y": -34,
+            "height": 23
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "echo_curious",
+          "anim": "bob",
+          "x": 17,
+          "y": -35,
+          "height": 11,
+          "z": 27,
+          "flip": true,
+          "mobile": {
+            "x": 6,
+            "y": -35.5,
+            "height": 7.5
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "text": "Welcome to the Moon. No air. No sound. Lots of dust.",
+          "style": "spark"
+        },
+        {
+          "text": "Long before people walked here, robots came first. One of them is standing right over there.",
+          "style": "narration",
+          "delay": 1.2
+        }
+      ],
+      "next": "moon-2"
+    },
+    "moon-2": {
+      "_script": "1.2",
+      "alt": "A memory flashback. Surveyor 3 drops toward the ground on its three legs, its engine still firing.",
+      "tap": "Press \"Engine off!\" to start the landing and watch it bounce.",
+      "missionLog": [
+        "Landed April 20, 1967.",
+        "Bounced to about 10 m, then 3 m, then settled."
+      ],
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_moon_plain",
+          "mobile": {
+            "focusX": 0.4
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "earth",
+          "pin": "bg",
+          "x": 22.25,
+          "y": 28.3,
+          "height": 14.8,
+          "z": 4,
+          "anim": "none",
+          "anchor": "center",
+          "keepClear": true,
+          "mobile": {
+            "pin": "screen",
+            "x": 32,
+            "y": 8,
+            "height": 6
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "surveyor3_engine_on",
+          "x": -16,
+          "y": 0,
+          "height": 40,
+          "z": 18,
+          "anim": "bob",
+          "anchor": "center",
+          "main": true,
+          "speaking": true,
+          "mobile": {
+            "x": -14,
+            "y": -4,
+            "height": 24
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "kit_helmet_idle",
+          "anim": "boil",
+          "x": 30,
+          "y": -34,
+          "height": 36,
+          "z": 26,
+          "mobile": {
+            "x": 25,
+            "y": -34,
+            "height": 23
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "echo_curious",
+          "anim": "bob",
+          "x": 17,
+          "y": -35,
+          "height": 11,
+          "z": 27,
+          "flip": true,
+          "mobile": {
+            "x": 6,
+            "y": -35.5,
+            "height": 7.5
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "text": "I bounced twice before I settled.",
+          "style": "spark"
+        },
+        {
+          "text": "My job was to check whether the Moon's ground could hold a spaceship. My engine didn't shut off in time, so I hopped across the dust.",
+          "style": "speech",
+          "tail": "none",
+          "speaker": "Surveyor 3",
+          "delay": 1.2
+        }
+      ],
+      "next": "moon-3"
+    },
+    "moon-3": {
+      "_script": "1.3",
+      "alt": "Close-up of Surveyor's scoop arm over the soil.",
+      "tap": "Drag the scoop to dig a trench.",
+      "missionLog": [
+        "Sent 6,326 TV pictures.",
+        "Last contact May 4, 1967."
+      ],
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_moon_plain",
+          "mobile": {
+            "focusX": 0.4
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "earth",
+          "pin": "bg",
+          "x": 22.25,
+          "y": 28.3,
+          "height": 14.8,
+          "z": 4,
+          "anim": "none",
+          "anchor": "center",
+          "keepClear": true,
+          "mobile": {
+            "pin": "screen",
+            "x": 32,
+            "y": 8,
+            "height": 6
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "surveyor3_scoop",
+          "x": -16,
+          "y": -30,
+          "height": 34,
+          "z": 20,
+          "anim": "boil",
+          "main": true,
+          "speaking": true,
+          "shadowHeight": 0.22,
+          "mobile": {
+            "x": -12,
+            "y": -26,
+            "height": 19.8
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "kit_helmet_idle",
+          "anim": "boil",
+          "x": 30,
+          "y": -34,
+          "height": 36,
+          "z": 26,
+          "mobile": {
+            "x": 25,
+            "y": -34,
+            "height": 23
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "echo_curious",
+          "anim": "bob",
+          "x": 17,
+          "y": -35,
+          "height": 11,
+          "z": 27,
+          "flip": true,
+          "mobile": {
+            "x": 6,
+            "y": -35.5,
+            "height": 7.5
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "text": "A little scoop. A big answer.",
+          "style": "spark"
+        },
+        {
+          "text": "I dug trenches and pushed on the soil. It felt like wet sand, strong enough to hold a lunar module. People could come!",
+          "style": "speech",
+          "tail": "none",
+          "speaker": "Surveyor 3",
+          "delay": 1.2
+        }
+      ],
+      "next": "moon-4"
+    },
+    "moon-4": {
+      "_script": "1.4",
+      "alt": "The Apollo 11 lunar module, gold foil shining, on four legs in the Sea of Tranquility. Its top half lifts off; the bottom half stays behind.",
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_moon_plain",
+          "mobile": {
+            "focusX": 0.4
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "earth",
+          "pin": "bg",
+          "x": 22.25,
+          "y": 28.3,
+          "height": 14.8,
+          "z": 4,
+          "anim": "none",
+          "anchor": "center",
+          "keepClear": true,
+          "mobile": {
+            "pin": "screen",
+            "x": 32,
+            "y": 8,
+            "height": 6
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "lm_descent_stage",
+          "x": -16,
+          "y": -16,
+          "height": 30,
+          "z": 16,
+          "anim": "boil",
+          "main": true,
+          "speaking": true,
+          "mobile": {
+            "x": -12,
+            "y": -13,
+            "height": 18
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "lm_ascent_stage",
+          "x": -6,
+          "y": 24,
+          "height": 16,
+          "z": 12,
+          "anim": "float",
+          "anchor": "center",
+          "mobile": {
+            "x": -16,
+            "y": 12,
+            "height": 10
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "kit_helmet_idle",
+          "anim": "boil",
+          "x": 30,
+          "y": -34,
+          "height": 36,
+          "z": 26,
+          "mobile": {
+            "x": 25,
+            "y": -34,
+            "height": 23
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "echo_excited",
+          "anim": "bob",
+          "x": 17,
+          "y": -35,
+          "height": 11,
+          "z": 27,
+          "mobile": {
+            "x": 6,
+            "y": -35.5,
+            "height": 7.5
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "text": "Half of me flew home. Half stayed as a launch pad.",
+          "style": "spark"
+        },
+        {
+          "text": "In July 1969, two astronauts landed in me. When they left, my top half blasted off from my back. I've stood here ever since.",
+          "style": "speech",
+          "tail": "none",
+          "speaker": "Eagle",
+          "delay": 1.2
+        }
+      ],
+      "next": "moon-5"
+    },
+    "moon-5": {
+      "_script": "1.5",
+      "alt": "The laser reflector, a small panel of mirrors, sitting on the gray ground. Earth shines above.",
+      "tap": "Fire a laser from Earth. The beam travels to the Moon, bounces, and comes back about 2.5 seconds later. A counter ticks.",
+      "badge": "Still useful",
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_moon_plain",
+          "mobile": {
+            "focusX": 0.4
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "earth",
+          "pin": "bg",
+          "x": 22.25,
+          "y": 28.3,
+          "height": 14.8,
+          "z": 4,
+          "anim": "none",
+          "anchor": "center",
+          "keepClear": true,
+          "mobile": {
+            "pin": "screen",
+            "x": 32,
+            "y": 8,
+            "height": 6
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "laser_reflector",
+          "x": -14,
+          "y": -24,
+          "height": 24,
+          "z": 18,
+          "anim": "boil",
+          "main": true,
+          "speaking": true,
+          "mobile": {
+            "x": -12,
+            "y": -20,
+            "height": 14
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "kit_helmet_idle",
+          "anim": "boil",
+          "x": 30,
+          "y": -34,
+          "height": 36,
+          "z": 26,
+          "mobile": {
+            "x": 25,
+            "y": -34,
+            "height": 23
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "echo_curious",
+          "anim": "bob",
+          "x": 17,
+          "y": -35,
+          "height": 11,
+          "z": 27,
+          "flip": true,
+          "mobile": {
+            "x": 6,
+            "y": -35.5,
+            "height": 7.5
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "text": "I'm a mirror that scientists still use.",
+          "style": "spark"
+        },
+        {
+          "text": "People on Earth still shine lasers at my mirrors and time the bounce. That's how they know the Moon drifts about 3.8 cm farther away every year, as fast as your fingernails grow.",
+          "style": "speech",
+          "tail": "none",
+          "speaker": "Laser reflector",
+          "delay": 1.2
+        }
+      ],
+      "next": "moon-6"
+    },
+    "moon-6": {
+      "_script": "1.6",
+      "alt": "Apollo 12 has landed. Two astronauts walk toward the old, dusty Surveyor 3. The astronauts wave; Surveyor glows warmly.",
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_moon_plain",
+          "mobile": {
+            "focusX": 0.4
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "earth",
+          "pin": "bg",
+          "x": 22.25,
+          "y": 28.3,
+          "height": 14.8,
+          "z": 4,
+          "anim": "none",
+          "anchor": "center",
+          "keepClear": true,
+          "mobile": {
+            "pin": "screen",
+            "x": 32,
+            "y": 8,
+            "height": 6
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "surveyor3",
+          "x": -22,
+          "y": -16,
+          "height": 40,
+          "z": 16,
+          "anim": "boil",
+          "main": true,
+          "speaking": true,
+          "shadowWidth": 1,
+          "shadowHeight": 0.36,
+          "shadowLift": 0.06,
+          "mobile": {
+            "x": -16,
+            "y": -14,
+            "height": 22
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "astronaut_walk",
+          "x": 12,
+          "y": -30,
+          "height": 40,
+          "z": 22,
+          "anim": "boil",
+          "flip": true,
+          "mobile": {
+            "x": 10,
+            "y": -30,
+            "height": 23
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "astronaut_wave",
+          "x": 30,
+          "y": -32,
+          "height": 40,
+          "z": 23,
+          "anim": "boil",
+          "flip": true,
+          "mobile": {
+            "x": 30,
+            "y": -33,
+            "height": 23
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "text": "Two years later, I had visitors!",
+          "style": "spark"
+        },
+        {
+          "text": "In 1969, Apollo 12 landed about 180 meters from me. The astronauts took pieces of me home, so scientists could see how I survived on the Moon.",
+          "style": "speech",
+          "tail": "none",
+          "speaker": "Surveyor 3",
+          "delay": 1.2
+        }
+      ],
+      "next": "moon-7"
+    },
+    "moon-7": {
+      "_script": "1.7",
+      "alt": "The Apollo 12 science station: a central box, a seismometer, and a finned nuclear battery, connected by cables.",
+      "tap": "Drop the empty ascent stage far away. A seismograph line wiggles… and keeps wiggling.",
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_moon_plain",
+          "mobile": {
+            "focusX": 0.4
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "earth",
+          "pin": "bg",
+          "x": 22.25,
+          "y": 28.3,
+          "height": 14.8,
+          "z": 4,
+          "anim": "none",
+          "anchor": "center",
+          "keepClear": true,
+          "mobile": {
+            "pin": "screen",
+            "x": 32,
+            "y": 8,
+            "height": 6
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "alsep_station",
+          "x": -14,
+          "y": -20,
+          "height": 30,
+          "z": 17,
+          "anim": "boil",
+          "main": true,
+          "speaking": true,
+          "mobile": {
+            "x": -12,
+            "y": -17,
+            "height": 18
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "lm_ascent_stage",
+          "x": -36,
+          "y": 14,
+          "height": 10,
+          "z": 10,
+          "anim": "float",
+          "anchor": "center",
+          "mobile": {
+            "x": -30,
+            "y": 12,
+            "height": 7
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "kit_helmet_idle",
+          "anim": "boil",
+          "x": 30,
+          "y": -34,
+          "height": 36,
+          "z": 26,
+          "mobile": {
+            "x": 25,
+            "y": -34,
+            "height": 23
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "echo_curious",
+          "anim": "bob",
+          "x": 17,
+          "y": -35,
+          "height": 11,
+          "z": 27,
+          "flip": true,
+          "mobile": {
+            "x": 6,
+            "y": -35.5,
+            "height": 7.5
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "text": "Listen… the Moon is ringing.",
+          "style": "spark"
+        },
+        {
+          "text": "The crew crashed their empty ascent stage into the Moon on purpose, and I felt it shake. It was the first recorded artificial moonquake.",
+          "style": "speech",
+          "tail": "none",
+          "speaker": "Science station",
+          "delay": 1.2
+        }
+      ],
+      "next": "moon-8"
+    },
+    "moon-8": {
+      "_script": "1.8",
+      "alt": "The Apollo 15 Lunar Roving Vehicle near tall, rounded mountains.",
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_moon_mountains"
+        },
+        {
+          "type": "sprite",
+          "image": "lrv",
+          "x": 16,
+          "y": -18,
+          "height": 34,
+          "z": 16,
+          "anim": "boil",
+          "main": true,
+          "speaking": true,
+          "mobile": {
+            "x": 14,
+            "y": -15,
+            "height": 20
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "kit_helmet_idle",
+          "anim": "boil",
+          "x": -30,
+          "y": -34,
+          "height": 36,
+          "z": 26,
+          "mobile": {
+            "x": -25,
+            "y": -34,
+            "height": 23
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "echo_happy",
+          "anim": "bob",
+          "x": -17,
+          "y": -35,
+          "height": 11,
+          "z": 27,
+          "mobile": {
+            "x": -6,
+            "y": -35.5,
+            "height": 7.5
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "text": "I'm a car parked on the Moon. Forever.",
+          "style": "spark"
+        },
+        {
+          "text": "I rode folded up inside the lander. On Apollo 15, the astronauts drove me to explore far from their landing site. Together they covered 27.9 km.",
+          "style": "speech",
+          "tail": "none",
+          "speaker": "Lunar rover",
+          "delay": 1.2
+        }
+      ],
+      "next": "moon-9"
+    },
+    "moon-9": {
+      "_script": "1.9",
+      "quiet": true,
+      "alt": "A wide view of the quiet Moon: the lander base, the rover and the mirrors, all still. Earth over the horizon. Echo sits down, a little sad.",
+      "onEnter": {
+        "set": {
+          "moon": true
+        }
+      },
+      "next": "hub",
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_moon_plain",
+          "mobile": {
+            "focusX": 0.4
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "earth",
+          "pin": "bg",
+          "x": 22.25,
+          "y": 28.3,
+          "height": 14.8,
+          "z": 4,
+          "anim": "none",
+          "anchor": "center",
+          "keepClear": true,
+          "mobile": {
+            "pin": "screen",
+            "x": 32,
+            "y": 8,
+            "height": 6
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "lm_descent_stage",
+          "x": -22,
+          "y": -8,
+          "height": 22,
+          "z": 12,
+          "anim": "boil",
+          "mobile": {
+            "x": -26,
+            "y": -8,
+            "height": 12
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "lrv",
+          "x": 26,
+          "y": -10,
+          "height": 22,
+          "z": 13,
+          "anim": "boil",
+          "mobile": {
+            "x": 26,
+            "y": -10,
+            "height": 12
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "laser_reflector",
+          "x": 4,
+          "y": -14,
+          "height": 13,
+          "z": 14,
+          "anim": "boil",
+          "mobile": {
+            "x": 0,
+            "y": -13,
+            "height": 8
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "kit_helmet_idle",
+          "anim": "boil",
+          "x": 16,
+          "y": -36,
+          "height": 36,
+          "z": 26,
+          "main": true,
+          "mobile": {
+            "x": 18,
+            "y": -36,
+            "height": 21
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "echo_sad",
+          "anim": "bob",
+          "x": 4,
+          "y": -37,
+          "height": 11,
+          "z": 27,
+          "mobile": {
+            "x": -6,
+            "y": -37.5,
+            "height": 7
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "text": "The Moon is quiet now. But we're still here.",
+          "style": "spark"
+        },
+        {
+          "text": "On September 30, 1977, the science stations were switched off. Footprints, wheels and mirrors still wait under the black sky.",
+          "style": "narration",
+          "delay": 1.2
+        },
+        {
+          "text": "They proved we could land. Now watch where that led.",
+          "style": "voyager",
+          "speaker": "Voyager 1",
+          "delay": 3.2,
+          "emote": [
+            "dots1",
+            "dots2",
+            "dots3"
+          ],
+          "emoteSpeed": 450
+        }
+      ]
+    },
+    "mars1-1": {
+      "_script": "2.1",
+      "chapter": {
+        "title": "Chapter 2: Mars",
+        "subtitle": "The First Visitors"
+      },
+      "alt": "A rocky orange plain under a butterscotch sky. Kit and Echo shimmer in.",
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_mars_plain"
+        },
+        {
+          "type": "sprite",
+          "image": "kit_helmet_walk",
+          "anim": "boil",
+          "x": -30,
+          "y": -34,
+          "height": 36,
+          "z": 26,
+          "main": true,
+          "mobile": {
+            "x": -25,
+            "y": -34,
+            "height": 23
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "echo_curious",
+          "anim": "bob",
+          "x": -17,
+          "y": -35,
+          "height": 11,
+          "z": 27,
+          "mobile": {
+            "x": -6,
+            "y": -35.5,
+            "height": 7.5
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "text": "Mars is red, dusty, and very cold.",
+          "style": "spark"
+        },
+        {
+          "text": "Reaching Mars takes months. And landing is the hardest part of all.",
+          "style": "narration",
+          "delay": 1.2
+        }
+      ],
+      "next": "mars1-2"
+    },
+    "mars1-2": {
+      "_script": "2.2",
+      "alt": "The Viking 1 lander on its three legs, its camera turned toward its own footpad.",
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_mars_plain"
+        },
+        {
+          "type": "sprite",
+          "image": "viking_lander",
+          "x": 16,
+          "y": -16,
+          "height": 40,
+          "z": 16,
+          "anim": "boil",
+          "shadowLift": 0.15,
+          "shadowHeight": 0.26,
+          "shadowWidth": 0.9,
+          "main": true,
+          "speaking": true,
+          "mobile": {
+            "x": 14,
+            "y": -13,
+            "height": 26
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "kit_helmet_idle",
+          "anim": "boil",
+          "x": -30,
+          "y": -34,
+          "height": 36,
+          "z": 26,
+          "mobile": {
+            "x": -25,
+            "y": -34,
+            "height": 23
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "echo_curious",
+          "anim": "bob",
+          "x": -17,
+          "y": -35,
+          "height": 11,
+          "z": 27,
+          "mobile": {
+            "x": -6,
+            "y": -35.5,
+            "height": 7.5
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "text": "I took the first picture ever on Mars.",
+          "style": "spark"
+        },
+        {
+          "text": "I landed on July 20, 1976. Minutes later, I sent home a picture of the rocky ground beside my foot.",
+          "style": "speech",
+          "tail": "none",
+          "speaker": "Viking 1",
+          "delay": 1.2
+        }
+      ],
+      "next": "mars1-3"
+    },
+    "mars1-3": {
+      "_script": "2.3",
+      "alt": "Viking's long arm reaching for the soil.",
+      "tap": "Scoop soil and drop it into Viking's tiny onboard lab. Bubbles and sparkles puzzle everyone.",
+      "missionLog": [
+        "Sent weather reports for years.",
+        "A wrong command from Earth cut contact in November 1982."
+      ],
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_mars_plain"
+        },
+        {
+          "type": "sprite",
+          "image": "viking_lander",
+          "x": 10,
+          "y": -24,
+          "height": 48,
+          "z": 18,
+          "anim": "boil",
+          "shadowLift": 0.15,
+          "shadowHeight": 0.26,
+          "shadowWidth": 0.9,
+          "main": true,
+          "speaking": true,
+          "mobile": {
+            "x": 12,
+            "y": -18,
+            "height": 27.8
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "kit_helmet_idle",
+          "anim": "boil",
+          "x": -33,
+          "y": -34,
+          "height": 36,
+          "z": 26,
+          "mobile": {
+            "x": -25,
+            "y": -34,
+            "height": 23
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "echo_curious",
+          "anim": "bob",
+          "x": -20,
+          "y": -35,
+          "height": 11,
+          "z": 27,
+          "mobile": {
+            "x": -6,
+            "y": -35.5,
+            "height": 7.5
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "text": "Is anything alive in here?",
+          "style": "spark"
+        },
+        {
+          "text": "Some of my tests looked a bit like life. Another test found no carbon-based chemicals at all. Scientists still argue about what it meant.",
+          "style": "speech",
+          "tail": "none",
+          "speaker": "Viking 1",
+          "delay": 1.2
+        }
+      ],
+      "next": "mars1-4"
+    },
+    "mars1-4": {
+      "_script": "2.4",
+      "alt": "Sky view. A giant cluster of airbags falls toward a rocky valley.",
+      "tap": "Release the airbags, then watch them bounce about 15 times and roll to a stop.",
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_mars_valley"
+        },
+        {
+          "type": "sprite",
+          "image": "pathfinder_airbags",
+          "x": 16,
+          "y": 14,
+          "height": 36,
+          "z": 18,
+          "anim": "float",
+          "anchor": "center",
+          "main": true,
+          "speaking": true,
+          "mobile": {
+            "x": 18,
+            "y": -4,
+            "height": 16
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "kit_helmet_idle",
+          "anim": "boil",
+          "x": -30,
+          "y": -34,
+          "height": 36,
+          "z": 26,
+          "mobile": {
+            "x": -25,
+            "y": -34,
+            "height": 23
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "echo_excited",
+          "anim": "bob",
+          "x": -17,
+          "y": -35,
+          "height": 11,
+          "z": 27,
+          "mobile": {
+            "x": -6,
+            "y": -35.5,
+            "height": 7.5
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "text": "I landed inside a giant bouncy ball!",
+          "style": "spark"
+        },
+        {
+          "text": "In July 1997, my lander fell wrapped in huge airbags. We bounced as high as 15 meters before rolling to a stop.",
+          "style": "speech",
+          "tail": "none",
+          "speaker": "Sojourner",
+          "delay": 1.2
+        }
+      ],
+      "next": "mars1-5"
+    },
+    "mars1-5": {
+      "_script": "2.5",
+      "alt": "The Pathfinder lander open like a flower. Little six-wheeled Sojourner rolls down its ramp onto Mars.",
+      "missionLog": [
+        "The lander is now called the Carl Sagan Memorial Station.",
+        "The last data came on September 27, 1997."
+      ],
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_mars_valley"
+        },
+        {
+          "type": "sprite",
+          "image": "pathfinder_open",
+          "x": 16,
+          "y": -14,
+          "height": 40,
+          "z": 14,
+          "anim": "boil",
+          "mobile": {
+            "x": 4,
+            "y": -12,
+            "height": 23.9
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "sojourner",
+          "on": {
+            "sprite": "pathfinder_open",
+            "x": 0.98,
+            "y": -0.02
+          },
+          "height": 11,
+          "z": 15,
+          "anim": "boil",
+          "main": true,
+          "speaking": true,
+          "mobile": {
+            "height": 7
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "kit_helmet_walk",
+          "anim": "boil",
+          "x": -28,
+          "y": -34,
+          "height": 36,
+          "z": 26,
+          "mobile": {
+            "x": -25,
+            "y": -34,
+            "height": 23
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "echo_happy",
+          "anim": "bob",
+          "x": -13,
+          "y": -35,
+          "height": 11,
+          "z": 27,
+          "mobile": {
+            "x": -6,
+            "y": -35.5,
+            "height": 7.5
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "text": "I'm only 30 cm tall, but I was first!",
+          "style": "spark"
+        },
+        {
+          "text": "I was the first rover on Mars. I drove up to rocks to study them. Rounded pebbles showed that water once rushed through this valley.",
+          "style": "speech",
+          "tail": "none",
+          "speaker": "Sojourner",
+          "delay": 1.2
+        }
+      ],
+      "next": "mars1-6"
+    },
+    "mars1-6": {
+      "_script": "2.6",
+      "alt": "A flat, frosty plain near the north pole, cracked into big polygon shapes. The Phoenix lander with its two round solar panels.",
+      "tap": "Dig a trench with Phoenix's arm. White bits appear. Then a time-lapse runs \"Day 1… Day 4\" as the white bits vanish.",
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_mars_arctic"
+        },
+        {
+          "type": "sprite",
+          "image": "phoenix",
+          "x": 14,
+          "y": -16,
+          "height": 36,
+          "z": 16,
+          "anim": "boil",
+          "main": true,
+          "speaking": true,
+          "mobile": {
+            "x": 14,
+            "y": -13,
+            "height": 21.2
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "kit_helmet_idle",
+          "anim": "boil",
+          "x": -30,
+          "y": -34,
+          "height": 36,
+          "z": 26,
+          "mobile": {
+            "x": -25,
+            "y": -34,
+            "height": 23
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "echo_curious",
+          "anim": "bob",
+          "x": -17,
+          "y": -35,
+          "height": 11,
+          "z": 27,
+          "mobile": {
+            "x": -6,
+            "y": -35.5,
+            "height": 7.5
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "text": "Now you see it… now you don't!",
+          "style": "spark"
+        },
+        {
+          "text": "I landed near the north pole on May 25, 2008. I dug a trench and found white bits. Four days later they were gone. They were ice, turning straight into vapor in the thin, dry air!",
+          "style": "speech",
+          "tail": "none",
+          "speaker": "Phoenix",
+          "delay": 1.2
+        }
+      ],
+      "next": "mars1-7"
+    },
+    "mars1-7": {
+      "_script": "2.7",
+      "quiet": true,
+      "alt": "The frosty plain at dusk. Frost creeps over Phoenix's panels. Echo pulls its arms in, cold.",
+      "onEnter": {
+        "set": {
+          "mars1": true
+        }
+      },
+      "next": "hub",
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_mars_arctic"
+        },
+        {
+          "type": "sprite",
+          "image": "phoenix",
+          "x": 14,
+          "y": -16,
+          "height": 36,
+          "z": 16,
+          "anim": "boil",
+          "main": true,
+          "speaking": true,
+          "mobile": {
+            "x": 14,
+            "y": -13,
+            "height": 21.2
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "kit_helmet_idle",
+          "anim": "boil",
+          "x": -30,
+          "y": -34,
+          "height": 36,
+          "z": 26,
+          "mobile": {
+            "x": -25,
+            "y": -34,
+            "height": 23
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "echo_sad",
+          "anim": "bob",
+          "x": -17,
+          "y": -35,
+          "height": 11,
+          "z": 27,
+          "mobile": {
+            "x": -6,
+            "y": -35.5,
+            "height": 7.5
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "text": "Winter came, and the Sun went away.",
+          "style": "spark"
+        },
+        {
+          "text": "I was built for one summer. In November 2008, the long winter came and my solar panels stopped, just as planned.",
+          "style": "speech",
+          "tail": "none",
+          "speaker": "Phoenix",
+          "delay": 1.2
+        },
+        {
+          "text": "They were the first visitors. Each one made the next one possible.",
+          "style": "voyager",
+          "speaker": "Voyager 1",
+          "delay": 3.2,
+          "emote": [
+            "dots1",
+            "dots2",
+            "dots3"
+          ],
+          "emoteSpeed": 450
+        }
+      ]
+    },
+    "mars2-1": {
+      "_script": "3.1",
+      "chapter": {
+        "title": "Chapter 3: Mars",
+        "subtitle": "The Long Drivers"
+      },
+      "alt": "The twins: Spirit in a crater on one side, Opportunity on the other side of Mars. Both rovers raise their camera masts and look around.",
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_mars_crater"
+        },
+        {
+          "type": "sprite",
+          "image": "mer_rover",
+          "x": -26,
+          "y": -14,
+          "height": 34,
+          "z": 14,
+          "anim": "boil",
+          "mobile": {
+            "x": -26,
+            "y": -10,
+            "height": 16
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "mer_rover",
+          "x": 26,
+          "y": -14,
+          "height": 34,
+          "z": 14,
+          "anim": "boil",
+          "flip": true,
+          "mobile": {
+            "x": 26,
+            "y": -10,
+            "height": 16
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "kit_helmet_idle",
+          "anim": "boil",
+          "x": -2,
+          "y": -36,
+          "height": 34,
+          "z": 26,
+          "main": true,
+          "mobile": {
+            "x": -6,
+            "y": -36,
+            "height": 21
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "echo_curious",
+          "anim": "bob",
+          "x": 11,
+          "y": -37,
+          "height": 11,
+          "z": 27,
+          "mobile": {
+            "x": 12,
+            "y": -37.5,
+            "height": 7.5
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "text": "We were twins, sent to opposite sides of Mars.",
+          "style": "spark"
+        },
+        {
+          "text": "Spirit landed on January 3, 2004, and Opportunity three weeks later. They were built for about 90 days. Their mission: find clues about water from long ago.",
+          "style": "narration",
+          "delay": 1.2
+        }
+      ],
+      "next": "mars2-2"
+    },
+    "mars2-2": {
+      "_script": "3.2",
+      "alt": "Opportunity on a dusty plain, its solar panels covered in a layer of dust. A swirling dust devil dances in the distance.",
+      "tap": "Steer Opportunity under the passing dust devil. The dust blows off and the panels sparkle.",
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_mars_meridiani"
+        },
+        {
+          "type": "sprite",
+          "image": "mer_rover",
+          "x": -12,
+          "y": -18,
+          "height": 36,
+          "z": 16,
+          "anim": "boil",
+          "main": true,
+          "speaking": true,
+          "mobile": {
+            "x": -10,
+            "y": -14,
+            "height": 20
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "kit_helmet_idle",
+          "anim": "boil",
+          "x": 30,
+          "y": -34,
+          "height": 36,
+          "z": 26,
+          "mobile": {
+            "x": 25,
+            "y": -34,
+            "height": 23
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "echo_curious",
+          "anim": "bob",
+          "x": 17,
+          "y": -35,
+          "height": 11,
+          "z": 27,
+          "mobile": {
+            "x": 6,
+            "y": -35.5,
+            "height": 7.5
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "text": "Dusty panels? Catch the wind!",
+          "style": "spark"
+        },
+        {
+          "text": "Dust slowly covered my solar panels, and my power dropped. But sometimes Martian winds swept them clean, and I woke up with fresh energy.",
+          "style": "speech",
+          "tail": "none",
+          "speaker": "Opportunity",
+          "delay": 1.2
+        }
+      ],
+      "next": "mars2-3"
+    },
+    "mars2-3": {
+      "_script": "3.3",
+      "alt": "A close-up of layered rock dotted with tiny round pebbles.",
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_mars_rock_closeup"
+        },
+        {
+          "type": "sprite",
+          "image": "kit_helmet_idle",
+          "anim": "boil",
+          "x": 30,
+          "y": -36,
+          "height": 30,
+          "z": 26,
+          "main": true,
+          "mobile": {
+            "x": 25,
+            "y": -37,
+            "height": 20
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "echo_curious",
+          "anim": "bob",
+          "x": 18,
+          "y": -37,
+          "height": 10,
+          "z": 27,
+          "mobile": {
+            "x": 8,
+            "y": -38,
+            "height": 7
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "text": "The rocks remembered water.",
+          "style": "spark"
+        },
+        {
+          "text": "The twins found rocks that could only form where water stayed for a long time. Long ago, Mars was a wetter world.",
+          "style": "narration",
+          "delay": 1.2
+        }
+      ],
+      "next": "mars2-4"
+    },
+    "mars2-4": {
+      "_script": "3.4",
+      "alt": "Spirit with its wheels sunk in soft, pale sand.",
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_mars_crater"
+        },
+        {
+          "type": "sprite",
+          "image": "mer_stuck",
+          "x": 6,
+          "y": -14,
+          "height": 36,
+          "z": 16,
+          "anim": "boil",
+          "main": true,
+          "mobile": {
+            "x": 8,
+            "y": -12,
+            "height": 20
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "kit_helmet_idle",
+          "anim": "boil",
+          "x": -32,
+          "y": -34,
+          "height": 36,
+          "z": 26,
+          "mobile": {
+            "x": -25,
+            "y": -34,
+            "height": 23
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "echo_sad",
+          "anim": "bob",
+          "x": -19,
+          "y": -35,
+          "height": 11,
+          "z": 27,
+          "mobile": {
+            "x": -6,
+            "y": -35.5,
+            "height": 7.5
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "text": "Spirit's wheels got stuck.",
+          "style": "spark"
+        },
+        {
+          "text": "After driving 7.7 km, Spirit sank into soft sand. It kept studying the ground right where it stood, until its mission ended in 2010.",
+          "style": "narration",
+          "delay": 1.2
+        }
+      ],
+      "next": "mars2-5"
+    },
+    "mars2-5": {
+      "_script": "3.5",
+      "alt": "InSight on a flat, smooth plain with two round solar panels. Its arm sets a dome-covered seismometer on the ground.",
+      "tap": "Listen to the seismograph line and tap when a marsquake wiggle appears.",
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_jezero"
+        },
+        {
+          "type": "sprite",
+          "image": "insight",
+          "x": 14,
+          "y": -16,
+          "height": 34,
+          "z": 16,
+          "anim": "boil",
+          "main": true,
+          "speaking": true,
+          "mobile": {
+            "x": 14,
+            "y": -13,
+            "height": 21.3
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "kit_helmet_idle",
+          "anim": "boil",
+          "x": -30,
+          "y": -34,
+          "height": 36,
+          "z": 26,
+          "mobile": {
+            "x": -25,
+            "y": -34,
+            "height": 23
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "echo_curious",
+          "anim": "bob",
+          "x": -17,
+          "y": -35,
+          "height": 11,
+          "z": 27,
+          "mobile": {
+            "x": -6,
+            "y": -35.5,
+            "height": 7.5
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "text": "I listened to the heartbeat of Mars.",
+          "style": "spark"
+        },
+        {
+          "text": "I landed in November 2018. My robot arm placed a super-sensitive seismometer on the ground. Then I listened, very carefully.",
+          "style": "speech",
+          "tail": "none",
+          "speaker": "InSight",
+          "delay": 1.2
+        }
+      ],
+      "next": "mars2-6"
+    },
+    "mars2-6": {
+      "_script": "3.6",
+      "alt": "InSight listening to Mars. Quake waves ripple through the planet and light up its crust, mantle and core.",
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_jezero"
+        },
+        {
+          "type": "sprite",
+          "image": "insight",
+          "x": 14,
+          "y": -16,
+          "height": 34,
+          "z": 16,
+          "anim": "boil",
+          "main": true,
+          "speaking": true,
+          "mobile": {
+            "x": 14,
+            "y": -13,
+            "height": 21.3
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "kit_helmet_idle",
+          "anim": "boil",
+          "x": -30,
+          "y": -34,
+          "height": 36,
+          "z": 26,
+          "mobile": {
+            "x": -25,
+            "y": -34,
+            "height": 23
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "echo_excited",
+          "anim": "bob",
+          "x": -17,
+          "y": -35,
+          "height": 11,
+          "z": 27,
+          "mobile": {
+            "x": -6,
+            "y": -35.5,
+            "height": 7.5
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "text": "Quakes showed what hides inside Mars.",
+          "style": "spark"
+        },
+        {
+          "text": "Marsquake waves traveled through the planet and showed scientists its crust, mantle and core. Slowly, dust covered my panels. My mission ended in December 2022.",
+          "style": "speech",
+          "tail": "none",
+          "speaker": "InSight",
+          "delay": 1.2
+        }
+      ],
+      "next": "mars2-7"
+    },
+    "mars2-7": {
+      "_script": "3.7",
+      "alt": "Jezero Crater. The tiny Ingenuity helicopter with its two stacked rotors, and the Perseverance rover watching nearby.",
+      "tap": "Hold to lift off, hover in the glowing band, then land on the flat spot.",
+      "missionLog": [
+        "Flew 17 km in total and reached 24 m high.",
+        "A rotor was damaged on its last flight on January 18, 2024.",
+        "It now stands still on Mars."
+      ],
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_jezero"
+        },
+        {
+          "type": "sprite",
+          "image": "perseverance",
+          "x": 24,
+          "y": -14,
+          "height": 36,
+          "z": 14,
+          "anim": "boil",
+          "mobile": {
+            "x": 22,
+            "y": -11,
+            "height": 18
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "ingenuity",
+          "x": 0,
+          "y": -22,
+          "height": 13,
+          "z": 18,
+          "anim": "boil",
+          "main": true,
+          "speaking": true,
+          "mobile": {
+            "x": 2,
+            "y": -20,
+            "height": 9
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "kit_helmet_idle",
+          "anim": "boil",
+          "x": -32,
+          "y": -34,
+          "height": 36,
+          "z": 26,
+          "mobile": {
+            "x": -25,
+            "y": -34,
+            "height": 23
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "echo_excited",
+          "anim": "bob",
+          "x": -19,
+          "y": -35,
+          "height": 11,
+          "z": 27,
+          "mobile": {
+            "x": -6,
+            "y": -35.5,
+            "height": 7.5
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "text": "They said five flights. I flew seventy-two.",
+          "style": "spark"
+        },
+        {
+          "text": "I rode to Mars under Perseverance's belly. On April 19, 2021, I made the first powered flight on another planet, in air less than 1% as thick as Earth's.",
+          "style": "speech",
+          "tail": "none",
+          "speaker": "Ingenuity",
+          "delay": 1.2
+        }
+      ],
+      "next": "mars2-8"
+    },
+    "mars2-8": {
+      "_script": "3.8",
+      "quiet": true,
+      "alt": "Opportunity alone on a wide plain as a planet-wide dust storm rolls in and the sky turns to a thick brown haze. Echo moves close to Kit.",
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_mars_meridiani"
+        },
+        {
+          "type": "sprite",
+          "image": "mer_rover",
+          "x": 8,
+          "y": -16,
+          "height": 32,
+          "z": 16,
+          "anim": "boil",
+          "main": true,
+          "mobile": {
+            "x": 12,
+            "y": -13,
+            "height": 18
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "kit_helmet_idle",
+          "anim": "boil",
+          "x": -30,
+          "y": -34,
+          "height": 36,
+          "z": 26,
+          "mobile": {
+            "x": -25,
+            "y": -34,
+            "height": 23
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "echo_sad",
+          "anim": "bob",
+          "x": -21,
+          "y": -35,
+          "height": 11,
+          "z": 27,
+          "mobile": {
+            "x": -12,
+            "y": -35.5,
+            "height": 7.5
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "text": "Opportunity, the other twin, kept driving. Then came the storm.",
+          "style": "spark"
+        },
+        {
+          "text": "For almost 15 years, Opportunity rolled on, 45.16 km in all. In 2018, a dust storm wrapped the whole planet. Its last signal came on June 10, 2018.",
+          "style": "narration",
+          "delay": 1.2
+        }
+      ],
+      "next": "mars2-9"
+    },
+    "mars2-9": {
+      "_script": "3.9",
+      "alt": "The Perseverance rover rolls past a small marker post for the old record of 45.16 km. Sparkles burst softly; Echo cheers.",
+      "onEnter": {
+        "set": {
+          "mars2": true
+        }
+      },
+      "next": "hub",
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_jezero"
+        },
+        {
+          "type": "sprite",
+          "image": "perseverance",
+          "x": 14,
+          "y": -16,
+          "height": 40,
+          "z": 16,
+          "anim": "boil",
+          "main": true,
+          "mobile": {
+            "x": 14,
+            "y": -13,
+            "height": 19.5
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "kit_helmet_idle",
+          "anim": "boil",
+          "x": -30,
+          "y": -34,
+          "height": 36,
+          "z": 26,
+          "mobile": {
+            "x": -25,
+            "y": -34,
+            "height": 23
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "echo_happy",
+          "anim": "bob",
+          "x": -17,
+          "y": -35,
+          "height": 11,
+          "z": 27,
+          "mobile": {
+            "x": -6,
+            "y": -35.5,
+            "height": 7.5
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "text": "A new rover passes the old record.",
+          "style": "spark"
+        },
+        {
+          "text": "On October 11, 2026, Perseverance drove farther than Opportunity ever had. The old record was finally broken.",
+          "style": "narration",
+          "delay": 1.2
+        },
+        {
+          "text": "Records are made to be passed. That's how explorers say thank you.",
+          "style": "voyager",
+          "speaker": "Voyager 1",
+          "delay": 3.2,
+          "emote": [
+            "dots1",
+            "dots2",
+            "dots3"
+          ],
+          "emoteSpeed": 450
+        }
+      ]
+    },
+    "small-1": {
+      "_script": "4.1",
+      "chapter": {
+        "title": "Chapter 4: Small Worlds",
+        "subtitle": "Small Worlds, Big Firsts"
+      },
+      "alt": "A starry space scene with tumbling rocky shapes. A long, peanut-shaped asteroid, Eros, turns slowly in the foreground.",
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_space_stars"
+        },
+        {
+          "type": "sprite",
+          "image": "eros",
+          "x": 14,
+          "y": 2,
+          "height": 26,
+          "z": 18,
+          "anim": "spin",
+          "anchor": "center",
+          "main": true,
+          "mobile": {
+            "x": 6,
+            "y": -4,
+            "height": 13
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "vesta",
+          "x": -38,
+          "y": 18,
+          "height": 10,
+          "z": 8,
+          "anim": "spin",
+          "anchor": "center",
+          "mobile": {
+            "x": -30,
+            "y": 4,
+            "height": 6
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "ceres",
+          "x": 38,
+          "y": -26,
+          "height": 9,
+          "z": 8,
+          "anim": "spin",
+          "anchor": "center",
+          "mobile": {
+            "x": 32,
+            "y": -20,
+            "height": 6
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "kit_helmet_idle",
+          "anim": "float",
+          "anchor": "center",
+          "x": -31,
+          "y": -22,
+          "height": 30,
+          "z": 26,
+          "mobile": {
+            "x": -24,
+            "y": -22,
+            "height": 19
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "echo_curious",
+          "anim": "float",
+          "anchor": "center",
+          "x": -17,
+          "y": -28,
+          "height": 10,
+          "z": 27,
+          "mobile": {
+            "x": -7,
+            "y": -27,
+            "height": 7
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "text": "Out here, the worlds are small and lumpy.",
+          "style": "spark"
+        },
+        {
+          "text": "Some small worlds wander near Earth. Others crowd together in a belt between Mars and Jupiter. Two brave explorers visited them.",
+          "style": "narration",
+          "delay": 1.2
+        }
+      ],
+      "next": "small-2"
+    },
+    "small-2": {
+      "_script": "4.2",
+      "alt": "The NEAR Shoemaker spacecraft (an eight-sided body with four solar panels and a dish) floating above Eros' cratered surface.",
+      "tap": "Give gentle little pushes to slow NEAR down and touch down softly. A speed meter shows walking speed.",
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_eros_surface"
+        },
+        {
+          "type": "sprite",
+          "image": "near_shoemaker",
+          "x": 14,
+          "y": 12,
+          "height": 26,
+          "z": 18,
+          "anim": "float",
+          "anchor": "center",
+          "main": true,
+          "speaking": true,
+          "mobile": {
+            "x": 10,
+            "y": 4,
+            "height": 15
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "kit_helmet_idle",
+          "anim": "boil",
+          "x": -30,
+          "y": -34,
+          "height": 36,
+          "z": 26,
+          "mobile": {
+            "x": -25,
+            "y": -34,
+            "height": 23
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "echo_curious",
+          "anim": "bob",
+          "x": -17,
+          "y": -35,
+          "height": 11,
+          "z": 27,
+          "mobile": {
+            "x": -6,
+            "y": -35.5,
+            "height": 7.5
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "text": "Nobody built me to land. I landed anyway.",
+          "style": "spark"
+        },
+        {
+          "text": "I was the first spacecraft to orbit an asteroid. At the end of my mission, on February 12, 2001, my team lowered me gently onto Eros, about as fast as you walk.",
+          "style": "speech",
+          "tail": "none",
+          "speaker": "NEAR",
+          "delay": 1.2
+        }
+      ],
+      "next": "small-3"
+    },
+    "small-3": {
+      "_script": "4.3",
+      "alt": "NEAR resting on the dusty surface of Eros, one solar panel tipped up toward the Sun. Tiny signal rings pulse from its dish, then slow and stop.",
+      "missionLog": [
+        "Last contact February 28, 2001.",
+        "Renamed in honor of geologist Eugene Shoemaker."
+      ],
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_eros_surface"
+        },
+        {
+          "type": "sprite",
+          "image": "near_shoemaker",
+          "x": 14,
+          "y": -16,
+          "height": 26,
+          "z": 16,
+          "anim": "boil",
+          "rotate": -12,
+          "main": true,
+          "speaking": true,
+          "mobile": {
+            "x": 12,
+            "y": -13,
+            "height": 15
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "kit_helmet_idle",
+          "anim": "boil",
+          "x": -30,
+          "y": -34,
+          "height": 36,
+          "z": 26,
+          "mobile": {
+            "x": -25,
+            "y": -34,
+            "height": 23
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "echo_curious",
+          "anim": "bob",
+          "x": -17,
+          "y": -35,
+          "height": 11,
+          "z": 27,
+          "mobile": {
+            "x": -6,
+            "y": -35.5,
+            "height": 7.5
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "text": "Still talking, from the surface of an asteroid!",
+          "style": "spark"
+        },
+        {
+          "text": "I wasn't built to survive landing, but I did, and I kept sending data for about two weeks. In all, I took 160,000 pictures. Then the deep cold, about −173 °C, quieted me.",
+          "style": "speech",
+          "tail": "none",
+          "speaker": "NEAR",
+          "delay": 1.2
+        }
+      ],
+      "next": "small-4"
+    },
+    "small-4": {
+      "_script": "4.4",
+      "alt": "The Dawn spacecraft with its very long solar-panel wings and a soft blue glow from its ion engine, between the asteroid Vesta and the dwarf planet Ceres.",
+      "tap": "Hold a gentle, steady push for a while. A dotted path slowly curls from Vesta toward Ceres.",
+      "missionLog": [
+        "Orbited Vesta 2011–2012 and arrived at Ceres in early 2015.",
+        "The first mission to orbit two bodies besides Earth and the Moon."
+      ],
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_space_stars"
+        },
+        {
+          "type": "sprite",
+          "image": "vesta",
+          "x": -12,
+          "y": 24,
+          "height": 12,
+          "z": 10,
+          "anim": "spin",
+          "anchor": "center",
+          "mobile": {
+            "x": -22,
+            "y": 26,
+            "height": 8
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "ceres",
+          "x": 38,
+          "y": -20,
+          "height": 14,
+          "z": 10,
+          "anim": "spin",
+          "anchor": "center",
+          "mobile": {
+            "x": 30,
+            "y": -18,
+            "height": 9
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "dawn",
+          "x": 10,
+          "y": 4,
+          "height": 30,
+          "z": 18,
+          "anim": "float",
+          "anchor": "center",
+          "main": true,
+          "speaking": true,
+          "mobile": {
+            "x": 6,
+            "y": 4,
+            "height": 16
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "kit_helmet_idle",
+          "anim": "float",
+          "anchor": "center",
+          "x": -31,
+          "y": -22,
+          "height": 30,
+          "z": 26,
+          "mobile": {
+            "x": -24,
+            "y": -22,
+            "height": 19
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "echo_curious",
+          "anim": "float",
+          "anchor": "center",
+          "x": -17,
+          "y": -28,
+          "height": 10,
+          "z": 27,
+          "mobile": {
+            "x": -7,
+            "y": -27,
+            "height": 7
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "text": "I visited two worlds and stayed with both.",
+          "style": "spark"
+        },
+        {
+          "text": "My ion engine gave the gentlest push, like a breath. But it kept pushing for weeks at a time. That let me orbit the giant asteroid Vesta, then fly on to the dwarf planet Ceres.",
+          "style": "speech",
+          "tail": "none",
+          "speaker": "Dawn",
+          "delay": 1.2
+        }
+      ],
+      "next": "small-5"
+    },
+    "small-5": {
+      "_script": "4.5",
+      "alt": "Dark gray Ceres with glittering white spots inside a large crater, Occator.",
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_space_stars"
+        },
+        {
+          "type": "sprite",
+          "image": "ceres",
+          "x": 14,
+          "y": 0,
+          "height": 50,
+          "z": 12,
+          "anim": "spin",
+          "anchor": "center",
+          "main": true,
+          "mobile": {
+            "x": 6,
+            "y": -4,
+            "height": 27.5
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "dawn",
+          "x": -14,
+          "y": 24,
+          "height": 12,
+          "z": 20,
+          "anim": "float",
+          "anchor": "center",
+          "speaking": true,
+          "mobile": {
+            "x": 28,
+            "y": 13,
+            "height": 8
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "kit_helmet_idle",
+          "anim": "float",
+          "anchor": "center",
+          "x": -31,
+          "y": -22,
+          "height": 30,
+          "z": 26,
+          "mobile": {
+            "x": -24,
+            "y": -22,
+            "height": 19
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "echo_excited",
+          "anim": "float",
+          "anchor": "center",
+          "x": -17,
+          "y": -28,
+          "height": 10,
+          "z": 27,
+          "mobile": {
+            "x": -7,
+            "y": -27,
+            "height": 7
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "text": "What were those bright spots?",
+          "style": "spark"
+        },
+        {
+          "text": "Ceres had shining spots inside a crater. They turned out to be salt, left behind when salty ice from below turned to vapor.",
+          "style": "speech",
+          "tail": "none",
+          "speaker": "Dawn",
+          "delay": 1.2
+        }
+      ],
+      "next": "small-6"
+    },
+    "small-6": {
+      "_script": "4.6",
+      "quiet": true,
+      "alt": "Dawn as a small silhouette circling Ceres, its wings catching faint sunlight.",
+      "onEnter": {
+        "set": {
+          "small": true
+        }
+      },
+      "next": "hub",
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_space_stars"
+        },
+        {
+          "type": "sprite",
+          "image": "ceres",
+          "x": 6,
+          "y": -2,
+          "height": 40,
+          "z": 12,
+          "anim": "spin",
+          "anchor": "center",
+          "mobile": {
+            "x": 4,
+            "y": -6,
+            "height": 24
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "dawn",
+          "x": 28,
+          "y": 16,
+          "height": 11,
+          "z": 18,
+          "anim": "float",
+          "anchor": "center",
+          "main": true,
+          "speaking": true,
+          "mobile": {
+            "x": 26,
+            "y": 14,
+            "height": 8
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "kit_helmet_idle",
+          "anim": "float",
+          "anchor": "center",
+          "x": -31,
+          "y": -22,
+          "height": 30,
+          "z": 26,
+          "mobile": {
+            "x": -24,
+            "y": -22,
+            "height": 19
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "echo_sad",
+          "anim": "float",
+          "anchor": "center",
+          "x": -17,
+          "y": -28,
+          "height": 10,
+          "z": 27,
+          "mobile": {
+            "x": -7,
+            "y": -27,
+            "height": 7
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "text": "Out of fuel, but still circling.",
+          "style": "spark"
+        },
+        {
+          "text": "In 2018, I ran out of the fuel I used to point myself. I still circle Ceres today, quietly.",
+          "style": "speech",
+          "tail": "none",
+          "speaker": "Dawn",
+          "delay": 1.2
+        },
+        {
+          "text": "Small worlds. Big firsts. Keep going, Keeper.",
+          "style": "voyager",
+          "speaker": "Voyager 1",
+          "delay": 3.2,
+          "emote": [
+            "dots1",
+            "dots2",
+            "dots3"
+          ],
+          "emoteSpeed": 450
+        }
+      ]
+    },
+    "beyond-1": {
+      "_script": "5.1",
+      "chapter": {
+        "title": "Chapter 5: Beyond",
+        "subtitle": "Eyes on the Stars"
+      },
+      "alt": "The Kepler telescope (a tube with a slanted sunshade and a solar panel) drifting in space, staring at a rich star field. Earth is a small blue dot ahead of it.",
+      "tap": "Watch one star's brightness line and tap each time it dips. Each dip reveals a tiny planet passing in front of the star.",
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_space_stars"
+        },
+        {
+          "type": "sprite",
+          "image": "kepler",
+          "x": 10,
+          "y": 2,
+          "height": 34,
+          "z": 18,
+          "anim": "float",
+          "anchor": "center",
+          "main": true,
+          "speaking": true,
+          "mobile": {
+            "x": 8,
+            "y": 0,
+            "height": 20
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "earth",
+          "x": 36,
+          "y": 24,
+          "height": 5,
+          "z": 6,
+          "anim": "none",
+          "anchor": "center",
+          "mobile": {
+            "x": 32,
+            "y": 20,
+            "height": 4
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "kit_helmet_idle",
+          "anim": "float",
+          "anchor": "center",
+          "x": -31,
+          "y": -22,
+          "height": 30,
+          "z": 26,
+          "mobile": {
+            "x": -24,
+            "y": -22,
+            "height": 19
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "echo_curious",
+          "anim": "float",
+          "anchor": "center",
+          "x": -17,
+          "y": -28,
+          "height": 10,
+          "z": 27,
+          "mobile": {
+            "x": -7,
+            "y": -27,
+            "height": 7
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "text": "I found planets by watching stars dim.",
+          "style": "spark"
+        },
+        {
+          "text": "I launched in 2009 and stared at one patch of sky. When a star dimmed just a tiny bit, it meant a planet was passing in front of it.",
+          "style": "speech",
+          "tail": "none",
+          "speaker": "Kepler",
+          "delay": 1.2
+        }
+      ],
+      "next": "beyond-2"
+    },
+    "beyond-2": {
+      "_script": "5.2",
+      "alt": "Kepler wobbling, with arrows of sunlight pushing on it until it holds steady. A small kayak doodle in the corner shows the idea.",
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_space_stars"
+        },
+        {
+          "type": "sprite",
+          "image": "kepler",
+          "x": 8,
+          "y": 2,
+          "height": 34,
+          "z": 18,
+          "anim": "float",
+          "anchor": "center",
+          "rotate": -14,
+          "main": true,
+          "speaking": true,
+          "mobile": {
+            "x": 6,
+            "y": 0,
+            "height": 20
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "kayak_doodle",
+          "x": 36,
+          "y": -30,
+          "height": 10,
+          "z": 22,
+          "anim": "boil",
+          "anchor": "center",
+          "mobile": {
+            "x": 30,
+            "y": -20,
+            "height": 7
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "kit_helmet_idle",
+          "anim": "float",
+          "anchor": "center",
+          "x": -31,
+          "y": -22,
+          "height": 30,
+          "z": 26,
+          "mobile": {
+            "x": -24,
+            "y": -22,
+            "height": 19
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "echo_curious",
+          "anim": "float",
+          "anchor": "center",
+          "x": -17,
+          "y": -28,
+          "height": 10,
+          "z": 27,
+          "mobile": {
+            "x": -7,
+            "y": -27,
+            "height": 7
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "text": "A broken wheel. A clever fix.",
+          "style": "spark"
+        },
+        {
+          "text": "In 2013, I lost one of the wheels that kept me pointing steady. Engineers used the gentle push of sunlight to balance me, like a kayak steering into the current. My second life was called K2.",
+          "style": "speech",
+          "tail": "none",
+          "speaker": "Kepler",
+          "delay": 1.2
+        }
+      ],
+      "next": "beyond-3"
+    },
+    "beyond-3": {
+      "_script": "5.3",
+      "alt": "The night sky filling up: around each star, a tiny planet appears, until the whole sky is full.",
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_space_stars"
+        },
+        {
+          "type": "sprite",
+          "image": "kepler",
+          "x": 14,
+          "y": 4,
+          "height": 26,
+          "z": 18,
+          "anim": "float",
+          "anchor": "center",
+          "main": true,
+          "speaking": true,
+          "mobile": {
+            "x": 10,
+            "y": 2,
+            "height": 16
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "kit_helmet_idle",
+          "anim": "float",
+          "anchor": "center",
+          "x": -31,
+          "y": -22,
+          "height": 30,
+          "z": 26,
+          "mobile": {
+            "x": -24,
+            "y": -22,
+            "height": 19
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "echo_excited",
+          "anim": "float",
+          "anchor": "center",
+          "x": -17,
+          "y": -28,
+          "height": 10,
+          "z": 27,
+          "mobile": {
+            "x": -7,
+            "y": -27,
+            "height": 7
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "text": "More planets than stars!",
+          "style": "spark"
+        },
+        {
+          "text": "I found more than 2,600 planets and showed that there are more planets than stars in our sky. I ran out of fuel in 2018. Now I drift around the Sun, trailing behind Earth.",
+          "style": "speech",
+          "tail": "none",
+          "speaker": "Kepler",
+          "delay": 1.2
+        }
+      ],
+      "next": "beyond-4"
+    },
+    "beyond-4": {
+      "_script": "5.4",
+      "alt": "Pioneer 10 (a big dish on a small body, with long thin booms) racing past giant, stripy Jupiter. A small gold plaque glints on its side.",
+      "tap": "Tap each part of the plaque to reveal what it means: the people, the Sun, the planets, the spacecraft.",
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_space_stars"
+        },
+        {
+          "type": "sprite",
+          "image": "jupiter",
+          "x": -4,
+          "y": 8,
+          "height": 46,
+          "z": 8,
+          "anim": "none",
+          "anchor": "center",
+          "mobile": {
+            "x": -6,
+            "y": 4,
+            "height": 24
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "pioneer",
+          "x": 26,
+          "y": 2,
+          "height": 32,
+          "z": 18,
+          "anim": "float",
+          "anchor": "center",
+          "main": true,
+          "speaking": true,
+          "mobile": {
+            "x": 24,
+            "y": -6,
+            "height": 18
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "kit_helmet_idle",
+          "anim": "float",
+          "anchor": "center",
+          "x": -31,
+          "y": -22,
+          "height": 30,
+          "z": 26,
+          "mobile": {
+            "x": -24,
+            "y": -22,
+            "height": 19
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "echo_curious",
+          "anim": "float",
+          "anchor": "center",
+          "x": -17,
+          "y": -28,
+          "height": 10,
+          "z": 27,
+          "mobile": {
+            "x": -7,
+            "y": -27,
+            "height": 7
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "text": "I carry a picture of you to the stars.",
+          "style": "spark"
+        },
+        {
+          "text": "I launched in 1972. I was the first spacecraft to cross the asteroid belt and fly past Jupiter. On my side is a plaque showing people and where Earth is.",
+          "style": "speech",
+          "tail": "none",
+          "speaker": "Pioneer 10",
+          "delay": 1.2
+        }
+      ],
+      "next": "beyond-5"
+    },
+    "beyond-5": {
+      "_script": "5.5",
+      "alt": "Pioneer 11 swinging past Saturn and its shimmering rings.",
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_space_stars"
+        },
+        {
+          "type": "sprite",
+          "image": "saturn",
+          "x": -6,
+          "y": 8,
+          "height": 30,
+          "z": 8,
+          "anim": "none",
+          "anchor": "center",
+          "mobile": {
+            "x": -4,
+            "y": 6,
+            "height": 13.9
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "pioneer",
+          "x": 28,
+          "y": 0,
+          "height": 30,
+          "z": 18,
+          "anim": "float",
+          "anchor": "center",
+          "main": true,
+          "mobile": {
+            "x": 24,
+            "y": -8,
+            "height": 17
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "kit_helmet_idle",
+          "anim": "float",
+          "anchor": "center",
+          "x": -31,
+          "y": -22,
+          "height": 30,
+          "z": 26,
+          "mobile": {
+            "x": -24,
+            "y": -22,
+            "height": 19
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "echo_curious",
+          "anim": "float",
+          "anchor": "center",
+          "x": -17,
+          "y": -28,
+          "height": 10,
+          "z": 27,
+          "mobile": {
+            "x": -7,
+            "y": -27,
+            "height": 7
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "text": "My twin flew to Saturn first.",
+          "style": "spark"
+        },
+        {
+          "text": "Pioneer 11 was the first spacecraft to fly past Saturn. It carries the same plaque, the same picture of us.",
+          "style": "narration",
+          "delay": 1.2
+        }
+      ],
+      "next": "beyond-6"
+    },
+    "beyond-6": {
+      "_script": "5.6",
+      "quiet": true,
+      "alt": "Two tiny probes drifting apart into a vast, dark star field. A faint red star, Aldebaran, glows far ahead of one.",
+      "onEnter": {
+        "set": {
+          "beyond": true
+        }
+      },
+      "next": "hub",
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_deep_space"
+        },
+        {
+          "type": "sprite",
+          "image": "pioneer",
+          "x": -16,
+          "y": 10,
+          "height": 15,
+          "z": 18,
+          "anim": "float",
+          "anchor": "center",
+          "main": true,
+          "mobile": {
+            "x": -16,
+            "y": 6,
+            "height": 10
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "pioneer",
+          "x": 24,
+          "y": -2,
+          "height": 12,
+          "z": 16,
+          "anim": "float",
+          "anchor": "center",
+          "flip": true,
+          "avoid": true,
+          "mobile": {
+            "x": 22,
+            "y": -8,
+            "height": 8
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "kit_helmet_idle",
+          "anim": "float",
+          "anchor": "center",
+          "x": -32,
+          "y": -26,
+          "height": 24,
+          "z": 26,
+          "mobile": {
+            "x": -26,
+            "y": -24,
+            "height": 16
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "echo_sad",
+          "anim": "float",
+          "anchor": "center",
+          "x": -20,
+          "y": -31,
+          "height": 8,
+          "z": 27,
+          "mobile": {
+            "x": -10,
+            "y": -28,
+            "height": 6
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "text": "Quiet now, and very far away.",
+          "style": "spark"
+        },
+        {
+          "text": "Pioneer 11 last spoke in 1995. Pioneer 10's last faint signal came on January 23, 2003, from 12.23 billion km away. In about two million years, it will pass a red star called Aldebaran.",
+          "style": "narration",
+          "delay": 1.2
+        },
+        {
+          "text": "They carried your picture. Now, Keeper, it's time for my story.",
+          "style": "voyager",
+          "speaker": "Voyager 1",
+          "delay": 3.2,
+          "emote": [
+            "dots1",
+            "dots2",
+            "dots3"
+          ],
+          "emoteSpeed": 450
+        }
+      ]
+    },
+    "finale-1": {
+      "_script": "F.1",
+      "chapter": {
+        "title": "Finale",
+        "subtitle": "One Light-Day"
+      },
+      "alt": "A montage page in three panels: a rocket launch, Voyager passing stripy Jupiter, then Voyager passing ringed Saturn.",
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_deep_space"
+        },
+        {
+          "type": "sprite",
+          "image": "voyager_launch",
+          "x": -30,
+          "y": 4,
+          "height": 17,
+          "z": 14,
+          "anim": "boil",
+          "anchor": "center",
+          "shadow": false,
+          "mobile": {
+            "x": -20,
+            "y": -6,
+            "height": 10
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "jupiter",
+          "x": 2,
+          "y": 10,
+          "height": 26,
+          "z": 10,
+          "anim": "none",
+          "anchor": "center",
+          "mobile": {
+            "x": 22,
+            "y": -2,
+            "height": 11
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "voyager",
+          "x": 6,
+          "y": -16,
+          "height": 14,
+          "z": 18,
+          "anim": "float",
+          "anchor": "center",
+          "main": true,
+          "speaking": true,
+          "mobile": {
+            "x": 26,
+            "y": -12,
+            "height": 8
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "saturn",
+          "x": 30,
+          "y": 8,
+          "height": 16,
+          "z": 10,
+          "anim": "none",
+          "anchor": "center",
+          "mobile": {
+            "x": -4,
+            "y": -26,
+            "height": 7
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "voyager",
+          "x": 34,
+          "y": -12,
+          "height": 11,
+          "z": 18,
+          "anim": "float",
+          "anchor": "center",
+          "mobile": {
+            "x": 4,
+            "y": -34,
+            "height": 6
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "text": "Now, my own story.",
+          "style": "spark"
+        },
+        {
+          "text": "I launched in 1977. I flew past Jupiter and Saturn. In 2012, I became the first spacecraft in interstellar space.",
+          "style": "voyager",
+          "speaker": "Voyager 1",
+          "delay": 1.2,
           "emote": [
             "dots1",
             "dots2",
@@ -99,586 +3497,126 @@
           "emoteSpeed": 450
         }
       ],
-      "next": "hub"
-    },
-    "moon-1": {
-      "focus": 30,
-      "parallax": 1,
-      "layers": [
-        {
-          "image": "/art/backgrounds/bg_moon_plain.webp",
-          "z": 0,
-          "factor": 0.005
-        }
-      ],
-      "bubbles": [
-        {
-          "text": "Welcome to the Moon. No air. No sound. Lots of dust.",
-          "style": "narration",
-          "x": 50,
-          "y": 8
-        },
-        {
-          "text": "Long before people walked here, robots came first. One of them is standing right over there.",
-          "style": "narration",
-          "x": 50,
-          "y": 90,
-          "delay": 1.5
-        }
-      ],
-      "next": "moon-2",
-      "onEnter": {
-        "set": {
-          "moon": true
-        }
-      }
-    },
-    "moon-2": {
-      "focus": 30,
-      "parallax": 1,
-      "layers": [
-        {
-          "image": "/art/backgrounds/bg_moon_plain.webp",
-          "z": 0,
-          "factor": 0.005
-        }
-      ],
-      "bubbles": [
-        {
-          "text": "I bounced twice before I settled.",
-          "style": "shout",
-          "x": 68,
-          "y": 25,
-          "speaker": "Surveyor 3",
-          "emote": "swirl"
-        },
-        {
-          "text": "I checked whether the Moon's ground could hold a spaceship. I hopped across the dust, dug trenches, and found soil like wet sand. Strong enough! People could come!",
-          "style": "speech",
-          "x": 68,
-          "y": 48,
-          "tail": "left",
-          "speaker": "Surveyor 3",
-          "delay": 1.5
-        }
-      ],
-      "next": "moon-3"
-    },
-    "moon-3": {
-      "focus": 30,
-      "parallax": 1,
-      "layers": [
-        {
-          "image": "/art/backgrounds/bg_moon_plain.webp",
-          "z": 0,
-          "factor": 0.005
-        }
-      ],
-      "bubbles": [
-        {
-          "text": "Half of me flew home. Half stayed as a launch pad.",
-          "style": "narration",
-          "x": 50,
-          "y": 8
-        },
-        {
-          "text": "In July 1969, two astronauts landed in me. When they left, my top half blasted off from my back. I've stood here ever since.",
-          "style": "speech",
-          "x": 68,
-          "y": 40,
-          "tail": "left",
-          "speaker": "Eagle",
-          "delay": 1.5,
-          "emote": "star"
-        }
-      ],
-      "next": "moon-4"
-    },
-    "moon-4": {
-      "focus": 30,
-      "parallax": 1,
-      "layers": [
-        {
-          "image": "/art/backgrounds/bg_moon_plain.webp",
-          "z": 0,
-          "factor": 0.005
-        }
-      ],
-      "bubbles": [
-        {
-          "text": "I'm a car parked on the Moon. Forever.",
-          "style": "shout",
-          "x": 68,
-          "y": 25,
-          "speaker": "Rover",
-          "emote": "laugh"
-        },
-        {
-          "text": "I rode folded up inside the lander. On Apollo 15, the astronauts drove me far from their landing site. Together we covered 27.9 km.",
-          "style": "speech",
-          "x": 68,
-          "y": 45,
-          "tail": "left",
-          "speaker": "Rover",
-          "delay": 1.5
-        },
-        {
-          "text": "They proved we could land. Now watch where that led.",
-          "style": "narration",
-          "x": 50,
-          "y": 90,
-          "delay": 4,
-          "speaker": "Voyager 1"
-        }
-      ],
-      "next": "hub"
-    },
-    "mars-1": {
-      "focus": 30,
-      "parallax": 1,
-      "layers": [
-        {
-          "image": "/art/backgrounds/bg_mars_plain.webp",
-          "z": 0,
-          "factor": 0.005
-        }
-      ],
-      "bubbles": [
-        {
-          "text": "Mars is red, dusty, and very cold.",
-          "style": "narration",
-          "x": 50,
-          "y": 8
-        },
-        {
-          "text": "Reaching Mars takes months. And landing is the hardest part of all.",
-          "style": "narration",
-          "x": 50,
-          "y": 90,
-          "delay": 1.5,
-          "emote": "cloud",
-          "emoteDelay": 0.8
-        }
-      ],
-      "next": "mars-2",
-      "onEnter": {
-        "set": {
-          "mars": true
-        }
-      }
-    },
-    "mars-2": {
-      "focus": 30,
-      "parallax": 1,
-      "layers": [
-        {
-          "image": "/art/backgrounds/bg_mars_plain.webp",
-          "z": 0,
-          "factor": 0.005
-        }
-      ],
-      "bubbles": [
-        {
-          "text": "I took the first picture ever on Mars.",
-          "style": "shout",
-          "x": 68,
-          "y": 25,
-          "speaker": "Viking 1",
-          "emote": "alert"
-        },
-        {
-          "text": "I landed on July 20, 1976. Some of my tests looked a bit like life. Another found no carbon-based chemicals. Scientists still argue about what it meant.",
-          "style": "speech",
-          "x": 68,
-          "y": 45,
-          "tail": "left",
-          "speaker": "Viking 1",
-          "delay": 1.5
-        },
-        {
-          "x": 30,
-          "y": 62,
-          "delay": 3.5,
-          "emote": "question",
-          "emoteScale": 2
-        }
-      ],
-      "next": "mars-3"
-    },
-    "mars-3": {
-      "focus": 30,
-      "parallax": 1,
-      "layers": [
-        {
-          "image": "/art/backgrounds/bg_mars_plain.webp",
-          "z": 0,
-          "factor": 0.005
-        }
-      ],
-      "bubbles": [
-        {
-          "text": "I'm only 30 cm tall, but I was first!",
-          "style": "shout",
-          "x": 68,
-          "y": 25,
-          "speaker": "Sojourner",
-          "emote": "faceHappy"
-        },
-        {
-          "text": "My lander bounced in on giant airbags in July 1997. Then I became the first rover on Mars. Rounded pebbles showed that water once rushed through this valley.",
-          "style": "speech",
-          "x": 68,
-          "y": 45,
-          "tail": "left",
-          "speaker": "Sojourner",
-          "delay": 1.5
-        }
-      ],
-      "next": "mars-4"
-    },
-    "mars-4": {
-      "focus": 30,
-      "parallax": 1,
-      "layers": [
-        {
-          "image": "/art/backgrounds/bg_mars_plain.webp",
-          "z": 0,
-          "factor": 0.005
-        }
-      ],
-      "bubbles": [
-        {
-          "text": "We were twins, sent to opposite sides of Mars.",
-          "style": "narration",
-          "x": 50,
-          "y": 8
-        },
-        {
-          "text": "Spirit landed on January 3, 2004, and Opportunity three weeks later. They were built for about 90 days, but found rocks that could only form where water stayed for a long time.",
-          "style": "narration",
-          "x": 50,
-          "y": 90,
-          "delay": 1.5,
-          "emote": "drops",
-          "emoteDelay": 0.8
-        }
-      ],
-      "next": "mars-5"
-    },
-    "mars-5": {
-      "focus": 30,
-      "parallax": 1,
-      "layers": [
-        {
-          "image": "/art/backgrounds/bg_mars_plain.webp",
-          "z": 0,
-          "factor": 0.005
-        }
-      ],
-      "bubbles": [
-        {
-          "text": "Opportunity kept driving for almost 15 years, 45.16 km in all.",
-          "style": "narration",
-          "x": 50,
-          "y": 8
-        },
-        {
-          "text": "In 2018, a dust storm wrapped the whole planet, and its last signal came on June 10. On October 11, 2026, Perseverance finally drove farther.",
-          "style": "narration",
-          "x": 50,
-          "y": 90,
-          "delay": 1.5
-        },
-        {
-          "x": 35,
-          "y": 55,
-          "delay": 2.5,
-          "emote": "faceSad",
-          "emoteScale": 2
-        },
-        {
-          "text": "Records are made to be passed. That's how explorers say thank you.",
-          "style": "speech",
-          "x": 68,
-          "y": 35,
-          "tail": "left",
-          "speaker": "Voyager 1",
-          "delay": 4,
-          "emote": "heart"
-        }
-      ],
-      "next": "mars-6"
-    },
-    "mars-6": {
-      "focus": 30,
-      "parallax": 1,
-      "layers": [
-        {
-          "image": "/art/backgrounds/bg_mars_plain.webp",
-          "z": 0,
-          "factor": 0.005
-        }
-      ],
-      "bubbles": [
-        {
-          "text": "They said five flights. I flew seventy-two.",
-          "style": "shout",
-          "x": 68,
-          "y": 25,
-          "speaker": "Ingenuity",
-          "emote": "star"
-        },
-        {
-          "text": "I rode to Mars under Perseverance's belly. On April 19, 2021, I made the first powered flight on another planet, in air less than 1% as thick as Earth's.",
-          "style": "speech",
-          "x": 68,
-          "y": 48,
-          "tail": "left",
-          "speaker": "Ingenuity",
-          "delay": 1.5
-        }
-      ],
-      "next": "hub"
-    },
-    "small-1": {
-      "focus": 30,
-      "parallax": 1,
-      "layers": [
-        {
-          "image": "/art/backgrounds/bg_eros_surface.webp",
-          "z": 0,
-          "factor": 0.005
-        }
-      ],
-      "bubbles": [
-        {
-          "text": "Out here, the worlds are small and lumpy.",
-          "style": "narration",
-          "x": 50,
-          "y": 8
-        },
-        {
-          "text": "I was the first spacecraft to orbit an asteroid. On February 12, 2001, my team lowered me gently onto Eros, about as fast as you walk. Nobody built me to land. I landed anyway!",
-          "style": "speech",
-          "x": 68,
-          "y": 42,
-          "tail": "left",
-          "speaker": "NEAR Shoemaker",
-          "delay": 1.5,
-          "emote": "circle"
-        }
-      ],
-      "next": "small-2",
-      "onEnter": {
-        "set": {
-          "small": true
-        }
-      }
-    },
-    "small-2": {
-      "focus": 30,
-      "parallax": 1,
-      "layers": [
-        {
-          "image": "/art/backgrounds/bg_eros_surface.webp",
-          "z": 0,
-          "factor": 0.005
-        }
-      ],
-      "bubbles": [
-        {
-          "text": "I visited two worlds and stayed with both.",
-          "style": "shout",
-          "x": 68,
-          "y": 22,
-          "speaker": "Dawn",
-          "emote": "idea"
-        },
-        {
-          "text": "My ion engine pushed as gently as a breath, but for weeks at a time. It took me to the asteroid Vesta, then the dwarf planet Ceres, where I found bright spots of salt.",
-          "style": "speech",
-          "x": 68,
-          "y": 48,
-          "tail": "left",
-          "speaker": "Dawn",
-          "delay": 1.5
-        },
-        {
-          "text": "Small worlds. Big firsts. Keep going, Keeper.",
-          "style": "narration",
-          "x": 50,
-          "y": 90,
-          "delay": 4,
-          "speaker": "Voyager 1"
-        }
-      ],
-      "next": "hub"
-    },
-    "beyond-1": {
-      "focus": 30,
-      "parallax": 1,
-      "layers": [
-        {
-          "image": "/art/backgrounds/bg_space_stars.webp",
-          "z": 0,
-          "factor": 0.005
-        }
-      ],
-      "bubbles": [
-        {
-          "text": "I found planets by watching stars dim.",
-          "style": "shout",
-          "x": 68,
-          "y": 22,
-          "speaker": "Kepler",
-          "emote": "stars"
-        },
-        {
-          "text": "I launched in 2009 and stared at one patch of sky. When a star dimmed a tiny bit, a planet was passing in front of it. I found more than 2,600!",
-          "style": "speech",
-          "x": 68,
-          "y": 48,
-          "tail": "left",
-          "speaker": "Kepler",
-          "delay": 1.5
-        }
-      ],
-      "next": "beyond-2",
-      "onEnter": {
-        "set": {
-          "beyond": true
-        }
-      }
-    },
-    "beyond-2": {
-      "focus": 30,
-      "parallax": 1,
-      "layers": [
-        {
-          "image": "/art/backgrounds/bg_space_stars.webp",
-          "z": 0,
-          "factor": 0.005
-        }
-      ],
-      "bubbles": [
-        {
-          "text": "I carry a picture of you to the stars.",
-          "style": "shout",
-          "x": 68,
-          "y": 22,
-          "speaker": "Pioneer 10",
-          "emote": "hearts"
-        },
-        {
-          "text": "I was the first to cross the asteroid belt and fly past Jupiter. On my side is a plaque showing people and where Earth is. My twin, Pioneer 11, carries the same one.",
-          "style": "speech",
-          "x": 68,
-          "y": 48,
-          "tail": "left",
-          "speaker": "Pioneer 10",
-          "delay": 1.5
-        }
-      ],
-      "next": "beyond-3"
-    },
-    "beyond-3": {
-      "focus": 30,
-      "parallax": 1,
-      "layers": [
-        {
-          "image": "/art/backgrounds/bg_space_stars.webp",
-          "z": 0,
-          "factor": 0.005
-        }
-      ],
-      "bubbles": [
-        {
-          "text": "Quiet now, and very far away.",
-          "style": "narration",
-          "x": 50,
-          "y": 8
-        },
-        {
-          "text": "Pioneer 10's last faint signal came on January 23, 2003, from 12.23 billion km away. In about two million years, it will pass a red star called Aldebaran.",
-          "style": "narration",
-          "x": 50,
-          "y": 90,
-          "delay": 1.5,
-          "emote": "sleeps",
-          "emoteDelay": 0.8
-        },
-        {
-          "text": "They carried your picture. Now, Keeper, it's time for my story.",
-          "style": "speech",
-          "x": 68,
-          "y": 35,
-          "tail": "left",
-          "speaker": "Voyager 1",
-          "delay": 4,
-          "if": {
-            "counter": "chapters",
-            "gte": 4
-          }
-        },
-        {
-          "text": "They carried your picture. Keep going, Keeper.",
-          "style": "speech",
-          "x": 68,
-          "y": 35,
-          "tail": "left",
-          "speaker": "Voyager 1",
-          "delay": 4,
-          "if": {
-            "counter": "chapters",
-            "lt": 4
-          }
-        }
-      ],
-      "next": "hub"
-    },
-    "finale-1": {
-      "focus": 30,
-      "parallax": 1,
-      "layers": [
-        {
-          "image": "/art/backgrounds/bg_hilltop_night.webp",
-          "z": 0,
-          "factor": 0.005
-        }
-      ],
-      "bubbles": [
-        {
-          "text": "Now, my own story.",
-          "style": "narration",
-          "x": 50,
-          "y": 8
-        },
-        {
-          "text": "I launched in 1977. I flew past Jupiter and Saturn. In 2012, I became the first spacecraft in interstellar space.",
-          "style": "speech",
-          "x": 68,
-          "y": 40,
-          "tail": "left",
-          "speaker": "Voyager 1",
-          "delay": 1.5,
-          "emote": "star"
-        },
-        {
-          "text": "I'll be honest, Keeper. My power is low, and only a couple of my instruments are still on. But I'm still out here, still sending my signal home.",
-          "style": "narration",
-          "x": 50,
-          "y": 90,
-          "delay": 4,
-          "speaker": "Voyager 1",
-          "emote": "faceSad",
-          "emoteDelay": 0.8
-        }
-      ],
       "next": "finale-2"
     },
     "finale-2": {
-      "focus": 30,
-      "parallax": 1,
+      "_script": "F.2",
+      "quiet": true,
+      "alt": "Voyager alone in deep space, its glow soft and low. Small instrument lights on its body, most of them off.",
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_deep_space"
+        },
+        {
+          "type": "sprite",
+          "image": "voyager",
+          "x": 6,
+          "y": -2,
+          "height": 36,
+          "z": 18,
+          "anim": "float",
+          "anchor": "center",
+          "main": true,
+          "speaking": true,
+          "mobile": {
+            "x": 4,
+            "y": -10,
+            "height": 22
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "text": "I'll be honest with you, Keeper.",
+          "style": "spark"
+        },
+        {
+          "text": "My power is low. Only a couple of my instruments are still on. But I'm still out here, still sending my signal home.",
+          "style": "voyager",
+          "speaker": "Voyager 1",
+          "delay": 1.2,
+          "emote": [
+            "dots1",
+            "dots2",
+            "dots3"
+          ],
+          "emoteSpeed": 450
+        }
+      ],
+      "next": "finale-3"
+    },
+    "finale-3": {
+      "_script": "F.3",
+      "alt": "Back on the hilltop at night. Kit types at a little console under the giant dish. Echo watches, antenna glowing.",
+      "next": "finale-4",
+      "input": {
+        "key": "message",
+        "to": "finale-4",
+        "placeholder": "Type a message for Voyager…",
+        "submit": "Send",
+        "maxLength": 140
+      },
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_hilltop_night",
+          "mobile": {
+            "focusX": 0.66
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "kit_typing",
+          "anim": "boil",
+          "x": -14,
+          "y": -32,
+          "height": 32,
+          "z": 26,
+          "main": true,
+          "mobile": {
+            "x": -12,
+            "y": -27,
+            "height": 21
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "echo_excited",
+          "anim": "bob",
+          "x": 4,
+          "y": -33,
+          "height": 12,
+          "z": 27,
+          "mobile": {
+            "x": 14,
+            "y": -28,
+            "height": 8.5
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "text": "Now you can answer me.",
+          "style": "spark"
+        },
+        {
+          "text": "On November 18, 2026, I reach one light-day from Earth, about 25.9 billion km. Your message will take a whole day to reach me. Send me one, Keeper.",
+          "style": "voyager",
+          "speaker": "Voyager 1",
+          "delay": 1.2,
+          "emote": [
+            "dots1",
+            "dots2",
+            "dots3"
+          ],
+          "emoteSpeed": 450
+        }
+      ]
+    },
+    "finale-4": {
+      "_script": "F.4",
+      "alt": "Kit and Echo sitting on the hill under a sky full of stars. Small glowing markers appear across the sky for every explorer they met. Echo leans against Kit.",
       "fireflies": {
         "count": 30,
         "radius": 80,
@@ -687,94 +3625,6 @@
           "orange"
         ]
       },
-      "layers": [
-        {
-          "image": "/art/backgrounds/bg_hilltop_night.webp",
-          "z": 0,
-          "factor": 0.005
-        }
-      ],
-      "bubbles": [
-        {
-          "text": "Now you can answer me.",
-          "style": "narration",
-          "x": 50,
-          "y": 8
-        },
-        {
-          "text": "On November 18, 2026, I reach one light-day from Earth, about 25.9 billion km. Your message will take a whole day to reach me. Send me one, Keeper.",
-          "style": "speech",
-          "x": 68,
-          "y": 40,
-          "tail": "left",
-          "speaker": "Voyager 1",
-          "delay": 1.5,
-          "emote": [
-            "dots1",
-            "dots2",
-            "dots3"
-          ],
-          "emoteSpeed": 450,
-          "emoteDelay": 1.5
-        }
-      ],
-      "next": "finale-3",
-      "input": {
-        "key": "message",
-        "to": "finale-3",
-        "placeholder": "Type a message for Voyager…",
-        "submit": "Send it",
-        "maxLength": 140
-      }
-    },
-    "finale-3": {
-      "focus": 30,
-      "parallax": 1,
-      "fireflies": {
-        "count": 40,
-        "radius": 80,
-        "colors": [
-          "yellow",
-          "orange"
-        ]
-      },
-      "layers": [
-        {
-          "image": "/art/backgrounds/bg_hilltop_night.webp",
-          "z": 0,
-          "factor": 0.005
-        }
-      ],
-      "bubbles": [
-        {
-          "text": "You told me: “{message}”",
-          "style": "speech",
-          "x": 65,
-          "y": 22,
-          "tail": "left",
-          "speaker": "Voyager 1",
-          "delay": 1,
-          "if": {
-            "flag": "message"
-          },
-          "emote": "heart"
-        },
-        {
-          "text": "They're quiet now. But they're still out there.",
-          "style": "narration",
-          "x": 50,
-          "y": 8
-        },
-        {
-          "text": "And so is the next explorer: you.",
-          "style": "narration",
-          "x": 50,
-          "y": 90,
-          "delay": 2,
-          "emote": "hearts",
-          "emoteDelay": 0.8
-        }
-      ],
       "next": null,
       "choices": [
         {
@@ -782,41 +3632,91 @@
           "to": "prologue-1",
           "reset": true
         }
+      ],
+      "layers": [
+        {
+          "type": "bg",
+          "image": "bg_hilltop_night",
+          "mobile": {
+            "focusX": 0.66
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "kit_sad",
+          "anim": "boil",
+          "x": 14,
+          "y": -26,
+          "height": 24,
+          "z": 26,
+          "main": true,
+          "mobile": {
+            "x": -12,
+            "y": -27,
+            "height": 16
+          }
+        },
+        {
+          "type": "sprite",
+          "image": "echo_happy",
+          "anim": "bob",
+          "x": 26,
+          "y": -26,
+          "height": 11,
+          "z": 27,
+          "mobile": {
+            "x": 4,
+            "y": -27.5,
+            "height": 8
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "text": "They're quiet now. But they're still out there.",
+          "style": "spark"
+        },
+        {
+          "text": "And so is the next explorer: you.",
+          "style": "narration",
+          "delay": 1.2
+        },
+        {
+          "text": "{message}",
+          "style": "speech",
+          "tail": "none",
+          "speaker": "Your message",
+          "delay": 2.4,
+          "if": {
+            "flag": "message"
+          }
+        }
       ]
     },
     "hub": {
-      "focus": 30,
-      "parallax": 1,
+      "alt": "The cozy control hut at night. The console screen glows, ready for the next memory.",
       "fireflies": {
-        "count": 24,
-        "radius": 80,
-        "colors": [
-          "yellow",
-          "orange"
-        ]
+        "count": 0
       },
       "layers": [
         {
-          "image": "/art/backgrounds/bg_control_hut.webp",
-          "z": 0,
-          "factor": 0.005
+          "type": "bg",
+          "image": "bg_control_hut",
+          "mobile": {
+            "focusX": 0.42
+          }
         }
       ],
       "bubbles": [
         {
           "text": "My friends are waiting, Keeper.",
-          "style": "narration",
-          "x": 50,
-          "y": 8
+          "style": "spark"
         },
         {
-          "text": "You have woken {counter:chapters} of my 4 memories. Where to next?",
-          "style": "speech",
-          "x": 65,
-          "y": 40,
-          "tail": "left",
+          "text": "You have woken {counter:chapters} of my 5 memories. Where to next?",
+          "style": "voyager",
           "speaker": "Voyager 1",
-          "delay": 1.5,
+          "delay": 1,
           "emote": [
             "dots1",
             "dots2",
@@ -827,28 +3727,78 @@
       ],
       "choices": [
         {
-          "text": "The Moon",
-          "to": "moon-1"
-        },
-        {
-          "text": "Mars",
-          "to": "mars-1"
-        },
-        {
-          "text": "The small worlds",
-          "to": "small-1"
-        },
-        {
-          "text": "The deep beyond",
-          "to": "beyond-1"
-        },
-        {
-          "text": "Hear my story now",
-          "to": "finale-1",
+          "text": "The Moon ✓",
+          "to": "moon-1",
           "if": {
-            "counter": "chapters",
-            "gte": 4
+            "flag": "moon"
           }
+        },
+        {
+          "text": "The Moon",
+          "to": "moon-1",
+          "if": {
+            "notFlag": "moon"
+          }
+        },
+        {
+          "text": "Mars: The First Visitors ✓",
+          "to": "mars1-1",
+          "if": {
+            "flag": "mars1"
+          }
+        },
+        {
+          "text": "Mars: The First Visitors",
+          "to": "mars1-1",
+          "if": {
+            "notFlag": "mars1"
+          }
+        },
+        {
+          "text": "Mars: The Long Drivers ✓",
+          "to": "mars2-1",
+          "if": {
+            "flag": "mars2"
+          }
+        },
+        {
+          "text": "Mars: The Long Drivers",
+          "to": "mars2-1",
+          "if": {
+            "notFlag": "mars2"
+          }
+        },
+        {
+          "text": "Small Worlds ✓",
+          "to": "small-1",
+          "if": {
+            "flag": "small"
+          }
+        },
+        {
+          "text": "Small Worlds",
+          "to": "small-1",
+          "if": {
+            "notFlag": "small"
+          }
+        },
+        {
+          "text": "Beyond ✓",
+          "to": "beyond-1",
+          "if": {
+            "flag": "beyond"
+          }
+        },
+        {
+          "text": "Beyond",
+          "to": "beyond-1",
+          "if": {
+            "notFlag": "beyond"
+          }
+        },
+        {
+          "text": "Finale: One Light-Day",
+          "to": "finale-1"
         }
       ]
     },
@@ -1103,45 +4053,5 @@
         }
       ]
     }
-  },
-  "cover": {
-    "layers": [
-      {
-        "type": "bg",
-        "image": "bg_hilltop_night",
-        "mobile": {
-          "focusX": 0.66
-        }
-      },
-      {
-        "type": "sprite",
-        "image": "kit_point",
-        "x": -24,
-        "y": -31,
-        "height": 34,
-        "z": 26,
-        "anim": "boil",
-        "main": true,
-        "mobile": {
-          "x": -22,
-          "y": -26,
-          "height": 24
-        }
-      },
-      {
-        "type": "sprite",
-        "image": "echo_excited",
-        "x": -10,
-        "y": -32,
-        "height": 12,
-        "z": 27,
-        "anim": "bob",
-        "mobile": {
-          "x": -2,
-          "y": -27,
-          "height": 8.5
-        }
-      }
-    ]
   }
 }

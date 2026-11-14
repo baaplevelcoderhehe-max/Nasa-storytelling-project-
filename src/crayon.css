@@ -420,3 +420,146 @@ html[data-reduce='1'] .choices__btn,
 html[data-reduce='1'] .choices__form {
   animation: none;
 }
+
+/* ---------- flowing bubbles (no x/y: placed by Bubbles.jsx) ---------- */
+.bubbles .bubble--flow {
+  transform: none;
+  transform-origin: 50% 0;
+}
+
+/* Spark: the one big line for young readers, on a paper card */
+.bubbles .bubble.spark {
+  max-width: min(640px, 90vw);
+  padding: 6px 14px 8px;
+  border: 16px solid transparent;
+  border-image: url('/art/ui/ui_paper_card.webp') 34 fill / 16px stretch;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  color: var(--ink);
+  font: 700 clamp(19px, 2.5vw, 30px) / 1.2 var(--font-book);
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.35));
+}
+
+/* Story told by an explorer: a little wider than a speech bubble */
+.bubbles .bubble.speech {
+  max-width: min(400px, 90vw);
+}
+
+/* Voyager 1: a glowing "incoming signal" panel */
+.bubbles .bubble.voyager {
+  max-width: min(460px, 90vw);
+  border: 3px solid #8fdcff;
+  border-radius: 14px;
+  background: #11203f;
+  color: #eef7ff;
+  font-weight: 500;
+  box-shadow:
+    0 0 0 3px rgba(17, 32, 63, 0.6),
+    0 0 22px rgba(143, 220, 255, 0.55);
+  animation:
+    pop 0.5s cubic-bezier(0.3, 1.5, 0.5, 1) forwards,
+    signal-glow 2.6s ease-in-out infinite;
+}
+.bubbles .bubble.voyager .speaker {
+  background: #8fdcff;
+  color: #11203f;
+}
+@keyframes signal-glow {
+  50% {
+    box-shadow:
+      0 0 0 3px rgba(17, 32, 63, 0.6),
+      0 0 34px rgba(143, 220, 255, 0.85);
+  }
+}
+
+/* Quiet pages: the words stay fully readable, the panels just glow less */
+.quiet .bubbles .bubble.voyager {
+  animation: pop 0.5s cubic-bezier(0.3, 1.5, 0.5, 1) forwards;
+}
+
+/* ---------- chapter banner (first spread of each part) ---------- */
+.chapter {
+  position: fixed;
+  left: 50%;
+  top: clamp(14px, 4vh, 40px);
+  z-index: 17;
+  translate: -50% 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  box-sizing: border-box;
+  width: max-content;
+  max-width: 94vw;
+  padding: 8px 4px 2px;
+  border: solid transparent;
+  border-width: 5px 54px 17px;
+  border-image: url('/art/ui/ui_chapter_banner.webp') 8 118 34 fill / 5px 54px 17px stretch;
+  color: var(--ink);
+  text-align: center;
+  pointer-events: none;
+  animation: chapter-show 3.2s ease both;
+}
+.chapter__title {
+  font: 700 clamp(17px, 2.6vw, 28px) / 1.1 var(--font-book);
+}
+.chapter__subtitle {
+  font: 500 clamp(13px, 1.7vw, 18px) / 1.2 var(--font-book);
+}
+@keyframes chapter-show {
+  0% {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  12%,
+  80% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+html[data-reduce='1'] .chapter {
+  animation: chapter-show-still 3.2s linear both;
+}
+@keyframes chapter-show-still {
+  0%,
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Many choices (the hub): two columns on wide screens so they stay low */
+@media (min-width: 720px) {
+  .choices {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: min(92vw, 640px);
+  }
+  .choices .choices__form {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Screenshot mode: all bubbles at once, no passing chapter banner */
+html[data-qa-freeze='1'] .bubbles .bubble,
+html[data-qa-freeze='1'] .bubbles .emote {
+  animation-delay: 0s !important;
+  animation-duration: 0.01s !important;
+}
+html[data-qa-freeze='1'] .chapter {
+  display: none;
+}
+
+/* A single choice (like "Read again") spans the full width of the choices area */
+.choices .choices__btn:only-child {
+  grid-column: 1 / -1;
+  justify-self: center;
+  width: min(100%, 320px);
+}

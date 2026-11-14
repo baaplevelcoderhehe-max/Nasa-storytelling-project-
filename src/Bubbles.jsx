@@ -1,5 +1,6 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { play } from './sound'
+import { getSpriteRects, subscribeSpriteRects } from './layoutBus'
 
 // ---------- emotes ----------
 // Files: /public/emotes/emote_<name>.png  (32x38 art, each has its own little bubble + tail).
@@ -53,21 +54,23 @@ function Emote({ name, speed = 350, scale = 2, className = '', style }) {
   )
 }
 
-// Speech bubbles are plain HTML laid over the scene. Positions are % of screen.
-// Remount per page (key) so the "delay" animation replays on every page turn.
+
+// ---------- layout ----------
 //
-// bubble fields (story.json):
-//   text, speaker, style, tail, x, y, width, delay   – as before
-//   emote        "heart" | ["dots1","dots2","dots3"]  – with text: pops on the bubble's corner.
-//                                                       without text: a standalone emote, x/y = where its tail points
-//   emoteSide    "right" (default) | "left"           – which corner it sits on (text bubbles)
-//   emoteScale   1-4 (default 1 on a bubble, 2 standalone) – 1 = native 32x38, crispest
-//   emoteDelay   seconds after the bubble appears (default 0.35)
-//   emoteSpeed   ms per frame for animated emotes (default 350)
-//   emoteSound   a sound name from sound.js, or false for silence
-// Keeps every bubble inside the screen: at least EDGE px from each side, and never
-// down in the controls area at the bottom (--controls-clear).
+// Bubbles with an x/y are placed there (percent of the screen), then nudged so they
+// stay inside it. Bubbles WITHOUT x/y "flow": they stack down from the top in order
+// (Spark first, then the story, then Voyager), each in the first spot that:
+//   - stays inside the screen (EDGE px from each side) and above the bottom controls
+//   - never covers the page's main sprite (the scene reports where it is)
+//   - avoids Kit and Echo when there is room
+// "side": "left" | "right" | "center" (default) says where a flowing bubble prefers to sit.
+
 const EDGE = 10
+const GAP = 12
+const LABEL_ROOM = 18 // the speaker label sits just above a bubble
+const SPRITE_MARGIN = 8
+const STEP = 10
+
 function controlsClear() {
   const probe = document.createElement('div')
   probe.style.cssText = 'position:fixed;visibility:hidden;height:var(--controls-clear)'
@@ -76,44 +79,76 @@ function controlsClear() {
   probe.remove()
   return h
 }
-function fitInside(el, clear) {
+
+const isFlow = (b) => b.x === undefined && b.y === undefined
+const hasTail = (b) => (b.style ?? 'speech') === 'speech' || b.style === 'shout'
+
+function overlapArea(a, r) {
+  const w = Math.min(a.right, r.right + SPRITE_MARGIN) - Math.max(a.left, r.left - SPRITE_MARGIN)
+  const h = Math.min(a.bottom, r.bottom + SPRITE_MARGIN) - Math.max(a.top, r.top - SPRITE_MARGIN)
+  return w > 0 && h > 0 ? w * h : 0
+}
+
+/**
+ * The first spot (from `fromTop` down) for a w x h bubble; returns its top-left.
+ * `strict` boxes must not be covered (the main sprite, bubbles already placed);
+ * `soft` ones are avoided when possible. If nothing is free, the spot that covers
+ * the least is used, always inside the screen.
+ */
+function findSpot(w, h, fromTop, side, strict, soft, vw, bottomLimit) {
+  const xs = {
+    left: EDGE,
+    center: Math.max(EDGE, (vw - w) / 2),
+    right: Math.max(EDGE, vw - EDGE - w),
+  }
+  const order = side === 'left' ? ['left', 'center', 'right'] : side === 'right' ? ['right', 'center', 'left'] : ['center', 'left', 'right']
+  const firstTop = Math.min(fromTop, Math.max(EDGE, bottomLimit - h))
+  const lastTop = Math.max(firstTop, bottomLimit - h)
+  let fallback = null // free of strict boxes, but touching a soft one
+  let leastBad = null // covers the least of the strict boxes
+  for (let top = firstTop; top <= lastTop; top += STEP) {
+    for (const key of order) {
+      const box = { left: xs[key], top, right: xs[key] + w, bottom: top + h }
+      const strictHit = strict.reduce((sum, r) => sum + overlapArea(box, r), 0)
+      if (strictHit > 0) {
+        if (!leastBad || strictHit < leastBad.strictHit) leastBad = { ...box, strictHit }
+        continue
+      }
+      const softHit = soft.reduce((sum, r) => sum + overlapArea(box, r), 0)
+      if (softHit === 0) return box
+      if (!fallback || softHit < fallback.softHit) fallback = { ...box, softHit }
+    }
+  }
+  return fallback ?? leastBad ?? { left: xs[order[0]], top: firstTop }
+}
+
+/** Nudges a positioned (x/y) bubble so it stays inside the screen and above the controls. */
+function fitInside(el, clear, tail) {
   el.style.translate = '0 0'
   const rect = el.getBoundingClientRect()
-  // Measure the real box (the pop-in animation scales it while it appears).
+  // The real box: the pop-in animation scales it while it appears.
   const w = el.offsetWidth
   const h = el.offsetHeight
-  const cx = (rect.left + rect.right) / 2
-  const cy = (rect.top + rect.bottom) / 2
-  const left = cx - w / 2
-  const top = cy - h / 2
+  const left = (rect.left + rect.right) / 2 - w / 2
+  const top = (rect.top + rect.bottom) / 2 - h / 2
   const vw = window.innerWidth
   const vh = window.innerHeight
   let dx = 0
   let dy = 0
   if (left < EDGE) dx = EDGE - left
   else if (left + w > vw - EDGE) dx = vw - EDGE - (left + w)
-  const tail = 22 // room for the speech tail under the box
-  if (top < EDGE + 16) dy = EDGE + 16 - top // +16: the speaker label sits above the box
+  if (top < EDGE + LABEL_ROOM) dy = EDGE + LABEL_ROOM - top
   else if (top + h + tail > vh - clear) dy = vh - clear - (top + h + tail)
   el.style.translate = `${Math.round(dx)}px ${Math.round(dy)}px`
 }
 
-export default function Bubbles({ bubbles = [] }) {
+export default function Bubbles({ bubbles = [], quiet = false }) {
   const refs = useRef([])
-  useLayoutEffect(() => {
-    const fit = () => {
-      const clear = controlsClear()
-      refs.current.forEach((el) => el && fitInside(el, clear))
-    }
-    fit()
-    // Fonts can change a bubble's size once they load.
-    document.fonts?.ready?.then(fit)
-    window.addEventListener('resize', fit)
-    return () => window.removeEventListener('resize', fit)
-  }, [bubbles])
 
   // Sounds: one per bubble (shouts get the bong), one per emote, timed to their pop-in.
+  // Quiet pages have no sound effects.
   useEffect(() => {
+    if (quiet) return
     bubbles.forEach((b) => {
       const delay = b.delay ?? 0
       if (b.text) {
@@ -128,6 +163,54 @@ export default function Bubbles({ bubbles = [] }) {
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  const layout = useRef(() => {})
+  layout.current = () => {
+    const clear = controlsClear()
+    const vw = window.innerWidth
+    const vh = window.innerHeight
+    const rects = getSpriteRects()
+    const strict = rects.filter((r) => r.main)
+    const soft = rects.filter((r) => r.soft && !r.main)
+    // Flowing bubbles also stop above any choice buttons.
+    const choicesEl = document.querySelector('.choices')
+    const bottomLimit = Math.min(vh - clear, choicesEl ? choicesEl.getBoundingClientRect().top - GAP : vh)
+    // Each flowing bubble starts looking at the previous one's top, so it can sit beside
+    // it or below it, but never above it (reading order). Placed bubbles are obstacles.
+    let cursor = EDGE + LABEL_ROOM
+    const placed = []
+    bubbles.forEach((b, i) => {
+      const el = refs.current[i]
+      if (!el || !b.text) return
+      const tail = hasTail(b) ? 22 : 0
+      if (!isFlow(b)) {
+        fitInside(el, clear, tail)
+        return
+      }
+      const w = el.offsetWidth
+      const h = el.offsetHeight + tail
+      const labelRoom = b.speaker ? LABEL_ROOM : 0
+      const obstacles = [...strict, ...placed]
+      const spot = findSpot(w, h, cursor + labelRoom, b.side, obstacles, soft, vw, bottomLimit)
+      el.style.left = `${Math.round(spot.left)}px`
+      el.style.top = `${Math.round(spot.top)}px`
+      // Room for this bubble's speaker label and a gap, so neighbours never touch.
+      placed.push({ left: spot.left - GAP, right: spot.left + w + GAP, top: spot.top - labelRoom - GAP, bottom: spot.top + h + GAP })
+      cursor = spot.top
+    })
+  }
+
+  useLayoutEffect(() => {
+    const run = () => layout.current()
+    run()
+    document.fonts?.ready?.then(run) // fonts can change a bubble's size once they load
+    const stop = subscribeSpriteRects(run)
+    window.addEventListener('resize', run)
+    return () => {
+      stop()
+      window.removeEventListener('resize', run)
+    }
+  }, [bubbles])
 
   return (
     <div className="bubbles">
@@ -155,17 +238,19 @@ export default function Bubbles({ bubbles = [] }) {
 
         const style = b.style ?? 'speech'
         const tail = style === 'speech' || style === 'shout' ? b.tail ?? 'left' : 'none'
-        // Lower-band bubbles are anchored above the HUD (progress bar) rather
-        // than at a screen %, which would collide with it on short windows.
-        const low = (b.y ?? 50) >= 75
+        const flow = isFlow(b)
+        // Lower-band positioned bubbles sit just above the bottom controls.
+        const low = !flow && (b.y ?? 50) >= 75
+        const position = flow
+          ? { left: 0, top: 0 }
+          : { left: `${b.x ?? 50}%`, ...(low ? { bottom: 'var(--controls-clear)' } : { top: `${b.y ?? 50}%` }) }
         return (
           <div
             key={i}
             ref={(el) => (refs.current[i] = el)}
-            className={`bubble ${style} tail-${tail}${low ? ' bubble--low' : ''}${hasEmote ? ' has-emote' : ''}${b.speaker ? ' has-speaker' : ''}`}
+            className={`bubble ${style} tail-${tail}${flow ? ' bubble--flow' : ''}${low ? ' bubble--low' : ''}${hasEmote ? ' has-emote' : ''}${b.speaker ? ' has-speaker' : ''}`}
             style={{
-              left: `${b.x ?? 50}%`,
-              ...(low ? { bottom: 'var(--controls-clear)' } : { top: `${b.y ?? 50}%` }),
+              ...position,
               animationDelay: `${b.delay ?? 0}s`,
               maxWidth: b.width ? `min(${b.width}px, 90vw)` : undefined,
             }}

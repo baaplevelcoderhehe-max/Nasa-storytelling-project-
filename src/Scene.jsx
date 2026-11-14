@@ -9,6 +9,7 @@ import './materials/layerMaterial'
 import './materials/spriteMaterial'
 import { art } from './data/art'
 import { useReducedMotion, useSmallScreen } from './motion'
+import { publishSpriteRects } from './layoutBus'
 
 // ---------------------------------------------------------------------------
 // A story page is a stack of layers (see "_help" in public/story.json):
@@ -174,7 +175,11 @@ function seeded(seed) {
 }
 const hash = (text) => [...text].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) | 0, 7)
 
-function Sprite({ layer, place, textures, still, index }) {
+/** Quiet pages: a dimmer scene and slower motion. */
+const QUIET_DIM = 0.72
+const QUIET_SPEED = 0.5
+
+function Sprite({ layer, place, textures, still, index, quiet }) {
   const mesh = useRef()
   const material = useRef()
   const shadow = useRef()
@@ -190,6 +195,9 @@ function Sprite({ layer, place, textures, still, index }) {
   // hardware whose feet stand at different depths, so every footpad touches it.
   const shadowY = place.y + shadowH * 0.12 + (layer.shadowLift ?? 0) * place.h
 
+  const baseRotation = ((layer.rotate ?? 0) * Math.PI) / 180
+  const speed = quiet ? QUIET_SPEED : 1
+
   useFrame((state, delta) => {
     const m = mesh.current
     if (!m) return
@@ -197,7 +205,13 @@ function Sprite({ layer, place, textures, still, index }) {
     let dy = 0
     let rot = 0
     let sc = 1
-    const t = state.clock.elapsedTime + phase
+    const clock = state.clock.elapsedTime * speed
+    const t = clock + phase
+
+    // An explorer that is speaking glows softly (hardware has no face, so the glow
+    // shows who is talking). Quiet pages are dimmer.
+    const glow = layer.speaking ? (still ? 1.08 : 1.07 + Math.sin(t * 2.4) * 0.06) : 1
+    if (material.current) material.current.tint.setScalar(glow * (quiet ? QUIET_DIM : 1))
 
     if (!still) {
       if (anim === 'bob') dy += Math.sin(t * 1.3) * place.h * 0.012
@@ -206,10 +220,10 @@ function Sprite({ layer, place, textures, still, index }) {
         dx += Math.cos(t * 0.33) * place.h * 0.03
         rot += Math.sin(t * 0.27) * 0.05
       }
-      if (anim === 'spin') m.userData.spin = (m.userData.spin ?? 0) + delta * 0.06
+      if (anim === 'spin') m.userData.spin = (m.userData.spin ?? 0) + delta * 0.06 * speed
       if (anim === 'boil' || layer.walk) {
         // Hand-drawn line boil: a new tiny offset 8 times a second.
-        const step = Math.floor(state.clock.elapsedTime * 8)
+        const step = Math.floor(clock * 8)
         const b = boil.current
         if (step !== b.step) {
           b.step = step
@@ -224,13 +238,13 @@ function Sprite({ layer, place, textures, still, index }) {
         sc *= b.sc
       }
       if (layer.walk) {
-        const frame = Math.floor(state.clock.elapsedTime * 4) % 2
+        const frame = Math.floor(clock * 4) % 2
         if (material.current && material.current.tex !== frames[frame]) material.current.tex = frames[frame]
-        dy += Math.abs(Math.sin(state.clock.elapsedTime * Math.PI * 4)) * place.h * 0.012
+        dy += Math.abs(Math.sin(clock * Math.PI * 4)) * place.h * 0.012
       }
     }
     m.position.set(place.x + dx, place.centerY + dy, place.z)
-    m.rotation.z = rot + (m.userData.spin ?? 0)
+    m.rotation.z = baseRotation + rot + (m.userData.spin ?? 0)
     m.scale.set(place.w * sc, place.h * sc, 1)
     if (shadow.current) {
       // The shadow stays on the ground; it shrinks a little when the sprite lifts.
@@ -266,14 +280,21 @@ function Sprite({ layer, place, textures, still, index }) {
   )
 }
 
-function Background({ layer, stage, texture, movement }) {
+function Background({ layer, stage, texture, movement, quiet }) {
   return (
     <Plane
       scale={[stage.bgW, stage.bgH, 1]}
       args={[1, 1, 1, 1]}
       position={[stage.bgOffsetX, 0, layer.z ?? 0]}
     >
-      <layerMaterial movement={movement} textr={texture} factor={layer.factor ?? 0.004} wiggle={0} scale={1} />
+      <layerMaterial
+        movement={movement}
+        textr={texture}
+        factor={layer.factor ?? 0.004}
+        wiggle={0}
+        scale={1}
+        dim={quiet ? QUIET_DIM : 1}
+      />
     </Plane>
   )
 }
@@ -326,6 +347,28 @@ function useFreezeFrame(name) {
   }, [advance, gl, name])
 }
 
+/** Tells the bubbles where the main sprite (and Kit and Echo) are on screen. */
+function useSpriteRects(layers, places) {
+  const size = useThree((s) => s.size)
+  const zoom = useThree((s) => s.camera.zoom)
+  useEffect(() => {
+    const rects = []
+    layers.forEach((l, i) => {
+      const p = places[i]
+      if (!p || !isSprite(l)) return
+      const name = l.walk ? 'kit_walk' : String(l.image)
+      const soft = /^(kit|echo)/.test(name) || !!l.keepClear
+      if (!l.main && !soft && !l.avoid) return
+      const cx = size.width / 2 + p.x * zoom
+      const cy = size.height / 2 - p.centerY * zoom
+      const hw = (p.w * zoom) / 2
+      const hh = (p.h * zoom) / 2
+      rects.push({ name, main: !!l.main || !!l.avoid, soft, left: cx - hw, right: cx + hw, top: cy - hh, bottom: cy + hh })
+    })
+    publishSpriteRects(rects)
+  })
+}
+
 function Experience({ page, cover, play, still, lowPower }) {
   const scaleN = useAspect(1600, 1000, 1.05)
   const scaleW = useAspect(2200, 1000, 1.05)
@@ -347,6 +390,7 @@ function Experience({ page, cover, play, still, lowPower }) {
   useFreezeFrame(play ? page.id : 'title')
   const stage = useStage(shown)
   const places = placeAll(shown.layers, stage)
+  useSpriteRects(shown.layers, places)
   const group = useRef()
   const layersRef = useRef([])
   const [movement] = useState(() => new THREE.Vector3())
@@ -369,16 +413,17 @@ function Experience({ page, cover, play, still, lowPower }) {
   }, 1)
 
   const fx = shown.fireflies
-  const showFireflies = play && fx && fx.count !== 0 && !still && !lowPower
+  const showFireflies = play && fx && fx.count !== 0 && !still && !lowPower && !shown.quiet
   return (
     <group ref={group}>
       {showFireflies && (
         <Fireflies count={fx.count ?? 20} radius={fx.radius ?? 80} colors={fx.colors ?? ['orange']} />
       )}
       {shown.layers.map((l, i) => {
-        if (isBg(l)) return <Background key={i} layer={l} stage={stage} texture={textures[srcOf(l.image)]} movement={movement} />
+        if (isBg(l))
+          return <Background key={i} layer={l} stage={stage} texture={textures[srcOf(l.image)]} movement={movement} quiet={!!shown.quiet} />
         if (isSprite(l))
-          return <Sprite key={i} index={i} layer={l} place={places[i]} textures={textures} still={still} />
+          return <Sprite key={i} index={i} layer={l} place={places[i]} textures={textures} still={still} quiet={!!shown.quiet} />
         return (
           <LegacyLayer
             key={i}

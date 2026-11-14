@@ -19,7 +19,8 @@
 // An existing folder is never overwritten: pick the next number instead.
 // Starts `pnpm dev` itself if nothing answers on the dev URL (and stops it after).
 // Options (environment): QA_URL=http://localhost:5174/ to shoot another server;
-// QA_SCRATCH=1 to write a working pass to qa/scratch/ instead (not kept in git).
+// QA_SCRATCH=1 to write a working pass to qa/scratch/ instead (not kept in git);
+// QA_FAST=1 for a quick working pass: phone and desktop only, no reduced-motion shots.
 
 import { spawn, execSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
@@ -214,13 +215,16 @@ async function main() {
   try {
     for (const id of pages) {
       const files = []
-      for (const size of Object.keys(SIZES)) {
+      const sizes = process.env.QA_FAST ? ['phone', 'desktop'] : Object.keys(SIZES)
+      for (const size of sizes) {
         const file = path.join(OUT, size, `${id}.png`)
         await shoot(browser, size, id, { start, reduced: false, file, errors })
         const { viewport, deviceScaleFactor } = SIZES[size]
         files.push({ path: file, label: `${size}  ${viewport.width}×${viewport.height}  @${deviceScaleFactor}x` })
       }
-      await shoot(browser, 'desktop', id, { start, reduced: true, file: path.join(OUT, 'reduced-motion', `${id}.png`), errors })
+      if (!process.env.QA_FAST) {
+        await shoot(browser, 'desktop', id, { start, reduced: true, file: path.join(OUT, 'reduced-motion', `${id}.png`), errors })
+      }
       const sheet = path.join(OUT, 'sheets', `${id}.png`)
       const info = await contactSheet(id, files, sheet)
       sheets.push(sheet)
