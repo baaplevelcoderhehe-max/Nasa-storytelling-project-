@@ -189,23 +189,156 @@ async function opaqueBox(file) {
   return { box, coverage: opaque / (box.width * box.height), hasPadding: box.width < w || box.height < h }
 }
 
-async function prepareSprite(file, name, outDir) {
+// ---------- defringe ----------
+
+const SCENE_GROUPS = new Set(['characters', 'hardware', 'planets', 'props'])
+const OPAQUE = 250
+const FRINGE_RADIUS = 3
+const luminance = (r, g, b) => 0.299 * r + 0.587 * g + 0.114 * b
+
+/**
+ * Removes the light halo a cut-out keeps from the paper or white it was cut from.
+ * Every half-transparent edge pixel takes the colour of the solid pixels next to it;
+ * if the edge pixel was clearly lighter than them (a fringe), it is also faded out.
+ * Very faint leftovers are cleared. Then, for sprites drawn in the 3D scene, colours
+ * are premultiplied by alpha, so fully transparent pixels are black and texture
+ * filtering can never pull white into the edge.
+ * (UI images are shown as plain <img> tags, which expect straight alpha, so they are
+ * defringed but not premultiplied.)
+ */
+/**
+ * Rim pass: solid pixels on the outer edge (next to transparency) that are much
+ * lighter than the drawing just inside them are a light outline left by the cut-out.
+ * They take the inner colour. Run twice to clear a 2-pixel rim.
+ */
+function clearLightRim(data, width, height) {
+  let fixed = 0
+  for (let pass = 0; pass < 2; pass++) {
+    const src = Buffer.from(data)
+    const alpha = (x, y) => (x < 0 || y < 0 || x >= width || y >= height ? 0 : src[(y * width + x) * 4 + 3])
+    const onEdge = (x, y) => {
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (alpha(x + dx, y + dy) < 128) return true
+      return false
+    }
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const i = (y * width + x) * 4
+        if (src[i + 3] < OPAQUE || !onEdge(x, y)) continue
+        let r = 0
+        let g = 0
+        let b = 0
+        let n = 0
+        for (let dy = -4; dy <= 4; dy++) {
+          for (let dx = -4; dx <= 4; dx++) {
+            const xx = x + dx
+            const yy = y + dy
+            if (Math.abs(dx) + Math.abs(dy) < 3) continue // look a little further inside
+            if (alpha(xx, yy) < OPAQUE || onEdge(xx, yy)) continue
+            const j = (yy * width + xx) * 4
+            r += src[j]
+            g += src[j + 1]
+            b += src[j + 2]
+            n++
+          }
+        }
+        if (n < 4) continue
+        r /= n
+        g /= n
+        b /= n
+        if (luminance(src[i], src[i + 1], src[i + 2]) - luminance(r, g, b) > 40) {
+          data[i] = Math.round(r)
+          data[i + 1] = Math.round(g)
+          data[i + 2] = Math.round(b)
+          fixed++
+        }
+      }
+    }
+  }
+  return fixed
+}
+
+function defringe(data, width, height, premultiply) {
+  let fixed = clearLightRim(data, width, height)
+  const src = Buffer.from(data)
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const i = (y * width + x) * 4
+      const a = src[i + 3]
+      if (a === 0 || a >= OPAQUE) continue
+      let r = 0
+      let g = 0
+      let b = 0
+      let n = 0
+      for (let dy = -FRINGE_RADIUS; dy <= FRINGE_RADIUS; dy++) {
+        const yy = y + dy
+        if (yy < 0 || yy >= height) continue
+        for (let dx = -FRINGE_RADIUS; dx <= FRINGE_RADIUS; dx++) {
+          const xx = x + dx
+          if (xx < 0 || xx >= width) continue
+          const j = (yy * width + xx) * 4
+          if (src[j + 3] >= OPAQUE) {
+            const w = 1 / (1 + dx * dx + dy * dy)
+            r += src[j] * w
+            g += src[j + 1] * w
+            b += src[j + 2] * w
+            n += w
+          }
+        }
+      }
+      if (n > 0) {
+        r /= n
+        g /= n
+        b /= n
+        const lighter = luminance(src[i], src[i + 1], src[i + 2]) - luminance(r, g, b)
+        data[i] = Math.round(r)
+        data[i + 1] = Math.round(g)
+        data[i + 2] = Math.round(b)
+        if (lighter > 35) data[i + 3] = Math.round(a * 0.55)
+        fixed++
+      } else if (a < 64 && luminance(src[i], src[i + 1], src[i + 2]) > 200) {
+        // A faint, light speck away from the drawing: part of the halo.
+        data[i + 3] = 0
+        fixed++
+      }
+    }
+  }
+  for (let i = 0; i < data.length; i += 4) {
+    if (data[i + 3] < 6) data[i + 3] = 0
+    if (premultiply) {
+      const a = data[i + 3] / 255
+      data[i] = Math.round(data[i] * a)
+      data[i + 1] = Math.round(data[i + 1] * a)
+      data[i + 2] = Math.round(data[i + 2] * a)
+    } else if (data[i + 3] === 0) {
+      data[i] = data[i + 1] = data[i + 2] = 0
+    }
+  }
+  return fixed
+}
+
+async function prepareSprite(file, name, outDir, group) {
   const meta = await sharp(file).metadata()
   const found = await opaqueBox(file)
   if (!found) throw new Error(`${file} is fully transparent`)
   const notes = []
   if (!meta.hasAlpha) notes.push('NO ALPHA CHANNEL in the original')
 
-  const buffer = await sharp(file)
+  const premultiply = SCENE_GROUPS.has(group)
+  const { data, info } = await sharp(file)
     .ensureAlpha()
     .extract(found.box)
     .resize({ width: SPRITE_MAX, height: SPRITE_MAX, fit: 'inside', withoutEnlargement: true })
-    .webp({ quality: SPRITE_QUALITY, alphaQuality: 90, effort: 6 })
+    .raw()
+    .toBuffer({ resolveWithObject: true })
+  const fixed = defringe(data, info.width, info.height, premultiply)
+  notes.push(`defringed ${fixed} edge px${premultiply ? ', premultiplied' : ''}`)
+  const buffer = await sharp(data, { raw: { width: info.width, height: info.height, channels: 4 } })
+    .webp({ quality: SPRITE_QUALITY, alphaQuality: 95, effort: 6, exact: true })
     .toBuffer()
   await writeFile(path.join(outDir, `${name}.webp`), buffer)
   const size = await sharp(buffer).metadata()
   if (found.hasPadding) notes.push(`trimmed ${meta.width}x${meta.height} -> ${found.box.width}x${found.box.height}`)
-  return { width: size.width, height: size.height, bytes: buffer.length, coverage: found.coverage, note: notes.join(', ') }
+  return { width: size.width, height: size.height, bytes: buffer.length, coverage: found.coverage, premultiplied: premultiply, note: notes.join(', ') }
 }
 
 // ---------- main ----------
@@ -233,7 +366,7 @@ async function main() {
       if (group === 'backgrounds') {
         result = await prepareBackground(full, name, outDir)
       } else {
-        result = await prepareSprite(full, name, outDir)
+        result = await prepareSprite(full, name, outDir, group)
         // The Pioneer plaque is a rectangular plate. If this file is a round disc
         // it is the Voyager Golden Record instead, so it gets that name.
         if (name === 'pioneer_plaque' && result.coverage < 0.88) {
@@ -246,7 +379,7 @@ async function main() {
         }
       }
       if (art[name]) throw new Error(`Two files would both be called "${name}"`)
-      art[name] = { src: `/art/${group}/${name}.webp`, width: result.width, height: result.height, group }
+      art[name] = { src: `/art/${group}/${name}.webp`, width: result.width, height: result.height, group, premultiplied: !!result.premultiplied }
       total += result.bytes
       report.push(
         `  ${String(Math.round(result.bytes / 1024)).padStart(4)} KB  ${group}/${name}  ${result.width}x${result.height}${
@@ -258,7 +391,7 @@ async function main() {
 
   const names = Object.keys(art).sort()
   const body = names
-    .map((n) => `  ${n}: { src: '${art[n].src}', width: ${art[n].width}, height: ${art[n].height}, group: '${art[n].group}' },`)
+    .map((n) => `  ${n}: { src: '${art[n].src}', width: ${art[n].width}, height: ${art[n].height}, group: '${art[n].group}'${art[n].premultiplied ? ', premultiplied: true' : ''} },`)
     .join('\n')
   await mkdir(path.dirname(ART_JS), { recursive: true })
   await writeFile(
@@ -266,7 +399,8 @@ async function main() {
     `// Generated by scripts/prepare-art.mjs from /sprites. Do not edit by hand:\n` +
       `// change the originals in /sprites and run \`node scripts/prepare-art.mjs\`.\n` +
       `//\n// Each entry: the public path, the pixel size of the prepared file, and its group\n` +
-      `// (characters | hardware | backgrounds | planets | props | ui).\n\n` +
+      `// (characters | hardware | backgrounds | planets | props | ui). premultiplied: colours are\n` +
+      `// already multiplied by alpha (scene sprites; the scene material expects that).\n\n` +
       `export const art = {\n${body}\n}\n\n` +
       `/** The art entry for a name, or undefined. */\nexport const getArt = (name) => art[name]\n`,
   )

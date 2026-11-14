@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { play } from './sound'
 
 // ---------- emotes ----------
@@ -65,7 +65,53 @@ function Emote({ name, speed = 350, scale = 2, className = '', style }) {
 //   emoteDelay   seconds after the bubble appears (default 0.35)
 //   emoteSpeed   ms per frame for animated emotes (default 350)
 //   emoteSound   a sound name from sound.js, or false for silence
+// Keeps every bubble inside the screen: at least EDGE px from each side, and never
+// down in the controls area at the bottom (--controls-clear).
+const EDGE = 10
+function controlsClear() {
+  const probe = document.createElement('div')
+  probe.style.cssText = 'position:fixed;visibility:hidden;height:var(--controls-clear)'
+  document.body.appendChild(probe)
+  const h = probe.getBoundingClientRect().height
+  probe.remove()
+  return h
+}
+function fitInside(el, clear) {
+  el.style.translate = '0 0'
+  const rect = el.getBoundingClientRect()
+  // Measure the real box (the pop-in animation scales it while it appears).
+  const w = el.offsetWidth
+  const h = el.offsetHeight
+  const cx = (rect.left + rect.right) / 2
+  const cy = (rect.top + rect.bottom) / 2
+  const left = cx - w / 2
+  const top = cy - h / 2
+  const vw = window.innerWidth
+  const vh = window.innerHeight
+  let dx = 0
+  let dy = 0
+  if (left < EDGE) dx = EDGE - left
+  else if (left + w > vw - EDGE) dx = vw - EDGE - (left + w)
+  const tail = 22 // room for the speech tail under the box
+  if (top < EDGE + 16) dy = EDGE + 16 - top // +16: the speaker label sits above the box
+  else if (top + h + tail > vh - clear) dy = vh - clear - (top + h + tail)
+  el.style.translate = `${Math.round(dx)}px ${Math.round(dy)}px`
+}
+
 export default function Bubbles({ bubbles = [] }) {
+  const refs = useRef([])
+  useLayoutEffect(() => {
+    const fit = () => {
+      const clear = controlsClear()
+      refs.current.forEach((el) => el && fitInside(el, clear))
+    }
+    fit()
+    // Fonts can change a bubble's size once they load.
+    document.fonts?.ready?.then(fit)
+    window.addEventListener('resize', fit)
+    return () => window.removeEventListener('resize', fit)
+  }, [bubbles])
+
   // Sounds: one per bubble (shouts get the bong), one per emote, timed to their pop-in.
   useEffect(() => {
     bubbles.forEach((b) => {
@@ -115,12 +161,13 @@ export default function Bubbles({ bubbles = [] }) {
         return (
           <div
             key={i}
+            ref={(el) => (refs.current[i] = el)}
             className={`bubble ${style} tail-${tail}${low ? ' bubble--low' : ''}${hasEmote ? ' has-emote' : ''}${b.speaker ? ' has-speaker' : ''}`}
             style={{
               left: `${b.x ?? 50}%`,
-              ...(low ? { bottom: 'var(--hud-clear)' } : { top: `${b.y ?? 50}%` }),
+              ...(low ? { bottom: 'var(--controls-clear)' } : { top: `${b.y ?? 50}%` }),
               animationDelay: `${b.delay ?? 0}s`,
-              maxWidth: b.width ? `${b.width}px` : undefined,
+              maxWidth: b.width ? `min(${b.width}px, 90vw)` : undefined,
             }}
           >
             {b.speaker && <span className="speaker">{b.speaker}</span>}

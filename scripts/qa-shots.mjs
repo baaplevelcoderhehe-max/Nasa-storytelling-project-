@@ -18,7 +18,8 @@
 //
 // An existing folder is never overwritten: pick the next number instead.
 // Starts `pnpm dev` itself if nothing answers on the dev URL (and stops it after).
-// Options (environment): QA_URL=http://localhost:5174/ to shoot another server.
+// Options (environment): QA_URL=http://localhost:5174/ to shoot another server;
+// QA_SCRATCH=1 to write a working pass to qa/scratch/ instead (not kept in git).
 
 import { spawn, execSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
@@ -36,7 +37,8 @@ if (!folder || pages.length === 0 || !/^\d{2}-[\w.-]+$/.test(folder)) {
 }
 
 const URL_BASE = process.env.QA_URL ?? 'http://localhost:5173/'
-const OUT = path.join(ROOT, 'qa', 'screenshots', folder)
+// QA_SCRATCH=1 writes to qa/scratch/ (not kept in git) for working passes.
+const OUT = path.join(ROOT, 'qa', process.env.QA_SCRATCH ? 'scratch' : 'screenshots', folder)
 const SIZES = {
   phone: { viewport: { width: 375, height: 812 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true },
   tablet: { viewport: { width: 768, height: 1024 }, deviceScaleFactor: 1, hasTouch: true },

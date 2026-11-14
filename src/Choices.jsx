@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { NavButtonFrame } from './ui/theme'
 
 // Choice buttons + optional free-text answer for the current state.
 // Choices come from state.choices (already filtered by the app); the input
@@ -9,12 +8,6 @@ export default function Choices({ state, onChoose }) {
   const choices = state?.choices ?? []
   const input = state?.input
   if (!choices.length && !input) return null
-
-  const frame = (i) => ({
-    ...NavButtonFrame({ w: 300, h: 44 }),
-    width: '100%',
-    animationDelay: `${0.15 + i * 0.1}s`,
-  })
 
   const submit = (e) => {
     e.preventDefault()
@@ -28,8 +21,8 @@ export default function Choices({ state, onChoose }) {
         <button
           key={i}
           type="button"
-          className="choices__btn"
-          style={frame(i)}
+          className="crayon-btn choices__btn"
+          style={{ animationDelay: `${0.15 + i * 0.1}s` }}
           onClick={() => onChoose(c)}
         >
           {c.text}
@@ -47,11 +40,7 @@ export default function Choices({ state, onChoose }) {
             aria-label={input.placeholder ?? 'Your answer'}
             autoComplete="off"
           />
-          <button
-            type="submit"
-            className="choices__btn choices__btn--submit"
-            style={{ ...frame(choices.length), width: 'auto', flex: '0 0 auto' }}
-          >
+          <button type="submit" className="crayon-btn choices__btn choices__btn--submit">
             {input.submit ?? 'Send'}
           </button>
         </form>

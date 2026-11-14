@@ -120,7 +120,13 @@ function useStage(page) {
   const portrait = aspect < 1
   const sizeScale =
     aspect >= LANDSCAPE_ASPECT ? 1 : Math.max(PORTRAIT_MIN_SCALE, aspect / LANDSCAPE_ASPECT)
-  return { vw, vh, bgW, bgH, sceneH: bgH, visibleW: Math.min(vw, bgW), portrait, sizeScale }
+  // focusX (0-1): which part of the picture stays in view when the sides are cropped
+  // (0.5 = middle). Clamped so the picture always covers the screen.
+  const bgo = bg && portrait && bg.mobile ? { ...bg, ...bg.mobile } : bg
+  const focusX = bgo?.focusX ?? 0.5
+  const room = Math.max(0, (bgW - vw) / 2)
+  const bgOffsetX = Math.max(-room, Math.min(room, (0.5 - focusX) * bgW))
+  return { vw, vh, bgW, bgH, bgOffsetX, sceneH: bgH, visibleW: Math.min(vw, bgW), portrait, sizeScale }
 }
 
 /** Where a sprite goes: centre position and size in world units. */
@@ -130,11 +136,32 @@ function placeSprite(l, stage) {
   const ownHeight = stage.portrait && l.mobile?.height != null
   const h = ((o.height ?? 30) / 100) * stage.sceneH * (ownHeight ? 1 : stage.sizeScale)
   const w = (h * iw) / ih
-  const across = o.pin === 'bg' ? stage.bgW : stage.visibleW
-  const x = ((o.x ?? 0) / 100) * across
+  const x = o.pin === 'bg' ? ((o.x ?? 0) / 100) * stage.bgW + stage.bgOffsetX : ((o.x ?? 0) / 100) * stage.visibleW
   const y = ((o.y ?? 0) / 100) * stage.sceneH
   const centerY = anchorOf(o) === 'bottom' ? y + h / 2 : y
   return { x, y, centerY, w, h, z: o.z ?? 20 }
+}
+
+/**
+ * Places every sprite. A sprite with "on": { "sprite": "pathfinder_open", "x": 0.9, "y": 0 }
+ * stands at a point on another sprite (x: 0 = its left edge, 1 = right edge; y: 0 =
+ * its bottom, 1 = its top), so the two stay together on every screen shape.
+ */
+function placeAll(layers, stage) {
+  const placed = layers.map((l) => (isSprite(l) ? placeSprite(l, stage) : null))
+  layers.forEach((l, i) => {
+    if (!isSprite(l)) return
+    const on = (stage.portrait && l.mobile?.on) || l.on
+    if (!on) return
+    const parent = placed[layers.findIndex((p) => isSprite(p) && p.image === on.sprite)]
+    if (!parent) return
+    const me = placed[i]
+    const x = parent.x - parent.w / 2 + (on.x ?? 0.5) * parent.w
+    const y = parent.centerY - parent.h / 2 + (on.y ?? 0) * parent.h
+    const z = l.z ?? parent.z + 1
+    placed[i] = { ...me, x, y, z, centerY: anchorOf(l) === 'bottom' ? y + me.h / 2 : y }
+  })
+  return placed
 }
 
 // ---------- animation ----------
@@ -158,7 +185,10 @@ function Sprite({ layer, place, textures, still, index }) {
   const frames = layer.walk ? WALK_FRAMES.map((n) => textures[srcOf(n)]) : [textures[srcOf(layer.image)]]
   const showShadow = hasShadow(layer)
   const shadowW = place.w * (layer.shadowWidth ?? 0.85)
-  const shadowH = Math.max(shadowW * 0.16, place.h * 0.04)
+  const shadowH = layer.shadowHeight != null ? shadowW * layer.shadowHeight : Math.max(shadowW * 0.16, place.h * 0.04)
+  // shadowLift raises the shadow's centre (share of the sprite height), for wide
+  // hardware whose feet stand at different depths, so every footpad touches it.
+  const shadowY = place.y + shadowH * 0.12 + (layer.shadowLift ?? 0) * place.h
 
   useFrame((state, delta) => {
     const m = mesh.current
@@ -214,7 +244,7 @@ function Sprite({ layer, place, textures, still, index }) {
   return (
     <>
       {showShadow && (
-        <mesh ref={shadow} position={[place.x, place.y + shadowH * 0.12, place.z - 0.2]}>
+        <mesh ref={shadow} position={[place.x, shadowY, place.z - 0.2]}>
           <planeGeometry args={[1, 1]} />
           <meshBasicMaterial map={getShadowTexture()} transparent depthWrite={false} toneMapped={false} />
         </mesh>
@@ -226,6 +256,8 @@ function Sprite({ layer, place, textures, still, index }) {
           tex={frames[0]}
           flip={layer.flip ? 1 : 0}
           opacity={layer.opacity ?? 1}
+          premult={art[layer.walk ? WALK_FRAMES[0] : layer.image]?.premultiplied ? 1 : 0}
+          premultipliedAlpha
           transparent
           depthWrite
         />
@@ -239,7 +271,7 @@ function Background({ layer, stage, texture, movement }) {
     <Plane
       scale={[stage.bgW, stage.bgH, 1]}
       args={[1, 1, 1, 1]}
-      position={[0, 0, layer.z ?? 0]}
+      position={[stage.bgOffsetX, 0, layer.z ?? 0]}
     >
       <layerMaterial movement={movement} textr={texture} factor={layer.factor ?? 0.004} wiggle={0} scale={1} />
     </Plane>
@@ -294,10 +326,10 @@ function useFreezeFrame(name) {
   }, [advance, gl, name])
 }
 
-function Experience({ page, play, still, lowPower }) {
+function Experience({ page, cover, play, still, lowPower }) {
   const scaleN = useAspect(1600, 1000, 1.05)
   const scaleW = useAspect(2200, 1000, 1.05)
-  const shown = play ? page : { layers: [{ type: 'bg', image: TITLE_BG }] }
+  const shown = play ? page : (cover ?? { layers: [{ type: 'bg', image: TITLE_BG }] })
   const urls = useMemo(() => pageImages(shown), [shown])
   const loaded = useTexture(urls)
   const textures = useMemo(() => {
@@ -314,6 +346,7 @@ function Experience({ page, play, still, lowPower }) {
 
   useFreezeFrame(play ? page.id : 'title')
   const stage = useStage(shown)
+  const places = placeAll(shown.layers, stage)
   const group = useRef()
   const layersRef = useRef([])
   const [movement] = useState(() => new THREE.Vector3())
@@ -345,7 +378,7 @@ function Experience({ page, play, still, lowPower }) {
       {shown.layers.map((l, i) => {
         if (isBg(l)) return <Background key={i} layer={l} stage={stage} texture={textures[srcOf(l.image)]} movement={movement} />
         if (isSprite(l))
-          return <Sprite key={i} index={i} layer={l} place={placeSprite(l, stage)} textures={textures} still={still} />
+          return <Sprite key={i} index={i} layer={l} place={places[i]} textures={textures} still={still} />
         return (
           <LegacyLayer
             key={i}
@@ -393,12 +426,12 @@ function Preload({ pages }) {
   return null
 }
 
-export default function Scene({ page, isPlaying, upcoming }) {
+export default function Scene({ page, cover, isPlaying, upcoming }) {
   const still = useReducedMotion()
   const small = useSmallScreen()
   const [lowFps, setLowFps] = useState(false)
   const lowPower = small || lowFps
-  const focus = isPlaying ? focusDepth(page) : null
+  const focus = focusDepth(isPlaying ? page : cover)
   // A page with only a background stays sharp: there is no subject to focus on.
   const blur = focus !== null && !lowPower
 
@@ -414,7 +447,7 @@ export default function Scene({ page, isPlaying, upcoming }) {
     >
       {/* Turn the expensive effects off if the frame rate drops. */}
       {FREEZE_AT === null && <PerformanceMonitor onDecline={() => setLowFps(true)} />}
-      <Experience key={isPlaying ? page.id : 'title'} page={page} play={isPlaying} still={still} lowPower={lowPower} />
+      <Experience key={isPlaying ? page.id : 'title'} page={page} cover={cover} play={isPlaying} still={still} lowPower={lowPower} />
       <Effects focus={focus ?? 0} blur={blur} />
       <Preload pages={upcoming} />
     </Canvas>

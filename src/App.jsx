@@ -4,8 +4,8 @@ import Bubbles from './Bubbles'
 import TitleScreen from './TitleScreen'
 import Choices from './Choices'
 import { play as sfx } from './sound'
-import { NavButton } from './ui/nav'
-import { Bar } from './ui/Bar'
+import PageControls from './ui/PageControls'
+import { useReducedMotion } from './motion'
 import {
   applyEffects,
   derivedCounters,
@@ -14,7 +14,6 @@ import {
   testCond,
   visibleChoices,
 } from './story'
-import './ui.css' // keep AFTER TitleScreen so the skin wins
 
 // Story navigation is a small state machine over story.json's state graph:
 //   { id, flags, counters, visited[], history[] }
@@ -25,6 +24,10 @@ export default function App() {
   const [error, setError] = useState(null)
   const [play, setPlay] = useState(false)
   const [nav, setNav] = useState(null)
+  const reduced = useReducedMotion()
+  useEffect(() => {
+    document.documentElement.dataset.reduce = reduced ? '1' : '0'
+  }, [reduced])
 
   useEffect(() => {
     fetch('/story.json')
@@ -141,7 +144,7 @@ export default function App() {
 
       <div className="scene">
         <Suspense fallback={<div className="status">Turning page…</div>}>
-          <Scene page={scene} isPlaying={play} upcoming={upcoming} />
+          <Scene page={scene} cover={story.cover} isPlaying={play} upcoming={upcoming} />
         </Suspense>
       </div>
 
@@ -157,31 +160,14 @@ export default function App() {
       )}
 
       {play && (
-        <nav className="hud" aria-label="Story controls">
-          <NavButton
-            dir="-1"
-            disabled={nav.history.length === 0}
-            onClick={back}
-            label="Back"
-          />
-          <div className="hud__progress">
-            <div className="hud__bar">
-              <Bar w={220} h={24} theme="Grey" />
-              <span className="hud__fill" style={{ width: `${(seen / total) * 100}%` }}>
-                <Bar w={220} h={24} theme="Blue" />
-              </span>
-            </div>
-            <span className="hud__count">
-              {seen} / {total}
-            </span>
-          </div>
-          <NavButton
-            dir="1"
-            disabled={!nextId}
-            onClick={() => go(nextId)}
-            label="Next page"
-          />
-        </nav>
+        <PageControls
+          position={Math.min(seen, total)}
+          total={total}
+          canBack={nav.history.length > 0}
+          canNext={!!nextId}
+          onBack={back}
+          onNext={() => go(nextId)}
+        />
       )}
     </>
   )

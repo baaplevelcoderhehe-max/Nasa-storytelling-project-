@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react'
-import './TitleScreen.css'
 import { initSound, play, startMusic, stopMusic } from './sound'
 
+// The book's cover. The picture behind it (the hill, the dish, Kit and Echo) is the
+// "cover" scene in story.json, drawn by Scene; this is only the words and the button.
 export default function TitleScreen({ title, subtitle = "NASA's explorers, still out there", onStart }) {
   const [leaving, setLeaving] = useState(false)
 
@@ -9,9 +10,9 @@ export default function TitleScreen({ title, subtitle = "NASA's explorers, still
     if (leaving) return
     setLeaving(true)
     initSound() // browser requires audio to start from a user gesture
-    stopMusic(2.5) // ambience fades out as the title warps away
-    play('click', { gain: 0.25 }) // the one and only click sound
-    setTimeout(onStart, 1100) // matches exit animation
+    stopMusic(2.5) // ambience fades out as the cover opens
+    play('click', { gain: 0.25 })
+    setTimeout(onStart, 900) // matches the exit animation
   }
 
   // Browsers block audio before a gesture: the ambience starts on the first
@@ -27,9 +28,11 @@ export default function TitleScreen({ title, subtitle = "NASA's explorers, still
     }
   }, [])
 
+  // Enter opens the book from anywhere on the cover. (Space only works on the
+  // focused button, so it never fires twice.)
   useEffect(() => {
     const onKey = (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
+      if (e.key === 'Enter' && !(e.target instanceof HTMLButtonElement)) {
         e.preventDefault()
         start()
       }
@@ -38,39 +41,35 @@ export default function TitleScreen({ title, subtitle = "NASA's explorers, still
     return () => window.removeEventListener('keydown', onKey)
   })
 
-  const letters = [...title]
-
   return (
-    <div className={`ts ${leaving ? 'ts--leaving' : ''}`}>
-      <div className="ts__glow" />
-      <div className="ts__grain" />
+    <div className={`cover ${leaving ? 'cover--leaving' : ''}`}>
+      <header className="cover__top">
+        <h1 className="cover__title" aria-label={title}>
+          {/* Whole words wrap together; each letter tilts a little (hand-lettered). */}
+          {title.split(' ').map((word, w, words) => {
+            const start = words.slice(0, w).join(' ').length + (w > 0 ? 1 : 0)
+            return (
+              <React.Fragment key={w}>
+                <span className="cover__word" aria-hidden="true">
+                  {[...word].map((ch, i) => (
+                    <span key={i} className="cover__letter" style={{ '--i': start + i }}>
+                      {ch}
+                    </span>
+                  ))}
+                </span>
+                {w < words.length - 1 ? ' ' : null}
+              </React.Fragment>
+            )
+          })}
+        </h1>
+        <p className="cover__banner">{subtitle}</p>
+      </header>
 
-      <div className="ts__content">
-        <div className="ts__panel">
-          <span className="ts__chip">{subtitle}</span>
-
-          <div className="ts__ornament ts__ornament--top"><span /><i>✦</i><span /></div>
-
-          <h1 className="ts__title" aria-label={title}>
-            {letters.map((ch, i) => (
-              <span key={i} className="ts__letter" style={{ '--i': i }} aria-hidden="true">
-                {ch === ' ' ? '\u00A0' : ch}
-              </span>
-            ))}
-          </h1>
-
-          <div className="ts__ornament ts__ornament--bottom"><span /><i>✦</i><span /></div>
-
-          <button
-            className="ts__btn"
-            onClick={start}
-          >
-            <span className="ts__btn-text">Begin</span>
-            <span className="ts__btn-ring" />
-          </button>
-
-          <p className="ts__hint">press enter</p>
-        </div>
+      <div className="cover__bottom">
+        <button type="button" className="crayon-btn cover__begin" onClick={start}>
+          Begin
+        </button>
+        <p className="cover__hint">or press Enter</p>
       </div>
     </div>
   )
