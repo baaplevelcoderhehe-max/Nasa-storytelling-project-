@@ -1,6 +1,6 @@
 {
   "title": "Still Out There",
-  "subtitle": "NASA's Machines lost to space",
+  "subtitle": "NASA's explorers, still out there",
   "start": "prologue-1",
   "chapters": [
     "moon",
@@ -9,7 +9,7 @@
     "beyond"
   ],
   "_help": {
-    "images": "Put image files in /public/story/ and refer to them as /story/yourfile.png",
+    "images": "Art lives in /public/art/<group>/ (made from /sprites by scripts/prepare-art.mjs). For now layers use paths like /art/backgrounds/bg_moon_plain.webp; Phase B switches to names from src/data/art.js.",
     "layer": "Layers are drawn back to front. z = depth (0 back, 50 front). factor = how much the layer shifts with the mouse. wiggle = leaf-sway amount (0 = none). fit = 'wide' or 'narrow'. scaleFactor = extra size multiplier.",
     "bubble": "x and y are percentages of the screen (center of the bubble). style: speech | thought | shout | narration. tail: left | right | none (ignored for narration/thought). delay = seconds before it appears (optional).",
     "emote": "emote = a name from /public/emotes (emote_heart.png -> \"heart\"; \"blank\" = empty bubble) or a list of names to animate, e.g. [\"dots1\",\"dots2\",\"dots3\"]. With text it pops on the bubble's corner (emoteSide: right|left); with no text it's standalone and x/y is where its tail points. Optional: emoteScale (1-4), emoteDelay (s), emoteSpeed (ms per frame), emoteSound (sound name or false). Avoid emotes on narration at y=8 (they'd go off the top).",
@@ -28,40 +28,9 @@
       },
       "layers": [
         {
-          "image": "/story/bg.jpg",
+          "image": "/art/backgrounds/bg_hilltop_night.webp",
           "z": 0,
           "factor": 0.005
-        },
-        {
-          "image": "/story/stars.png",
-          "z": 10,
-          "factor": 0.005
-        },
-        {
-          "image": "/story/ground.png",
-          "z": 20
-        },
-        {
-          "image": "/story/bear.png",
-          "z": 30,
-          "scaleFactor": 0.83,
-          "fit": "narrow"
-        },
-        {
-          "image": "/story/leaves1.png",
-          "z": 40,
-          "factor": 0.03,
-          "scaleFactor": 1,
-          "wiggle": 0.6
-        },
-        {
-          "image": "/story/leaves2.png",
-          "z": 49,
-          "x": -20,
-          "y": -20,
-          "factor": 0.04,
-          "scaleFactor": 1.3,
-          "wiggle": 1
         }
       ],
       "bubbles": [
@@ -95,20 +64,9 @@
       "parallax": 1,
       "layers": [
         {
-          "image": "/story/bg.jpg",
+          "image": "/art/backgrounds/bg_hilltop_night.webp",
           "z": 0,
           "factor": 0.005
-        },
-        {
-          "image": "/story/stars.png",
-          "z": 10,
-          "factor": 0.005
-        },
-        {
-          "image": "/story/bear.png",
-          "z": 30,
-          "scaleFactor": 0.6,
-          "fit": "narrow"
         }
       ],
       "bubbles": [
@@ -148,30 +106,9 @@
       "parallax": 1,
       "layers": [
         {
-          "image": "/story/bg.jpg",
+          "image": "/art/backgrounds/bg_moon_plain.webp",
           "z": 0,
           "factor": 0.005
-        },
-        {
-          "image": "/story/stars.png",
-          "z": 10,
-          "factor": 0.005
-        },
-        {
-          "image": "/story/ground.png",
-          "z": 20
-        },
-        {
-          "image": "/story/bear.png",
-          "z": 30,
-          "scaleFactor": 0.83,
-          "fit": "narrow"
-        },
-        {
-          "image": "/story/leaves1.png",
-          "z": 40,
-          "factor": 0.03,
-          "wiggle": 0.6
         }
       ],
       "bubbles": [
@@ -201,24 +138,9 @@
       "parallax": 1,
       "layers": [
         {
-          "image": "/story/bg.jpg",
+          "image": "/art/backgrounds/bg_moon_plain.webp",
           "z": 0,
           "factor": 0.005
-        },
-        {
-          "image": "/story/stars.png",
-          "z": 10,
-          "factor": 0.005
-        },
-        {
-          "image": "/story/ground.png",
-          "z": 20
-        },
-        {
-          "image": "/story/bear.png",
-          "z": 30,
-          "scaleFactor": 0.83,
-          "fit": "narrow"
         }
       ],
       "bubbles": [
@@ -247,30 +169,9 @@
       "parallax": 1,
       "layers": [
         {
-          "image": "/story/bg.jpg",
+          "image": "/art/backgrounds/bg_moon_plain.webp",
           "z": 0,
           "factor": 0.005
-        },
-        {
-          "image": "/story/stars.png",
-          "z": 10,
-          "factor": 0.005
-        },
-        {
-          "image": "/story/ground.png",
-          "z": 20
-        },
-        {
-          "image": "/story/bear.png",
-          "z": 30,
-          "scaleFactor": 0.83,
-          "fit": "narrow"
-        },
-        {
-          "image": "/story/leaves1.png",
-          "z": 40,
-          "factor": 0.03,
-          "wiggle": 0.6
         }
       ],
       "bubbles": [
@@ -298,30 +199,9 @@
       "parallax": 1,
       "layers": [
         {
-          "image": "/story/bg.jpg",
+          "image": "/art/backgrounds/bg_moon_plain.webp",
           "z": 0,
           "factor": 0.005
-        },
-        {
-          "image": "/story/stars.png",
-          "z": 10,
-          "factor": 0.005
-        },
-        {
-          "image": "/story/ground.png",
-          "z": 20
-        },
-        {
-          "image": "/story/bear.png",
-          "z": 30,
-          "scaleFactor": 0.83,
-          "fit": "narrow"
-        },
-        {
-          "image": "/story/leaves1.png",
-          "z": 40,
-          "factor": 0.03,
-          "wiggle": 0.6
         }
       ],
       "bubbles": [
@@ -358,25 +238,9 @@
       "parallax": 1,
       "layers": [
         {
-          "image": "/story/bg.jpg",
+          "image": "/art/backgrounds/bg_mars_plain.webp",
           "z": 0,
           "factor": 0.005
-        },
-        {
-          "image": "/story/ground.png",
-          "z": 20
-        },
-        {
-          "image": "/story/bear.png",
-          "z": 30,
-          "scaleFactor": 0.83,
-          "fit": "narrow"
-        },
-        {
-          "image": "/story/leaves1.png",
-          "z": 40,
-          "factor": 0.03,
-          "wiggle": 0.6
         }
       ],
       "bubbles": [
@@ -408,19 +272,9 @@
       "parallax": 1,
       "layers": [
         {
-          "image": "/story/bg.jpg",
+          "image": "/art/backgrounds/bg_mars_plain.webp",
           "z": 0,
           "factor": 0.005
-        },
-        {
-          "image": "/story/ground.png",
-          "z": 20
-        },
-        {
-          "image": "/story/bear.png",
-          "z": 30,
-          "scaleFactor": 0.83,
-          "fit": "narrow"
         }
       ],
       "bubbles": [
@@ -456,19 +310,9 @@
       "parallax": 1,
       "layers": [
         {
-          "image": "/story/bg.jpg",
+          "image": "/art/backgrounds/bg_mars_plain.webp",
           "z": 0,
           "factor": 0.005
-        },
-        {
-          "image": "/story/ground.png",
-          "z": 20
-        },
-        {
-          "image": "/story/bear.png",
-          "z": 30,
-          "scaleFactor": 0.83,
-          "fit": "narrow"
         }
       ],
       "bubbles": [
@@ -497,25 +341,9 @@
       "parallax": 1,
       "layers": [
         {
-          "image": "/story/bg.jpg",
+          "image": "/art/backgrounds/bg_mars_plain.webp",
           "z": 0,
           "factor": 0.005
-        },
-        {
-          "image": "/story/ground.png",
-          "z": 20
-        },
-        {
-          "image": "/story/bear.png",
-          "z": 30,
-          "scaleFactor": 0.83,
-          "fit": "narrow"
-        },
-        {
-          "image": "/story/leaves1.png",
-          "z": 40,
-          "factor": 0.03,
-          "wiggle": 0.6
         }
       ],
       "bubbles": [
@@ -542,19 +370,9 @@
       "parallax": 1,
       "layers": [
         {
-          "image": "/story/bg.jpg",
+          "image": "/art/backgrounds/bg_mars_plain.webp",
           "z": 0,
           "factor": 0.005
-        },
-        {
-          "image": "/story/ground.png",
-          "z": 20
-        },
-        {
-          "image": "/story/bear.png",
-          "z": 30,
-          "scaleFactor": 0.83,
-          "fit": "narrow"
         }
       ],
       "bubbles": [
@@ -596,25 +414,9 @@
       "parallax": 1,
       "layers": [
         {
-          "image": "/story/bg.jpg",
+          "image": "/art/backgrounds/bg_mars_plain.webp",
           "z": 0,
           "factor": 0.005
-        },
-        {
-          "image": "/story/ground.png",
-          "z": 20
-        },
-        {
-          "image": "/story/bear.png",
-          "z": 30,
-          "scaleFactor": 0.83,
-          "fit": "narrow"
-        },
-        {
-          "image": "/story/leaves1.png",
-          "z": 40,
-          "factor": 0.03,
-          "wiggle": 0.6
         }
       ],
       "bubbles": [
@@ -643,24 +445,9 @@
       "parallax": 1,
       "layers": [
         {
-          "image": "/story/bg.jpg",
+          "image": "/art/backgrounds/bg_eros_surface.webp",
           "z": 0,
           "factor": 0.005
-        },
-        {
-          "image": "/story/stars.png",
-          "z": 10,
-          "factor": 0.005
-        },
-        {
-          "image": "/story/ground.png",
-          "z": 20
-        },
-        {
-          "image": "/story/bear.png",
-          "z": 30,
-          "scaleFactor": 0.83,
-          "fit": "narrow"
         }
       ],
       "bubbles": [
@@ -693,20 +480,9 @@
       "parallax": 1,
       "layers": [
         {
-          "image": "/story/bg.jpg",
+          "image": "/art/backgrounds/bg_eros_surface.webp",
           "z": 0,
           "factor": 0.005
-        },
-        {
-          "image": "/story/stars.png",
-          "z": 10,
-          "factor": 0.005
-        },
-        {
-          "image": "/story/bear.png",
-          "z": 30,
-          "scaleFactor": 0.6,
-          "fit": "narrow"
         }
       ],
       "bubbles": [
@@ -743,20 +519,9 @@
       "parallax": 1,
       "layers": [
         {
-          "image": "/story/bg.jpg",
+          "image": "/art/backgrounds/bg_space_stars.webp",
           "z": 0,
           "factor": 0.005
-        },
-        {
-          "image": "/story/stars.png",
-          "z": 10,
-          "factor": 0.008
-        },
-        {
-          "image": "/story/bear.png",
-          "z": 30,
-          "scaleFactor": 0.6,
-          "fit": "narrow"
         }
       ],
       "bubbles": [
@@ -790,20 +555,9 @@
       "parallax": 1,
       "layers": [
         {
-          "image": "/story/bg.jpg",
+          "image": "/art/backgrounds/bg_space_stars.webp",
           "z": 0,
           "factor": 0.005
-        },
-        {
-          "image": "/story/stars.png",
-          "z": 10,
-          "factor": 0.008
-        },
-        {
-          "image": "/story/bear.png",
-          "z": 30,
-          "scaleFactor": 0.6,
-          "fit": "narrow"
         }
       ],
       "bubbles": [
@@ -832,13 +586,8 @@
       "parallax": 1,
       "layers": [
         {
-          "image": "/story/bg.jpg",
+          "image": "/art/backgrounds/bg_space_stars.webp",
           "z": 0,
-          "factor": 0.005
-        },
-        {
-          "image": "/story/stars.png",
-          "z": 10,
           "factor": 0.005
         }
       ],
@@ -892,20 +641,9 @@
       "parallax": 1,
       "layers": [
         {
-          "image": "/story/bg.jpg",
+          "image": "/art/backgrounds/bg_hilltop_night.webp",
           "z": 0,
           "factor": 0.005
-        },
-        {
-          "image": "/story/stars.png",
-          "z": 10,
-          "factor": 0.008
-        },
-        {
-          "image": "/story/bear.png",
-          "z": 30,
-          "scaleFactor": 0.6,
-          "fit": "narrow"
         }
       ],
       "bubbles": [
@@ -951,39 +689,9 @@
       },
       "layers": [
         {
-          "image": "/story/bg.jpg",
+          "image": "/art/backgrounds/bg_hilltop_night.webp",
           "z": 0,
           "factor": 0.005
-        },
-        {
-          "image": "/story/stars.png",
-          "z": 10,
-          "factor": 0.005
-        },
-        {
-          "image": "/story/ground.png",
-          "z": 20
-        },
-        {
-          "image": "/story/bear.png",
-          "z": 30,
-          "scaleFactor": 0.83,
-          "fit": "narrow"
-        },
-        {
-          "image": "/story/leaves1.png",
-          "z": 40,
-          "factor": 0.03,
-          "wiggle": 0.6
-        },
-        {
-          "image": "/story/leaves2.png",
-          "z": 49,
-          "x": -20,
-          "y": -20,
-          "factor": 0.04,
-          "scaleFactor": 1.3,
-          "wiggle": 1
         }
       ],
       "bubbles": [
@@ -1032,39 +740,9 @@
       },
       "layers": [
         {
-          "image": "/story/bg.jpg",
+          "image": "/art/backgrounds/bg_hilltop_night.webp",
           "z": 0,
           "factor": 0.005
-        },
-        {
-          "image": "/story/stars.png",
-          "z": 10,
-          "factor": 0.005
-        },
-        {
-          "image": "/story/ground.png",
-          "z": 20
-        },
-        {
-          "image": "/story/bear.png",
-          "z": 30,
-          "scaleFactor": 0.83,
-          "fit": "narrow"
-        },
-        {
-          "image": "/story/leaves1.png",
-          "z": 40,
-          "factor": 0.03,
-          "wiggle": 0.6
-        },
-        {
-          "image": "/story/leaves2.png",
-          "z": 49,
-          "x": -20,
-          "y": -20,
-          "factor": 0.04,
-          "scaleFactor": 1.3,
-          "wiggle": 1
         }
       ],
       "bubbles": [
@@ -1119,20 +797,9 @@
       },
       "layers": [
         {
-          "image": "/story/bg.jpg",
+          "image": "/art/backgrounds/bg_control_hut.webp",
           "z": 0,
           "factor": 0.005
-        },
-        {
-          "image": "/story/stars.png",
-          "z": 10,
-          "factor": 0.005
-        },
-        {
-          "image": "/story/bear.png",
-          "z": 30,
-          "scaleFactor": 0.6,
-          "fit": "narrow"
         }
       ],
       "bubbles": [

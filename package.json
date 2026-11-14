@@ -19,7 +19,9 @@
     "three": "^0.168.0"
   },
   "devDependencies": {
+    "@playwright/test": "1.65.0",
     "@vitejs/plugin-react": "^4.3.0",
+    "sharp": "^0.35.5",
     "vite": "^4.5.14"
   }
 }

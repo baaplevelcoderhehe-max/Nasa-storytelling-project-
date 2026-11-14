@@ -13,7 +13,7 @@ import * as THREE from "three"
 function Experience({ page, play }) {
   const scaleN = useAspect(1600, 1000, 1.05)
   const scaleW = useAspect(2200, 1000, 1.05)
-  const bgTexture = useTexture('/story/bg.jpg')
+  const bgTexture = useTexture('/art/backgrounds/bg_hilltop_night.webp')
   const textures = useTexture(
   page.layers.map((l) => l.image),
   (arr) => [].concat(arr).forEach((t) => { t.colorSpace = THREE.SRGBColorSpace }),

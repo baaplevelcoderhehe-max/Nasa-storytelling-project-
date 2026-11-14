@@ -1,0 +1,287 @@
+// Prepares the storybook art for the web.
+//
+//   node scripts/prepare-art.mjs
+//
+// Reads the untouched originals in /sprites and writes web-ready WebP files to
+// /public/art/<group>/, plus src/data/art.js (name -> { src, width, height }).
+// Run it again whenever a sprite is added or changed in /sprites.
+//
+// Backgrounds: 1920 px wide WebP, quality ~80 (lowered step by step until the file
+//   is under 350 KB), with any painted paper border cropped off.
+// Sprites: transparent padding trimmed, at most 1024 px on the long side, WebP
+//   with alpha.
+
+import { mkdir, readdir, rm, stat, writeFile } from 'node:fs/promises'
+import path from 'node:path'
+import sharp from 'sharp'
+
+const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/(\w:)/, '$1')), '..')
+const SRC = path.join(ROOT, 'sprites')
+const OUT = path.join(ROOT, 'public', 'art')
+const ART_JS = path.join(ROOT, 'src', 'data', 'art.js')
+
+// Source folder in /sprites -> output group in /public/art
+const GROUPS = {
+  Characters: 'characters',
+  hardware: 'hardware',
+  backgrounds: 'backgrounds',
+  planets: 'planets',
+  props: 'props',
+  UI: 'ui',
+}
+
+// Files that are skipped, and files that get a new name.
+const IGNORE = new Set(['pathfinder_open (2).png'])
+const RENAME = { 'Untitled design (1).png': 'voyager' }
+
+const BG_WIDTH = 1920
+const BG_QUALITY = 80
+const BG_MIN_QUALITY = 50
+const BG_MAX_BYTES = 350 * 1024
+const SPRITE_MAX = 1024
+const SPRITE_QUALITY = 85
+const ALPHA_THRESHOLD = 8 // alpha at or below this counts as empty padding
+
+const log = (...a) => console.log(...a)
+
+/** "bg_moon_plain.png.jpg" -> "bg_moon_plain", "Kit Idle.png" -> "kit_idle" */
+function cleanName(file) {
+  if (RENAME[file]) return RENAME[file]
+  return file
+    .replace(/(\.(png|jpe?g|webp))+$/i, '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_|_$/g, '')
+}
+
+// ---------- backgrounds ----------
+
+/**
+ * Finds a light paper border painted around the picture and returns the crop box
+ * inside it, or null when the picture runs edge to edge.
+ * Works on a small copy for speed, then scales the box back up.
+ */
+async function findPaperBorder(file, width, height) {
+  const SCALE = 4
+  const { data, info } = await sharp(file)
+    .resize(Math.round(width / SCALE))
+    .removeAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true })
+  const w = info.width
+  const h = info.height
+  const px = (x, y) => {
+    const i = (y * w + x) * 3
+    return [data[i], data[i + 1], data[i + 2]]
+  }
+  const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2])
+  const average = (pts) =>
+    pts.reduce((s, p) => [s[0] + p[0], s[1] + p[1], s[2] + p[2]], [0, 0, 0]).map((v) => v / pts.length)
+
+  // Paper colour = the four corners; picture colour = the middle.
+  const corner = []
+  for (let y = 0; y < 4; y++)
+    for (let x = 0; x < 4; x++)
+      corner.push(px(x, y), px(w - 1 - x, y), px(x, h - 1 - y), px(w - 1 - x, h - 1 - y))
+  const middle = []
+  for (let y = Math.round(h * 0.3); y < h * 0.7; y += 2)
+    for (let x = Math.round(w * 0.3); x < w * 0.7; x += 2) middle.push(px(x, y))
+  const paper = average(corner)
+  const brightness = (c) => (c[0] + c[1] + c[2]) / 3
+  // A paper border is light, low in colour, and clearly different from the picture.
+  const isLight = brightness(paper) > 200 && Math.max(...paper) - Math.min(...paper) < 60
+  if (!isLight || dist(paper, average(middle)) < 60) return null
+
+  const isPaper = (p) => dist(p, paper) < 70
+
+  // How far the paper reaches in from one edge along a line. Only the unbroken run
+  // from the edge counts, so light stars or highlights inside the picture are ignored.
+  const runFromEdge = (length, at) => {
+    let n = 0
+    while (n < length / 3 && isPaper(at(n))) n++
+    return n
+  }
+  // The painted edge is ragged: take the deepest reach along each side.
+  const deepest = (lines, length, at) => {
+    let max = 0
+    for (const line of lines) max = Math.max(max, runFromEdge(length, (n) => at(line, n)))
+    return max
+  }
+  const range = (from, to) => Array.from({ length: to - from }, (_, i) => from + i)
+  const rows = range(Math.round(h * 0.04), Math.round(h * 0.96))
+  const cols = range(Math.round(w * 0.04), Math.round(w * 0.96))
+
+  const left = deepest(rows, w, (y, n) => px(n, y))
+  const right = deepest(rows, w, (y, n) => px(w - 1 - n, y))
+  const top = deepest(cols, h, (x, n) => px(x, n))
+  const bottom = deepest(cols, h, (x, n) => px(x, h - 1 - n))
+
+  // A small extra inset clears the last brush-stroke wisps and the rounded corners.
+  const inset = Math.round(Math.min(w, h) * 0.012)
+  const box = {
+    left: (left + inset) * SCALE,
+    top: (top + inset) * SCALE,
+    width: (w - left - right - 2 * inset) * SCALE,
+    height: (h - top - bottom - 2 * inset) * SCALE,
+  }
+  box.width = Math.min(box.width, width - box.left)
+  box.height = Math.min(box.height, height - box.top)
+  return box
+}
+
+async function prepareBackground(file, name, outDir) {
+  const meta = await sharp(file).metadata()
+  const border = await findPaperBorder(file, meta.width, meta.height)
+  let pipeline = () => {
+    let p = sharp(file)
+    if (border) p = p.extract(border)
+    return p.resize({ width: BG_WIDTH, withoutEnlargement: true })
+  }
+  let quality = BG_QUALITY
+  let buffer
+  for (;;) {
+    buffer = await pipeline().webp({ quality, effort: 6 }).toBuffer()
+    if (buffer.length <= BG_MAX_BYTES || quality <= BG_MIN_QUALITY) break
+    quality -= 5
+  }
+  const out = path.join(outDir, `${name}.webp`)
+  await writeFile(out, buffer)
+  const size = await sharp(buffer).metadata()
+  return {
+    width: size.width,
+    height: size.height,
+    bytes: buffer.length,
+    note: [
+      border ? `paper border cropped (${border.left},${border.top} ${border.width}x${border.height})` : '',
+      quality !== BG_QUALITY ? `quality ${quality}` : '',
+      buffer.length > BG_MAX_BYTES ? 'STILL OVER 350 KB' : '',
+    ]
+      .filter(Boolean)
+      .join(', '),
+  }
+}
+
+// ---------- sprites ----------
+
+/** Bounding box of every pixel that is not (almost) fully transparent. */
+async function opaqueBox(file) {
+  const { data, info } = await sharp(file).ensureAlpha().raw().toBuffer({ resolveWithObject: true })
+  const { width: w, height: h, channels } = info
+  let minX = w
+  let minY = h
+  let maxX = -1
+  let maxY = -1
+  let opaque = 0
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      if (data[(y * w + x) * channels + 3] > ALPHA_THRESHOLD) {
+        opaque++
+        if (x < minX) minX = x
+        if (x > maxX) maxX = x
+        if (y < minY) minY = y
+        if (y > maxY) maxY = y
+      }
+    }
+  }
+  if (maxX < 0) return null
+  const box = { left: minX, top: minY, width: maxX - minX + 1, height: maxY - minY + 1 }
+  return { box, coverage: opaque / (box.width * box.height), hasPadding: box.width < w || box.height < h }
+}
+
+async function prepareSprite(file, name, outDir) {
+  const meta = await sharp(file).metadata()
+  const found = await opaqueBox(file)
+  if (!found) throw new Error(`${file} is fully transparent`)
+  const notes = []
+  if (!meta.hasAlpha) notes.push('NO ALPHA CHANNEL in the original')
+
+  const buffer = await sharp(file)
+    .ensureAlpha()
+    .extract(found.box)
+    .resize({ width: SPRITE_MAX, height: SPRITE_MAX, fit: 'inside', withoutEnlargement: true })
+    .webp({ quality: SPRITE_QUALITY, alphaQuality: 90, effort: 6 })
+    .toBuffer()
+  await writeFile(path.join(outDir, `${name}.webp`), buffer)
+  const size = await sharp(buffer).metadata()
+  if (found.hasPadding) notes.push(`trimmed ${meta.width}x${meta.height} -> ${found.box.width}x${found.box.height}`)
+  return { width: size.width, height: size.height, bytes: buffer.length, coverage: found.coverage, note: notes.join(', ') }
+}
+
+// ---------- main ----------
+
+async function main() {
+  await rm(OUT, { recursive: true, force: true })
+  const art = {}
+  const report = []
+  let total = 0
+
+  for (const [srcGroup, group] of Object.entries(GROUPS)) {
+    const srcDir = path.join(SRC, srcGroup)
+    const outDir = path.join(OUT, group)
+    await mkdir(outDir, { recursive: true })
+    const files = (await readdir(srcDir)).filter((f) => /\.(png|jpe?g|webp)$/i.test(f)).sort()
+
+    for (const file of files) {
+      if (IGNORE.has(file)) {
+        report.push(`  skip   ${srcGroup}/${file} (ignored duplicate)`)
+        continue
+      }
+      let name = cleanName(file)
+      const full = path.join(srcDir, file)
+      let result
+      if (group === 'backgrounds') {
+        result = await prepareBackground(full, name, outDir)
+      } else {
+        result = await prepareSprite(full, name, outDir)
+        // The Pioneer plaque is a rectangular plate. If this file is a round disc
+        // it is the Voyager Golden Record instead, so it gets that name.
+        if (name === 'pioneer_plaque' && result.coverage < 0.88) {
+          const { rename } = await import('node:fs/promises')
+          await rename(path.join(outDir, `${name}.webp`), path.join(outDir, 'golden_record.webp'))
+          result.note = `${result.note}, ROUND DISC (coverage ${result.coverage.toFixed(2)}): saved as golden_record`
+          name = 'golden_record'
+        } else if (name === 'pioneer_plaque') {
+          result.note = `${result.note ? `${result.note}, ` : ''}rectangular plate (coverage ${result.coverage.toFixed(2)})`
+        }
+      }
+      if (art[name]) throw new Error(`Two files would both be called "${name}"`)
+      art[name] = { src: `/art/${group}/${name}.webp`, width: result.width, height: result.height, group }
+      total += result.bytes
+      report.push(
+        `  ${String(Math.round(result.bytes / 1024)).padStart(4)} KB  ${group}/${name}  ${result.width}x${result.height}${
+          result.note ? `  (${result.note})` : ''
+        }`,
+      )
+    }
+  }
+
+  const names = Object.keys(art).sort()
+  const body = names
+    .map((n) => `  ${n}: { src: '${art[n].src}', width: ${art[n].width}, height: ${art[n].height}, group: '${art[n].group}' },`)
+    .join('\n')
+  await mkdir(path.dirname(ART_JS), { recursive: true })
+  await writeFile(
+    ART_JS,
+    `// Generated by scripts/prepare-art.mjs from /sprites. Do not edit by hand:\n` +
+      `// change the originals in /sprites and run \`node scripts/prepare-art.mjs\`.\n` +
+      `//\n// Each entry: the public path, the pixel size of the prepared file, and its group\n` +
+      `// (characters | hardware | backgrounds | planets | props | ui).\n\n` +
+      `export const art = {\n${body}\n}\n\n` +
+      `/** The art entry for a name, or undefined. */\nexport const getArt = (name) => art[name]\n`,
+  )
+
+  log(report.join('\n'))
+  log(`\n${names.length} images, ${(total / 1024 / 1024).toFixed(2)} MB in public/art`)
+  log(`wrote ${path.relative(ROOT, ART_JS)}`)
+  const over = (await Promise.all(names.filter((n) => art[n].group === 'backgrounds').map(async (n) => {
+    const s = await stat(path.join(ROOT, 'public', art[n].src))
+    return s.size > BG_MAX_BYTES ? n : null
+  }))).filter(Boolean)
+  if (over.length) log(`WARNING: over 350 KB: ${over.join(', ')}`)
+}
+
+main().catch((e) => {
+  console.error(e)
+  process.exit(1)
+})

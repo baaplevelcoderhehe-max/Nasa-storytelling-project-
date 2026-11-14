@@ -123,7 +123,7 @@ export function play(name, { gain = 1, rate = 1, jitter = 0, delay = 0 } = {}) {
 
 // ---------- ambient music (title screen) ----------
 
-const MUSIC_URL = '/ambient-music.wav'
+const MUSIC_URL = '/ambient-music.ogg'
 const MUSIC_VOLUME = 0.6
 
 let musicSrc = null

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import './TitleScreen.css'
 import { initSound, play, startMusic, stopMusic } from './sound'
 
-export default function TitleScreen({ title, subtitle = 'NASA\'s Machines lost to space', onStart }) {
+export default function TitleScreen({ title, subtitle = "NASA's explorers, still out there", onStart }) {
   const [leaving, setLeaving] = useState(false)
 
   const start = () => {
