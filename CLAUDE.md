@@ -20,10 +20,18 @@ story happen; nothing can be failed.
   report the folder path and the contact sheet paths.
   - Example: `node scripts/qa-shots.mjs 03-phaseC-story title prologue-1 moon-1`
   - Folder names are `NN-short-feature-name`, numbered in order. Never overwrite an
-    old folder. The `qa/screenshots/` folders are kept in git.
+    old folder.
+  - Only the contact sheets (`sheets/*.webp`, WebP quality ~80) and `NOTES.md` are
+    kept in git. The per-device shots (`phone/`, `tablet/`, `desktop/`,
+    `reduced-motion/`) stay on disk and are ignored by `.gitignore`.
+  - Working passes go to `qa/scratch/` (`QA_SCRATCH=1`, add `QA_FAST=1` for phone and
+    desktop only); that folder is ignored.
   - Capture every page or screen the feature touched (for story work, every page
     that changed). Fill in "What changed" and "Still looks off" in the folder's
     `NOTES.md`.
+- Bubble rules are checked with `node scripts/check-bubbles.mjs` (every page, three sizes).
+- Story spreads are built by `node scripts/build-story.mjs` from `docs/script.md`; don't edit
+  the spreads in `public/story.json` by hand.
 - Git safety: never run destructive git commands (`reset --hard`, `checkout -- .`,
   `clean`, `rm -rf` on tracked folders) without asking. Commit after each phase:
   `feat(phaseX): summary`.
