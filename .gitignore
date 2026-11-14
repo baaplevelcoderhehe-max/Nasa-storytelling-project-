@@ -4,4 +4,6 @@ dist
 sprites.zip
 test-results
 playwright-report
-qa
+# Review screenshots are kept in git; any other test output in qa/ is not.
+qa/*
+!qa/screenshots/

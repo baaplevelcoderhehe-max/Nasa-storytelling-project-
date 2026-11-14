@@ -269,6 +269,31 @@ function LegacyLayer({ layer, index, texture, movement, scaleN, scaleW, layersRe
 
 // ---------- one page ----------
 
+/**
+ * Screenshot mode (?freeze=<seconds>, used by scripts/qa-shots.mjs): once the art is
+ * loaded, play the scene's first <seconds> frame by frame, then hold that exact frame
+ * and mark the page with data-qa-frozen, so every review shot is identical.
+ */
+const FREEZE_AT = (() => {
+  if (typeof window === 'undefined') return null
+  const value = new URLSearchParams(window.location.search).get('freeze')
+  return value === null || Number.isNaN(Number(value)) ? null : Number(value)
+})()
+
+function useFreezeFrame(name) {
+  const advance = useThree((s) => s.advance)
+  const gl = useThree((s) => s.gl)
+  useEffect(() => {
+    if (FREEZE_AT === null) return
+    // Every animation here depends only on the time, so two frames are enough:
+    // the start, then straight to FREEZE_AT seconds.
+    advance(0)
+    advance(FREEZE_AT)
+    gl.getContext().finish() // wait until the GPU has actually drawn it
+    document.body.dataset.qaFrozen = name
+  }, [advance, gl, name])
+}
+
 function Experience({ page, play, still, lowPower }) {
   const scaleN = useAspect(1600, 1000, 1.05)
   const scaleW = useAspect(2200, 1000, 1.05)
@@ -287,6 +312,7 @@ function Experience({ page, play, still, lowPower }) {
     })
   }, [textures])
 
+  useFreezeFrame(play ? page.id : 'title')
   const stage = useStage(shown)
   const group = useRef()
   const layersRef = useRef([])
@@ -380,14 +406,14 @@ export default function Scene({ page, isPlaying, upcoming }) {
     <Canvas
       orthographic
       dpr={[1, 1.75]}
-      frameloop={still ? 'demand' : 'always'}
+      frameloop={FREEZE_AT !== null ? 'never' : still ? 'demand' : 'always'}
       gl={{ antialias: false }}
       camera={{ zoom: 5, position: [0, 0, 200], far: 300, near: 50 }}
       eventSource={document.getElementById('root')}
       eventPrefix="client"
     >
       {/* Turn the expensive effects off if the frame rate drops. */}
-      <PerformanceMonitor onDecline={() => setLowFps(true)} />
+      {FREEZE_AT === null && <PerformanceMonitor onDecline={() => setLowFps(true)} />}
       <Experience key={isPlaying ? page.id : 'title'} page={page} play={isPlaying} still={still} lowPower={lowPower} />
       <Effects focus={focus ?? 0} blur={blur} />
       <Preload pages={upcoming} />
