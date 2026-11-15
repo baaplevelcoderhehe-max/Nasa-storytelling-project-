@@ -157,7 +157,6 @@ It starts the development server if needed and writes `qa/screenshots/10-my-chan
 - Interface sounds and emotes by [Kenney](https://kenney.nl) (CC0).
 - The [Fredoka](https://github.com/hafontia/Fredoka-One) font, under the SIL Open Font License (`public/fonts/OFL-Fredoka.txt`).
 - The layer shader is based on work by Gianmarco Simone ([@ggsimm](https://twitter.com/ggsimm)).
-- Ambient music: source to be confirmed.
 
 ## Disclaimer
 

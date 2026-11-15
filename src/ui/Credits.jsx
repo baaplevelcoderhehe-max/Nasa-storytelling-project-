@@ -54,7 +54,6 @@ export default function Credits({ onClose }) {
             <li>
               The layer shader is based on work by Gianmarco Simone (<Ext href="https://twitter.com/ggsimm">@ggsimm</Ext>).
             </li>
-            <li>Ambient music: source to be confirmed.</li>
           </ul>
         </section>
 
