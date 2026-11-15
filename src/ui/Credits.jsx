@@ -2,12 +2,6 @@ import React from 'react'
 import Panel from './Panel'
 import { SOURCE_GROUPS } from '../data/sources'
 
-const TEAM = [
-  ['Ghulam Hussain Khan', 'Main Developer'],
-  ['Hammad Ali Butt', 'Main Developer'],
-  ['Fibonacci Team', 'Co-Developers'],
-]
-
 function Ext({ href, children }) {
   return (
     <a href={href} target="_blank" rel="noreferrer" className="credits__link">
@@ -21,17 +15,11 @@ export default function Credits({ onClose }) {
   return (
     <Panel title="Credits" onClose={onClose} wide>
       <div className="credits">
-        <section aria-labelledby="credits-team">
-          <h3 id="credits-team" className="credits__heading">
-            Made by
+        <section aria-labelledby="credits-team" className="credits__team">
+          <h3 id="credits-team" className="credits__heading credits__made-by">
+            Made by Team Fibonacci
           </h3>
-          <ul className="credits__team">
-            {TEAM.map(([name, role]) => (
-              <li key={name}>
-                <strong>{name}</strong> — {role}
-              </li>
-            ))}
-          </ul>
+          <p className="credits__guidance">Under the guidance of FreeFall-labs</p>
         </section>
 
         <section aria-labelledby="credits-sources">

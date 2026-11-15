@@ -1292,3 +1292,14 @@ html[data-text-size='3'] {
   padding-left: 0;
   padding-right: 0;
 }
+/* Credits team line: the guidance line is smaller and lighter, but still AA
+   (#5c4636 on the paper card #fff8e7 is about 8.3:1). */
+.credits__made-by {
+  margin-bottom: 2px;
+  font-size: calc(1.3rem * var(--text-scale));
+}
+.credits__guidance {
+  margin: 0 0 6px;
+  color: #5c4636;
+  font: 500 calc(0.9rem * var(--text-scale)) / 1.3 var(--font-book);
+}
