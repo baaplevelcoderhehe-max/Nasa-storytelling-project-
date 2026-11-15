@@ -18,9 +18,21 @@
     <meta name="twitter:description" content="NASA's explorers, still out there: an animated storybook." />
     <meta name="twitter:image" content="/og-image.jpg" />
     <link rel="icon" type="image/png" href="/favicon.png" />
+    <!-- Show the cover at once: the still picture, the story text and the title font. -->
+    <link rel="preload" as="image" href="/art/cover-landscape.webp" media="(orientation: landscape)" fetchpriority="high" />
+    <link rel="preload" as="image" href="/art/cover-portrait.webp" media="(orientation: portrait)" fetchpriority="high" />
+    <link rel="preload" as="fetch" href="/story.json" crossorigin />
+    <link rel="preload" as="font" href="/fonts/fredoka-latin.woff2" type="font/woff2" crossorigin />
+    <style>
+      html, body, #root { margin: 0; height: 100%; background: #0d1533; }
+      .boot-still, .boot-still img { position: fixed; inset: 0; width: 100%; height: 100%; }
+      .boot-still img { object-fit: cover; object-position: 50% 50%; }
+      @media (orientation: portrait) { .boot-still img { object-position: 50% 100%; } }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <!-- Until the app starts, a still picture of the cover (the app replaces it with the same picture). -->
+    <div id="root"><picture class="boot-still" aria-hidden="true"><source media="(orientation: portrait)" srcset="/art/cover-portrait.webp" width="780" height="1688" /><img src="/art/cover-landscape.webp" width="1600" height="900" alt="" /></picture></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

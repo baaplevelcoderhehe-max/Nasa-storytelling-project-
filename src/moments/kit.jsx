@@ -105,7 +105,7 @@ export function ArtImg({ name, className, style, alt = '' }) {
     }
   }, [name, entry])
   if (!entry || !src) return <span className={className} style={style} aria-hidden="true" />
-  return <img className={className} style={style} src={src} alt={alt} draggable={false} />
+  return <img className={className} style={style} src={src} alt={alt} width={entry.width} height={entry.height} draggable={false} />
 }
 
 /** A soft crayon wobble for SVG paths: small offsets that change a few times a second. */

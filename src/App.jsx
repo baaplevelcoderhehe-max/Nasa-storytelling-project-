@@ -1,9 +1,12 @@
-import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
-import Scene from './Scene'
+import React, { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Bubbles from './Bubbles'
 import TitleScreen from './TitleScreen'
 import Choices from './Choices'
 import Interacts from './Interacts'
+
+// The 3D scene (three.js, React Three Fiber, postprocessing) is the biggest part of the
+// app, so it loads in the background while a still picture of the cover shows.
+const Scene = lazy(() => import('./Scene'))
 import SceneAnim from './SceneAnims'
 import { play as sfx, setMusicVolume, setSoundEnabled } from './sound'
 import PageControls from './ui/PageControls'
@@ -33,6 +36,34 @@ export default function App() {
   const [panel, setPanel] = useState(null) // 'settings' | 'credits' | null
   const [autoOpen, setAutoOpen] = useState(null)
   const [pendingTo, setPendingTo] = useState(null)
+  // The 3D scene has drawn its first frame: the still cover picture fades away.
+  const [sceneReady, setSceneReady] = useState(false)
+  const waiting = useRef(null)
+  useEffect(() => {
+    const on = () => {
+      setSceneReady(true)
+      const run = waiting.current
+      waiting.current = null
+      run?.()
+    }
+    window.addEventListener('scene-ready', on)
+    return () => window.removeEventListener('scene-ready', on)
+  }, [])
+  // Start loading the 3D scene once the cover has painted and the browser is idle, so
+  // the title and the still picture appear first. Test links load it straight away.
+  const [loadScene, setLoadScene] = useState(() => /[?&](page|freeze)=/.test(window.location.search))
+  useEffect(() => {
+    if (loadScene) return undefined
+    const go = () => setLoadScene(true)
+    if ('requestIdleCallback' in window) {
+      const id = window.requestIdleCallback(go, { timeout: 1500 })
+      return () => window.cancelIdleCallback(id)
+    }
+    const id = setTimeout(go, 300)
+    return () => clearTimeout(id)
+  }, [loadScene])
+  /** Runs now if the 3D scene is ready, otherwise as soon as it is (Begin, Continue). */
+  const whenReady = (fn) => (sceneReady ? fn() : (waiting.current = fn))
 
   const nav = useBook((s) => s.nav)
   const setNav = useBook((s) => s.setNav)
@@ -169,7 +200,14 @@ export default function App() {
   }, [play, current, go, back])
 
   if (error) return <div className="status">Could not load story: {error}</div>
-  if (!story) return <div className="status">Opening book…</div>
+  // While the story loads, keep showing the still cover picture from index.html.
+  if (!story)
+    return (
+      <picture className="boot-still" aria-label="Still Out There is opening" role="img">
+        <source media="(orientation: portrait)" srcSet="/art/cover-portrait.webp" width="780" height="1688" />
+        <img src="/art/cover-landscape.webp" width="1600" height="900" alt="" />
+      </picture>
+    )
 
   // Words that change with the date ({voyagerHome}, {voyagerReach}), plus the flags.
   const vars = { ...(nav?.flags ?? {}), ...lightDayWords() }
@@ -221,15 +259,19 @@ export default function App() {
           subtitle={story.subtitle}
           hasSave={hasSave}
           panelOpen={!!panel}
-          onStart={() => openBook(story.start)}
-          onContinue={() => {
-            if (nav && states[nav.id]) setPlay(true)
-            else openBook(story.start)
-          }}
-          onStartOver={() => {
-            clearProgress()
-            openBook(story.start)
-          }}
+          onStart={() => whenReady(() => openBook(story.start))}
+          onContinue={() =>
+            whenReady(() => {
+              if (nav && states[nav.id]) setPlay(true)
+              else openBook(story.start)
+            })
+          }
+          onStartOver={() =>
+            whenReady(() => {
+              clearProgress()
+              openBook(story.start)
+            })
+          }
           onSettings={() => setPanel('settings')}
           onCredits={() => setPanel('credits')}
         />
@@ -237,9 +279,17 @@ export default function App() {
 
       {/* The picture: described in words for screen readers ("alt" on every page). */}
       <div className="scene" role="img" aria-label={sceneAlt}>
-        <Suspense fallback={<div className="status">Turning page…</div>}>
-          <Scene page={scene} cover={story.cover} isPlaying={play && !!current} upcoming={upcoming} />
+        <Suspense fallback={play ? <div className="status">Turning page…</div> : null}>
+          {loadScene && <Scene page={scene} cover={story.cover} isPlaying={play && !!current} upcoming={upcoming} />}
         </Suspense>
+        {/* A still picture of the cover scene, shown at once over the canvas; it fades away
+            when the 3D scene is drawing. */}
+        {!play && (
+          <picture className={`scene__still${sceneReady ? ' is-hidden' : ''}`} aria-hidden="true">
+            <source media="(orientation: portrait)" srcSet="/art/cover-portrait.webp" width="780" height="1688" />
+            <img src="/art/cover-landscape.webp" width="1600" height="900" alt="" decoding="async" fetchpriority="high" />
+          </picture>
+        )}
       </div>
 
       {/* Each page's words, announced in reading order. */}

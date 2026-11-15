@@ -1,6 +1,10 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react'
 import { play } from './sound'
-import { ACTIONS } from './moments/actions'
+import { ACTION_TITLES } from './moments/titles'
+import { useIdle } from './moments/useIdle'
+
+// The card and the 16 moments load only when a reader opens one.
+const MomentCard = lazy(() => import('./moments/MomentCard'))
 
 // The things a reader can tap on a spread (story.json: state.interacts).
 //
@@ -13,102 +17,6 @@ import { ACTIONS } from './moments/actions'
 // moment opens in a crayon card over the scene; it can always be closed or skipped,
 // and the page can always be turned. Works with mouse, touch and keyboard (Escape
 // closes the card). If the reader does nothing for 8 seconds, a hint appears.
-
-const IDLE_MS = 8000
-
-function useIdle(active, deps) {
-  const [idle, setIdle] = useState(false)
-  const timer = useRef(null)
-  const poke = useCallback(() => {
-    setIdle(false)
-    clearTimeout(timer.current)
-    timer.current = setTimeout(() => setIdle(true), IDLE_MS)
-  }, [])
-  useEffect(() => {
-    if (!active) {
-      clearTimeout(timer.current)
-      setIdle(false)
-      return undefined
-    }
-    poke()
-    return () => clearTimeout(timer.current)
-  }, [active, ...deps]) // eslint-disable-line react-hooks/exhaustive-deps
-  return [idle, poke]
-}
-
-function MomentCard({ item, done, onDone, onClose }) {
-  const action = ACTIONS[item.action]
-  const [finished, setFinished] = useState(done)
-  const [idle, poke] = useIdle(!finished, [item.id])
-  const card = useRef(null)
-  const back = useRef(typeof document !== 'undefined' ? document.activeElement : null)
-
-  useEffect(() => {
-    // The scene behind the card pauses while it is open (Scene listens for this).
-    window.dispatchEvent(new CustomEvent('moment', { detail: true }))
-    return () => window.dispatchEvent(new CustomEvent('moment', { detail: false }))
-  }, [])
-
-  useEffect(() => {
-    // Move focus into the card; give it back when the card closes.
-    const first = card.current?.querySelector('button:not(:disabled), input')
-    ;(first ?? card.current)?.focus()
-    const returnTo = back.current
-    return () => returnTo?.focus?.()
-  }, [])
-
-  useEffect(() => {
-    const onKey = (e) => {
-      if (e.key === 'Escape') {
-        e.preventDefault()
-        onClose()
-      }
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
-
-  const finish = useCallback(() => {
-    setFinished(true)
-    onDone()
-  }, [onDone])
-
-  const Component = action.Component
-  return (
-    <div className="moment-backdrop" onClick={onClose}>
-      <div
-        ref={card}
-        className="moment"
-        role="dialog"
-        aria-modal="true"
-        aria-label={item.label ?? action.title}
-        tabIndex={-1}
-        onClick={(e) => e.stopPropagation()}
-        onPointerDown={poke}
-      >
-        <div className="moment__head">
-          <h2 className="moment__title">{item.label ?? action.title}</h2>
-          <button type="button" className="moment__close" onClick={onClose} aria-label={finished ? 'Close' : 'Skip this and close'}>
-            <span aria-hidden="true">✕</span>
-          </button>
-        </div>
-        <Component done={done} onDone={finish} poke={poke} />
-        {idle && !finished && (
-          <p className="moment__hint" role="status">
-            {action.hint}
-          </p>
-        )}
-        {finished && item.action !== 'pulse' && (
-          <div className="moment__row">
-            <button type="button" className="crayon-btn moment__btn" onClick={onClose}>
-              Back to the story
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
 
 function NoteCard({ item, onClose }) {
   const card = useRef(null)
@@ -180,7 +88,7 @@ export default function Interacts({ interacts = [], pageKey, autoOpen, onFinish,
           {visible.map((it) => {
             const isTap = !!it.action
             const isDone = done.includes(it.id)
-            const label = it.label ?? ACTIONS[it.action]?.title ?? 'Open'
+            const label = it.label ?? ACTION_TITLES[it.action] ?? 'Open'
             return (
               <button
                 key={it.id}
@@ -201,12 +109,13 @@ export default function Interacts({ interacts = [], pageKey, autoOpen, onFinish,
           })}
           {idle && firstTap && (
             <span className="hotspots__hint" role="status">
-              Try it: tap “{firstTap.label ?? ACTIONS[firstTap.action]?.title}”
+              Try it: tap “{firstTap.label ?? ACTION_TITLES[firstTap.action]}”
             </span>
           )}
         </div>
       )}
-      {item?.action && ACTIONS[item.action] && (
+      {item?.action && ACTION_TITLES[item.action] && (
+        <Suspense fallback={null}>
         <MomentCard
           key={item.id}
           item={item}
@@ -217,6 +126,7 @@ export default function Interacts({ interacts = [], pageKey, autoOpen, onFinish,
           }}
           onClose={close}
         />
+        </Suspense>
       )}
       {item && !item.action && <NoteCard item={item} onClose={close} />}
     </>

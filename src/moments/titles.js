@@ -1,0 +1,20 @@
+// The tap-moment names shown on the page bar (kept apart from moments/actions.jsx,
+// so the moments themselves load only when a card opens).
+export const ACTION_TITLES = {
+  dial: 'Turn the dial',
+  engineOff: 'Engine off!',
+  scoop: 'Drag the scoop',
+  laser: 'Fire the laser',
+  ascent: 'Drop the ascent stage',
+  vikingLab: 'Scoop soil',
+  airbags: 'Release the airbags',
+  phoenixDig: 'Dig with Phoenix',
+  dustDevil: 'Catch the wind',
+  marsquake: 'Listen for marsquakes',
+  ingenuity: 'Fly Ingenuity',
+  nearLand: 'Land NEAR gently',
+  dawnPush: 'Hold a gentle push',
+  dips: 'Spot the dips',
+  plaque: 'Read the plaque',
+  pulse: 'Send it to Voyager',
+}

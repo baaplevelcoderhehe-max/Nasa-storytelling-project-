@@ -418,6 +418,23 @@ const FREEZE_AT = (() => {
   return value === null || Number.isNaN(Number(value)) ? null : Number(value)
 })()
 
+/**
+ * Tells the app the 3D scene is showing, so the still cover picture (which sits on top
+ * of the canvas) can fade away. A short wait lets the effects pass start first.
+ */
+function useSceneReady() {
+  useEffect(() => {
+    let frames = 0
+    const start = performance.now()
+    let id = requestAnimationFrame(function tick() {
+      frames += 1
+      if (frames >= 20 && performance.now() - start >= 600) window.dispatchEvent(new Event('scene-ready'))
+      else id = requestAnimationFrame(tick)
+    })
+    return () => cancelAnimationFrame(id)
+  }, [])
+}
+
 function useFreezeFrame(name) {
   const advance = useThree((s) => s.advance)
   const gl = useThree((s) => s.gl)
@@ -474,6 +491,7 @@ function Experience({ page, cover, play, still, lowPower }) {
   }, [textures])
 
   useFreezeFrame(play ? page.id : 'title')
+  useSceneReady()
   const stage = useStage(shown)
   const places = placeAll(shown.layers, stage)
   useSpriteRects(shown.layers, places)
@@ -582,7 +600,7 @@ export default function Scene({ page, cover, isPlaying, upcoming }) {
   return (
     <Canvas
       orthographic
-      dpr={[1, 1.75]}
+      dpr={[1, small ? 1.5 : 1.75]}
       frameloop={FREEZE_AT !== null ? 'never' : still || paused ? 'demand' : 'always'}
       gl={{ antialias: false }}
       camera={{ zoom: 5, position: [0, 0, 200], far: 300, near: 50 }}
@@ -593,7 +611,8 @@ export default function Scene({ page, cover, isPlaying, upcoming }) {
       {FREEZE_AT === null && <PerformanceMonitor onDecline={() => setLowFps(true)} />}
       <Experience key={isPlaying ? (page.sceneKey ?? page.id) : (cover?.sceneKey ?? 'title')} page={page} cover={cover} play={isPlaying} still={still} lowPower={lowPower} />
       <Effects focus={focus ?? 0} blur={blur} />
-      <Preload pages={upcoming} />
+      {/* Phones load only the current and the next page's pictures. */}
+      <Preload pages={small ? (upcoming ?? []).slice(0, 1) : upcoming} />
     </Canvas>
   )
 }
