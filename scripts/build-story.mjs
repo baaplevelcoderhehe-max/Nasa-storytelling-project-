@@ -792,10 +792,10 @@ const TAPS = {
 // The "made in code" animations from the script (src/SceneAnims.jsx). box: percent of
 // the screen (x, y = centre, w/h = size); mobile: the phone box.
 const ANIMS = {
-  'mars1-2': { type: 'photo', box: { x: 45, y: 50, w: 19 }, mobile: { x: 33, y: 52, w: 46 } },
-  'mars2-6': { type: 'cutaway', box: { x: 44, y: 52, w: 21 }, mobile: { x: 38, y: 56, w: 56 } },
+  'mars1-2': { type: 'photo', box: { x: 45, y: 50, w: 19 }, mobile: { x: 31, y: 47, w: 42, max: 230 } },
+  'mars2-6': { type: 'cutaway', box: { x: 47, y: 56, w: 20 }, mobile: { x: 32, y: 47, w: 52, max: 270 } },
   'beyond-3': { type: 'planetPops', avoid: false, box: { x: 50, y: 34, w: 96, h: 56 } },
-  'finale-4': { type: 'markers', box: { x: 40, y: 44, w: 68, h: 26 }, mobile: { x: 50, y: 47, w: 90, h: 16 } },
+  'finale-4': { type: 'markers', box: { x: 40, y: 51, w: 72, h: 24 }, mobile: { x: 50, y: 47, w: 90, h: 16 } },
 }
 
 function interactsFor(id, spread) {

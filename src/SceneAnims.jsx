@@ -61,7 +61,7 @@ function Cutaway({ t }) {
   ]
   return (
     <div className="anim-cutaway">
-      <svg viewBox="-130 -120 260 240" role="img" aria-label="Mars cut open like a fruit: crust, mantle and core. Quake waves light up each layer.">
+      <svg viewBox="-112 -112 300 224" role="img" aria-label="Mars cut open like a fruit: crust, mantle and core. Quake waves light up each layer.">
         <circle r={R + 4} fill="#2b1d14" />
         {layers.map((l) => {
           const k = lit(l.inner, l.r)
@@ -72,14 +72,20 @@ function Cutaway({ t }) {
         {t < 1e6 && !FROZEN && (
           <circle r={clamp(R * (1 - wave / 1.6), 0, R)} fill="none" stroke="#fff3d1" strokeWidth="3" opacity={wave < 1.6 ? 0.8 : 0} />
         )}
-        {layers.map((l, i) => (
-          <text key={l.name} x={-R - 24} y={-60 + i * 50} className="anim-cutaway__label" textAnchor="end">
-            {l.name}
-          </text>
-        ))}
-        {layers.map((l, i) => (
-          <line key={`${l.name}-l`} x1={-R - 20} y1={-64 + i * 50} x2={-(l.r + l.inner) / 2 * 0.7} y2={-(l.r + l.inner) / 2 * 0.7} stroke="#fff3d1" strokeWidth="1.5" />
-        ))}
+        {/* labels on the right, pointing at each layer along the cut edge */}
+        {layers.map((l, i) => {
+          const mid = (l.r + l.inner) / 2
+          const ly = -78 + i * 34
+          return (
+            <g key={l.name}>
+              <line x1={mid} y1={-4} x2={R + 14} y2={ly} stroke="#fff3d1" strokeWidth="2" />
+              <circle cx={mid} cy={-4} r="3.5" fill="#fff3d1" />
+              <text x={R + 18} y={ly + 5} className="anim-cutaway__label">
+                {l.name}
+              </text>
+            </g>
+          )
+        })}
       </svg>
     </div>
   )
@@ -130,7 +136,8 @@ function Markers({ t }) {
   const shown = clamp(Math.floor(t / 0.35) + 1, 0, EXPLORERS.length)
   const pos = (i) => {
     const p = i / (EXPLORERS.length - 1)
-    return [6 + p * 88, 60 - Math.sin(p * Math.PI) * 44 + ((i * 7) % 3) * 4]
+    // A gentle arc that zig-zags a little, so neighbouring names don't touch.
+    return [6 + p * 88, 58 - Math.sin(p * Math.PI) * 40 + (i % 2 ? 9 : -9)]
   }
   return (
     <div className="anim-markers" role="img" aria-label={`Glowing markers light up across the sky for every explorer: ${EXPLORERS.join(', ')}.`}>
@@ -150,7 +157,7 @@ function Markers({ t }) {
       {EXPLORERS.map((name, i) => {
         const [x, y] = pos(i)
         return (
-          <span key={name} className={`anim-markers__dot${i < shown ? ' is-lit' : ''}`} style={{ left: `${x}%`, top: `${y}%` }}>
+          <span key={name} className={`anim-markers__dot${i < shown ? ' is-lit' : ''}${i % 2 ? '' : ' is-above'}`} style={{ left: `${x}%`, top: `${y}%` }}>
             <span className="anim-markers__name">{name}</span>
           </span>
         )
@@ -206,7 +213,7 @@ export default function SceneAnim({ anim, pageKey }) {
       style={{
         left: `${box.x}%`,
         top: `${box.y}%`,
-        width: box.w ? `${box.w}%` : undefined,
+        width: box.w ? (box.max ? `min(${box.w}%, ${box.max}px)` : `${box.w}%`) : undefined,
         height: box.h ? `${box.h}%` : undefined,
         opacity: ease(Math.min(1, t * 3 + (FROZEN ? 1 : 0))),
       }}

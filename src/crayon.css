@@ -1058,3 +1058,12 @@ html[data-reduce='1'] .tap-btn.is-hinting {
   bottom: auto;
   top: calc(100% - 6px);
 }
+.anim-markers__dot.is-above .anim-markers__name {
+  top: auto;
+  bottom: 14px;
+}
+@media (max-width: 1000px) {
+  .anim-markers__name {
+    display: none;
+  }
+}
