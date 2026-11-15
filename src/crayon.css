@@ -1283,3 +1283,12 @@ html[data-text-size='3'] {
   display: inline;
   line-height: 1.7;
 }
+/* Short choice lists sit side by side on phones too, so they stay low (F.4 keeps Kit clear). */
+.choices:not(:has(.choices__form)) {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.choices:not(:has(.choices__form)) .choices__btn {
+  padding-left: 0;
+  padding-right: 0;
+}
