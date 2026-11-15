@@ -567,6 +567,13 @@ export default function Scene({ page, cover, isPlaying, upcoming }) {
   const still = useReducedMotion()
   const small = useSmallScreen()
   const [lowFps, setLowFps] = useState(false)
+  // A tap moment covers the scene: pause it until the card closes.
+  const [paused, setPaused] = useState(false)
+  useEffect(() => {
+    const on = (e) => setPaused(!!e.detail)
+    window.addEventListener('moment', on)
+    return () => window.removeEventListener('moment', on)
+  }, [])
   const lowPower = small || lowFps
   const focus = focusDepth(isPlaying ? page : cover)
   // A page with only a background stays sharp: there is no subject to focus on.
@@ -576,7 +583,7 @@ export default function Scene({ page, cover, isPlaying, upcoming }) {
     <Canvas
       orthographic
       dpr={[1, 1.75]}
-      frameloop={FREEZE_AT !== null ? 'never' : still ? 'demand' : 'always'}
+      frameloop={FREEZE_AT !== null ? 'never' : still || paused ? 'demand' : 'always'}
       gl={{ antialias: false }}
       camera={{ zoom: 5, position: [0, 0, 200], far: 300, near: 50 }}
       eventSource={document.getElementById('root')}

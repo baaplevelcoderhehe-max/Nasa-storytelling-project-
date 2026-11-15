@@ -1,202 +1,224 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { play } from './sound'
+import { ACTIONS } from './moments/actions'
 
-// ---------- emotes ----------
-// Files: /public/emotes/emote_<name>.png  (32x38 art, each has its own little bubble + tail).
-// Use "blank" for the empty bubble (emote__.png).
-const EMOTE_DIR = '/emotes'
-const emoteSrc = (n) => `${EMOTE_DIR}/${n === 'blank' || n === '' ? 'emote__' : `emote_${n}`}.png`
+// The things a reader can tap on a spread (story.json: state.interacts).
+//
+//   { "id": "tap", "action": "engineOff" }          a tap moment (see moments/actions.jsx)
+//   { "id": "log", "label": "Mission Log",
+//     "facts": ["Landed April 20, 1967.", ...] }     a note with Mission Log facts
+//   { "id": "x", "label": "…", "text": "…" }        a plain note
+//
+// They sit in a bar just above the page controls (bubbles keep clear of it). A tap
+// moment opens in a crayon card over the scene; it can always be closed or skipped,
+// and the page can always be turned. Works with mouse, touch and keyboard (Escape
+// closes the card). If the reader does nothing for 8 seconds, a hint appears.
 
-// Which UI sound each emote plays when it pops (override per bubble with "emoteSound", or false = silent).
-const EMOTE_SFX = {
-  question: ['question', 0.3],
-  exclamation: ['error', 0.18], exclamations: ['error', 0.18], alert: ['error', 0.18],
-  anger: ['error', 0.18], cross: ['error', 0.18],
-  heart: ['confirm', 0.3], hearts: ['confirm', 0.3], star: ['confirm', 0.3], stars: ['confirm', 0.3],
-  idea: ['confirm', 0.3], faceHappy: ['confirm', 0.3], laugh: ['confirm', 0.3],
-  music: ['confirm', 0.3], cash: ['confirm', 0.3],
-}
-const DEFAULT_EMOTE_SFX = ['tick', 0.35]
+const IDLE_MS = 8000
 
-// name: "heart"  or  ["dots1","dots2","dots3"] (loops as an animation)
-export function Emote({ name, speed = 350, scale = 2, className = '', style }) {
-  const frames = [].concat(name)
-  const key = frames.join('|')
-  const [frame, setFrame] = useState(0)
-
-  useEffect(() => {
-    frames.forEach((n) => { new Image().src = emoteSrc(n) }) // preload so frame swaps don't flicker
-    if (frames.length < 2) return
-    const t = setInterval(() => setFrame((f) => (f + 1) % frames.length), speed)
-    return () => clearInterval(t)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, speed])
-
-  return (
-    <span className={`emote ${className}`} style={style}>
-      <img
-        src={emoteSrc(frames[frame % frames.length])}
-        width={32 * scale}
-        height={38 * scale}
-        alt=""
-        draggable={false}
-        onError={(e) => { e.currentTarget.style.visibility = 'hidden' }}
-      />
-    </span>
-  )
-}
-
-// One-shot sound for a timed reveal, keyed off an explicit `at`.
-// Auto-timed (per-bubble `delay`) is handled inside <Bubbles/> itself.
-export function TimedSound({ name, at = 0, gain = 0.3, jitter = 0.1 }) {
-  useEffect(() => {
-    if (!name || name === false) return
-    play(name, { gain, jitter, delay: at })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+function useIdle(active, deps) {
+  const [idle, setIdle] = useState(false)
+  const timer = useRef(null)
+  const poke = useCallback(() => {
+    setIdle(false)
+    clearTimeout(timer.current)
+    timer.current = setTimeout(() => setIdle(true), IDLE_MS)
   }, [])
-  return null
+  useEffect(() => {
+    if (!active) {
+      clearTimeout(timer.current)
+      setIdle(false)
+      return undefined
+    }
+    poke()
+    return () => clearTimeout(timer.current)
+  }, [active, ...deps]) // eslint-disable-line react-hooks/exhaustive-deps
+  return [idle, poke]
 }
 
-// Interactables live in story.json (page.interacts), each with:
-//   id          unique key within the page
-//   x, y        % of screen (centre of the hotspot)
-//   radius      px, hit area (default 44)
-//   label       shown on the marker (optional)
-//   text        first line of the note
-//   detail      rest of the note
-//   sound       play on open (default "signal")
-//   emote       emote on the marker / in the note (optional)
-//   require     array of interactable ids on the SAME page that must be done first
-//   hidden      1 = invisible marker, until it becomes available
-//   target      "note" (default) | "page"  — page opens an image panel and queues
-//              the page turn (works only on the last interactable of a page)
-//   go          page id to turn to when target is "page"
-//   layers      extra layers to show on the scene while this is available/open
-//   fireflies   firefly config to merge in while open
-//   replace     id of an interactable to retire (its marker/line disappears)
-//   delay, emoteSpeed, emoteScale, emoteDelay — same conventions as bubbles
-const DOT = 80
+function MomentCard({ item, done, onDone, onClose }) {
+  const action = ACTIONS[item.action]
+  const [finished, setFinished] = useState(done)
+  const [idle, poke] = useIdle(!finished, [item.id])
+  const card = useRef(null)
+  const back = useRef(typeof document !== 'undefined' ? document.activeElement : null)
 
-export default function Interacts({
-  interacts = [],
-  done,
-  opened,
-  available,
-  onOpen,
-  onClose,
-  onDone,
-}) {
-  const ordered = useMemo(
-    () => interacts.map((it, i) => ({ ...it, _i: i })),
-    [interacts],
-  )
-  const byId = useMemo(() => {
-    const m = {}
-    ordered.forEach((it) => { m[it.id] = it })
-    return m
-  }, [ordered])
-  const doneSet = useMemo(() => new Set(done), [done])
-
-  // An interactable is available when it isn't done and every `require` is done.
-  // Anything not explicitly gated is available right away.
   useEffect(() => {
-    ordered.forEach((it) => {
-      const isDone = doneSet.has(it.id)
-      const reqs = [].concat(it.require ?? [])
-      const unmet = reqs.filter((r) => !doneSet.has(r))
-      const isOpen = opened === it.id
-      const avail = !isDone && unmet.length === 0
-      if (avail && !available.has(it.id)) onDone('add', it.id)
-      if (!avail && available.has(it.id) && !isOpen) onDone('remove', it.id)
-    })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [done, opened])
+    // The scene behind the card pauses while it is open (Scene listens for this).
+    window.dispatchEvent(new CustomEvent('moment', { detail: true }))
+    return () => window.dispatchEvent(new CustomEvent('moment', { detail: false }))
+  }, [])
 
-  const active = ordered.filter((it) => !doneSet.has(it.id) || opened === it.id)
-  const isOpen = (it) => opened === it.id
+  useEffect(() => {
+    // Move focus into the card; give it back when the card closes.
+    const first = card.current?.querySelector('button:not(:disabled), input')
+    ;(first ?? card.current)?.focus()
+    const returnTo = back.current
+    return () => returnTo?.focus?.()
+  }, [])
 
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        onClose()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+
+  const finish = useCallback(() => {
+    setFinished(true)
+    onDone()
+  }, [onDone])
+
+  const Component = action.Component
+  return (
+    <div className="moment-backdrop" onClick={onClose}>
+      <div
+        ref={card}
+        className="moment"
+        role="dialog"
+        aria-modal="true"
+        aria-label={item.label ?? action.title}
+        tabIndex={-1}
+        onClick={(e) => e.stopPropagation()}
+        onPointerDown={poke}
+      >
+        <div className="moment__head">
+          <h2 className="moment__title">{item.label ?? action.title}</h2>
+          <button type="button" className="moment__close" onClick={onClose} aria-label={finished ? 'Close' : 'Skip this and close'}>
+            <span aria-hidden="true">✕</span>
+          </button>
+        </div>
+        <Component done={done} onDone={finish} poke={poke} />
+        {idle && !finished && (
+          <p className="moment__hint" role="status">
+            {action.hint}
+          </p>
+        )}
+        {finished && item.action !== 'pulse' && (
+          <div className="moment__row">
+            <button type="button" className="crayon-btn moment__btn" onClick={onClose}>
+              Back to the story
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function NoteCard({ item, onClose }) {
+  const card = useRef(null)
+  useEffect(() => {
+    card.current?.querySelector('button')?.focus()
+    const onKey = (e) => e.key === 'Escape' && onClose()
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+  return (
+    <div className="moment-backdrop" onClick={onClose}>
+      <div ref={card} className="note-card" role="dialog" aria-modal="true" aria-label={item.label} onClick={(e) => e.stopPropagation()}>
+        <div className="moment__head">
+          <h2 className="moment__title">{item.label}</h2>
+          <button type="button" className="moment__close" onClick={onClose} aria-label="Close">
+            <span aria-hidden="true">✕</span>
+          </button>
+        </div>
+        {item.facts ? (
+          <ul className="note-card__facts">
+            {item.facts.map((f) => (
+              <li key={f}>{f}</li>
+            ))}
+          </ul>
+        ) : (
+          <p className="note-card__text">{item.text}</p>
+        )}
+      </div>
+    </div>
+  )
+}
+
+/**
+ * pageKey: the state id (resets what has been opened). autoOpen: an interact id to
+ * open straight away (used by the F.3 pulse after Send). onFinish(item): called when
+ * a moment is completed (the pulse uses it to turn the page).
+ */
+export default function Interacts({ interacts = [], pageKey, autoOpen, onFinish, onAutoClosed }) {
+  const [opened, setOpened] = useState(null)
+  const [done, setDone] = useState([])
+  const visible = interacts.filter((it) => !it.hidden)
+  const firstTap = visible.find((it) => it.action && !done.includes(it.id))
+  const [idle, poke] = useIdle(!!firstTap && !opened, [pageKey])
+
+  useEffect(() => {
+    setOpened(null)
+    setDone([])
+  }, [pageKey])
+
+  useEffect(() => {
+    if (autoOpen) setOpened(autoOpen)
+  }, [autoOpen])
+
+  const open = (it) => {
+    play('signal', { gain: 0.25, jitter: 0.05 })
+    poke()
+    setOpened(it.id)
+  }
+  const close = useCallback(() => {
+    if (opened && interacts.find((i) => i.id === opened)?.hidden) onAutoClosed?.()
+    setOpened(null)
+  }, [opened, interacts, onAutoClosed])
+
+  const item = interacts.find((it) => it.id === opened)
   return (
     <>
-      {/* markers (under the note layer) */}
-      <div className="hotspots">
-        {active.map((it) => {
-          const avail = available.has(it.id)
-          const hidden = it.hidden && !avail
-          if (hidden) return null
-          return (
-            <button
-              key={it.id}
-              type="button"
-              className={`hotspot ${avail ? 'is-available' : 'is-locked'} ${isOpen(it) ? 'is-open' : ''}`}
-              style={{
-                left: `${it.x ?? 50}%`,
-                top: `${it.y ?? 50}%`,
-                '--r': `${it.radius ?? 44}px`,
-              }}
-              onClick={() => avail && onOpen(it.id)}
-              disabled={!avail}
-              aria-label={it.label ?? 'More about this'}
-              title={avail ? it.label ?? 'Open' : 'Find the other signal first'}
-            >
-              <span className="hotspot__ring" aria-hidden="true" />
-              <span className="hotspot__dot" aria-hidden="true" />
-              {it.label && <span className="hotspot__label">{it.label}</span>}
-              {it.emote && (
-                <Emote
-                  name={it.emote}
-                  speed={it.emoteSpeed}
-                  scale={it.emoteScale ?? 2}
-                  className="emote--marker"
-                  style={{ animationDelay: `${(it.delay ?? 0) + (it.emoteDelay ?? 0)}s` }}
-                />
-              )}
-            </button>
-          )
-        })}
-      </div>
-
-      {/* the open note / image panel */}
-      {opened && byId[opened] && (
-        <div
-          className={`note-backdrop ${byId[opened].target === 'page' ? 'note-backdrop--page' : ''}`}
-          onClick={onClose}
-        >
-          <div
-            className={`note ${byId[opened].target === 'page' ? 'note--page' : ''}`}
-            style={{ '--note-w': byId[opened].width ? `${byId[opened].width}px` : 'auto' }}
-            role="dialog"
-            aria-modal="false"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button type="button" className="note__close" onClick={onClose} aria-label="Close">
-              <span aria-hidden="true">✕</span>
-            </button>
-            {byId[opened].speaker && <span className="note__speaker">{byId[opened].speaker}</span>}
-            <p className="note__text">
-              {byId[opened].label && <span className="note__title">{byId[opened].label}</span>}
-              {byId[opened].text}
-              {byId[opened].detail && (
-                <>
-                  {' '}
-                  <span className="note__detail">{byId[opened].detail}</span>
-                </>
-              )}
-            </p>
-            {byId[opened].image && (
-              <img className="note__img" src={byId[opened].image} alt={byId[opened].label ?? ''} />
-            )}
-            {byId[opened].target === 'page' && (
+      {visible.length > 0 && (
+        <div className="hotspots" role="group" aria-label="Things to try on this page">
+          {visible.map((it) => {
+            const isTap = !!it.action
+            const isDone = done.includes(it.id)
+            const label = it.label ?? ACTIONS[it.action]?.title ?? 'Open'
+            return (
               <button
+                key={it.id}
                 type="button"
-                className="note__go"
-                onClick={() => onDone('go', byId[opened].go)}
+                className={`${isTap ? 'tap-btn crayon-btn' : 'paper-tag'}${isDone ? ' is-done' : ''}${
+                  isTap && idle && it === firstTap ? ' is-hinting' : ''
+                }`}
+                onClick={() => open(it)}
               >
-                {byId[opened].goLabel ?? 'Continue ›'}
+                {isTap && (
+                  <span className="tap-btn__icon" aria-hidden="true">
+                    {isDone ? '✓' : '✋'}
+                  </span>
+                )}
+                {label}
               </button>
-            )}
-          </div>
+            )
+          })}
+          {idle && firstTap && (
+            <span className="hotspots__hint" role="status">
+              Try it: tap “{firstTap.label ?? ACTIONS[firstTap.action]?.title}”
+            </span>
+          )}
         </div>
       )}
+      {item?.action && ACTIONS[item.action] && (
+        <MomentCard
+          key={item.id}
+          item={item}
+          done={done.includes(item.id)}
+          onDone={() => {
+            setDone((d) => (d.includes(item.id) ? d : [...d, item.id]))
+            onFinish?.(item)
+          }}
+          onClose={close}
+        />
+      )}
+      {item && !item.action && <NoteCard item={item} onClose={close} />}
     </>
   )
 }

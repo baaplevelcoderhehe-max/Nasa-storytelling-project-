@@ -744,7 +744,7 @@ const spreads = [
     script: 'F.3',
     alt: 'Back on the hilltop at night. Kit types at a little console under the giant dish. Echo watches, antenna glowing.',
     next: 'finale-4',
-    input: { key: 'message', to: 'finale-4', placeholder: 'Type a message for Voyager…', submit: 'Send', maxLength: 140 },
+    input: { key: 'message', to: 'finale-4', placeholder: 'Type a message for Voyager…', submit: 'Send', maxLength: 140, action: 'pulse' },
     layers: [hilltop(), kit('kit_typing', 'left', { x: -14, y: -32, height: 32, main: true, m: { x: -12, y: -27, height: 21 } }), echo('echo_excited', 'left', { x: 4, y: -33, height: 12, m: { x: 14, y: -28, height: 8.5 } })],
     bubbles: [
       spark('Now you can answer me.'),
@@ -767,6 +767,45 @@ const spreads = [
     ],
   },
 ]
+
+// ---------- tap moments and animated scenes (Phase D) ----------
+
+// Which tap moment (src/moments/actions.jsx) each spread's "Tap" line becomes.
+const TAPS = {
+  'prologue-2': 'dial',
+  'moon-2': 'engineOff',
+  'moon-3': 'scoop',
+  'moon-5': 'laser',
+  'moon-7': 'ascent',
+  'mars1-3': 'vikingLab',
+  'mars1-4': 'airbags',
+  'mars1-6': 'phoenixDig',
+  'mars2-2': 'dustDevil',
+  'mars2-5': 'marsquake',
+  'mars2-7': 'ingenuity',
+  'small-2': 'nearLand',
+  'small-4': 'dawnPush',
+  'beyond-1': 'dips',
+  'beyond-4': 'plaque',
+}
+
+// The "made in code" animations from the script (src/SceneAnims.jsx). box: percent of
+// the screen (x, y = centre, w/h = size); mobile: the phone box.
+const ANIMS = {
+  'mars1-2': { type: 'photo', box: { x: 45, y: 50, w: 19 }, mobile: { x: 33, y: 52, w: 46 } },
+  'mars2-6': { type: 'cutaway', box: { x: 44, y: 52, w: 21 }, mobile: { x: 38, y: 56, w: 56 } },
+  'beyond-3': { type: 'planetPops', avoid: false, box: { x: 50, y: 34, w: 96, h: 56 } },
+  'finale-4': { type: 'markers', box: { x: 40, y: 44, w: 68, h: 26 }, mobile: { x: 50, y: 47, w: 90, h: 16 } },
+}
+
+function interactsFor(id, spread) {
+  const list = []
+  if (TAPS[id]) list.push({ id: 'tap', action: TAPS[id] })
+  if (spread.missionLog) list.push({ id: 'log', label: 'Mission Log', facts: spread.missionLog })
+  // F.3: Send plays the pulse along "24 hours to Voyager" before the last page.
+  if (id === 'finale-3') list.push({ id: 'pulse', action: 'pulse', hidden: true })
+  return list
+}
 
 // ---------- assemble ----------
 
@@ -806,10 +845,13 @@ async function main() {
   spreads.forEach((s, i) => {
     const { id, part, script, ...rest } = s
     const next = s.next !== undefined ? s.next : spreads[i + 1]?.id ?? null
+    const interacts = interactsFor(id, s)
     states[id] = {
       _script: script,
       ...(part ? { chapter: PARTS[part] } : {}),
       ...rest,
+      ...(interacts.length ? { interacts } : {}),
+      ...(ANIMS[id] ? { anim: ANIMS[id] } : {}),
       next,
     }
   })

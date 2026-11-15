@@ -3,6 +3,8 @@ import Scene from './Scene'
 import Bubbles from './Bubbles'
 import TitleScreen from './TitleScreen'
 import Choices from './Choices'
+import Interacts from './Interacts'
+import SceneAnim from './SceneAnims'
 import { play as sfx } from './sound'
 import PageControls from './ui/PageControls'
 import { useReducedMotion } from './motion'
@@ -24,6 +26,12 @@ export default function App() {
   const [error, setError] = useState(null)
   const [play, setPlay] = useState(false)
   const [nav, setNav] = useState(null)
+  const [autoOpen, setAutoOpen] = useState(null)
+  const [pendingTo, setPendingTo] = useState(null)
+  useEffect(() => {
+    setAutoOpen(null)
+    setPendingTo(null)
+  }, [nav?.id])
   const reduced = useReducedMotion()
   useEffect(() => {
     document.documentElement.dataset.reduce = reduced ? '1' : '0'
@@ -102,6 +110,14 @@ export default function App() {
         return
       }
       sfx('click', { gain: 0.25 })
+      // An answer with an action (F.3 Send): keep the answer, play the moment first;
+      // the moment turns the page when it is finished.
+      if (choice.action) {
+        setNav((n) => ({ ...n, flags: { ...n.flags, ...(choice.set ?? {}) } }))
+        setPendingTo(choice.to)
+        setAutoOpen(choice.action)
+        return
+      }
       go(choice.to, choice.set)
     },
     [nav, story, go],
@@ -110,7 +126,9 @@ export default function App() {
   useEffect(() => {
     if (!play) return // arrows/space do nothing on the title screen
     const onKey = (e) => {
-      if (e.target instanceof HTMLElement && /^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return
+      if (e.target instanceof HTMLElement && /^(INPUT|TEXTAREA|BUTTON|SELECT)$/.test(e.target.tagName)) return
+      // While a tap moment or a note is open, its own keys win (arrows steer, Space holds).
+      if (document.querySelector('.moment-backdrop')) return
       if (e.key === 'ArrowRight' || e.key === ' ') current?.next && go(current.next)
       if (e.key === 'ArrowLeft') back()
     }
@@ -167,6 +185,20 @@ export default function App() {
           key={`${nav.id}:${nav.history.length}`}
           quiet={!!current?.quiet}
           bubbles={bubbles}
+        />
+      )}
+
+      {play && current?.anim && <SceneAnim key={`anim:${nav.id}`} anim={current.anim} pageKey={nav.id} />}
+
+      {play && (current?.interacts?.length > 0) && (
+        <Interacts
+          interacts={current.interacts}
+          pageKey={nav.id}
+          autoOpen={autoOpen}
+          onFinish={(item) => {
+            if (item.action === 'pulse' && pendingTo) go(pendingTo)
+          }}
+          onAutoClosed={() => setAutoOpen(null)}
         />
       )}
 

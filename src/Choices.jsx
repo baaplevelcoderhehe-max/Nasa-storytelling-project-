@@ -12,7 +12,7 @@ export default function Choices({ state, onChoose }) {
   const submit = (e) => {
     e.preventDefault()
     const text = value.trim()
-    onChoose({ to: input.to, set: text ? { [input.key]: text } : {} })
+    onChoose({ to: input.to, set: text ? { [input.key]: text } : {}, action: input.action })
   }
 
   return (

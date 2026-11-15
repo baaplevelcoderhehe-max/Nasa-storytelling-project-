@@ -44,7 +44,7 @@ const story = JSON.parse(await readFile(new URL('../public/story.json', import.m
 const pages = process.argv.slice(2).length ? process.argv.slice(2) : ['hub', ...story.order]
 
 const server = await ensureServer()
-const browser = await chromium.launch({ channel: 'chromium', args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] })
+const browser = await chromium.launch({ channel: 'chromium', args: ['--enable-gpu', '--use-angle=d3d11', '--ignore-gpu-blocklist'] })
 const problems = []
 let checked = 0
 try {
@@ -52,7 +52,7 @@ try {
     const context = await browser.newContext({ viewport })
     const page = await context.newPage()
     for (const id of pages) {
-      await page.goto(`${URL_BASE}?page=${id}&freeze=2`)
+      await page.goto(`${URL_BASE}?page=${id}&freeze=2`, { timeout: 90000 })
       await page.waitForFunction((name) => document.body.dataset.qaFrozen === name, id, { timeout: 30000 }).catch(() => {})
       // Screenshot mode shows every bubble at once; give layout a moment to settle.
       await page.waitForTimeout(600)

@@ -243,6 +243,12 @@
           "delay": 1.2
         }
       ],
+      "interacts": [
+        {
+          "id": "tap",
+          "action": "dial"
+        }
+      ],
       "next": "prologue-3"
     },
     "prologue-3": {
@@ -495,6 +501,20 @@
           "delay": 1.2
         }
       ],
+      "interacts": [
+        {
+          "id": "tap",
+          "action": "engineOff"
+        },
+        {
+          "id": "log",
+          "label": "Mission Log",
+          "facts": [
+            "Landed April 20, 1967.",
+            "Bounced to about 10 m, then 3 m, then settled."
+          ]
+        }
+      ],
       "next": "moon-3"
     },
     "moon-3": {
@@ -589,6 +609,20 @@
           "tail": "none",
           "speaker": "Surveyor 3",
           "delay": 1.2
+        }
+      ],
+      "interacts": [
+        {
+          "id": "tap",
+          "action": "scoop"
+        },
+        {
+          "id": "log",
+          "label": "Mission Log",
+          "facts": [
+            "Sent 6,326 TV pictures.",
+            "Last contact May 4, 1967."
+          ]
         }
       ],
       "next": "moon-4"
@@ -785,6 +819,12 @@
           "tail": "none",
           "speaker": "Laser reflector",
           "delay": 1.2
+        }
+      ],
+      "interacts": [
+        {
+          "id": "tap",
+          "action": "laser"
         }
       ],
       "next": "moon-6"
@@ -985,6 +1025,12 @@
           "tail": "none",
           "speaker": "Science station",
           "delay": 1.2
+        }
+      ],
+      "interacts": [
+        {
+          "id": "tap",
+          "action": "ascent"
         }
       ],
       "next": "moon-8"
@@ -1313,6 +1359,19 @@
           "delay": 1.2
         }
       ],
+      "anim": {
+        "type": "photo",
+        "box": {
+          "x": 45,
+          "y": 50,
+          "w": 19
+        },
+        "mobile": {
+          "x": 33,
+          "y": 52,
+          "w": 46
+        }
+      },
       "next": "mars1-3"
     },
     "mars1-3": {
@@ -1389,6 +1448,20 @@
           "delay": 1.2
         }
       ],
+      "interacts": [
+        {
+          "id": "tap",
+          "action": "vikingLab"
+        },
+        {
+          "id": "log",
+          "label": "Mission Log",
+          "facts": [
+            "Sent weather reports for years.",
+            "A wrong command from Earth cut contact in November 1982."
+          ]
+        }
+      ],
       "next": "mars1-4"
     },
     "mars1-4": {
@@ -1457,6 +1530,12 @@
           "tail": "none",
           "speaker": "Sojourner",
           "delay": 1.2
+        }
+      ],
+      "interacts": [
+        {
+          "id": "tap",
+          "action": "airbags"
         }
       ],
       "next": "mars1-5"
@@ -1546,6 +1625,16 @@
           "delay": 1.2
         }
       ],
+      "interacts": [
+        {
+          "id": "log",
+          "label": "Mission Log",
+          "facts": [
+            "The lander is now called the Carl Sagan Memorial Station.",
+            "The last data came on September 27, 1997."
+          ]
+        }
+      ],
       "next": "mars1-6"
     },
     "mars1-6": {
@@ -1613,6 +1702,12 @@
           "tail": "none",
           "speaker": "Phoenix",
           "delay": 1.2
+        }
+      ],
+      "interacts": [
+        {
+          "id": "tap",
+          "action": "phoenixDig"
         }
       ],
       "next": "mars1-7"
@@ -1867,6 +1962,12 @@
           "delay": 1.2
         }
       ],
+      "interacts": [
+        {
+          "id": "tap",
+          "action": "dustDevil"
+        }
+      ],
       "next": "mars2-3"
     },
     "mars2-3": {
@@ -2052,6 +2153,12 @@
           "delay": 1.2
         }
       ],
+      "interacts": [
+        {
+          "id": "tap",
+          "action": "marsquake"
+        }
+      ],
       "next": "mars2-6"
     },
     "mars2-6": {
@@ -2120,6 +2227,19 @@
           "delay": 1.2
         }
       ],
+      "anim": {
+        "type": "cutaway",
+        "box": {
+          "x": 44,
+          "y": 52,
+          "w": 21
+        },
+        "mobile": {
+          "x": 38,
+          "y": 56,
+          "w": 56
+        }
+      },
       "next": "mars2-7"
     },
     "mars2-7": {
@@ -2206,6 +2326,21 @@
           "tail": "none",
           "speaker": "Ingenuity",
           "delay": 1.2
+        }
+      ],
+      "interacts": [
+        {
+          "id": "tap",
+          "action": "ingenuity"
+        },
+        {
+          "id": "log",
+          "label": "Mission Log",
+          "facts": [
+            "Flew 17 km in total and reached 24 m high.",
+            "A rotor was damaged on its last flight on January 18, 2024.",
+            "It now stands still on Mars."
+          ]
         }
       ],
       "next": "mars2-8"
@@ -2528,6 +2663,12 @@
           "delay": 1.2
         }
       ],
+      "interacts": [
+        {
+          "id": "tap",
+          "action": "nearLand"
+        }
+      ],
       "next": "small-3"
     },
     "small-3": {
@@ -2599,6 +2740,16 @@
           "tail": "none",
           "speaker": "NEAR",
           "delay": 1.2
+        }
+      ],
+      "interacts": [
+        {
+          "id": "log",
+          "label": "Mission Log",
+          "facts": [
+            "Last contact February 28, 2001.",
+            "Renamed in honor of geologist Eugene Shoemaker."
+          ]
         }
       ],
       "next": "small-4"
@@ -2705,6 +2856,20 @@
           "tail": "none",
           "speaker": "Dawn",
           "delay": 1.2
+        }
+      ],
+      "interacts": [
+        {
+          "id": "tap",
+          "action": "dawnPush"
+        },
+        {
+          "id": "log",
+          "label": "Mission Log",
+          "facts": [
+            "Orbited Vesta 2011–2012 and arrived at Ceres in early 2015.",
+            "The first mission to orbit two bodies besides Earth and the Moon."
+          ]
         }
       ],
       "next": "small-5"
@@ -2988,6 +3153,12 @@
           "delay": 1.2
         }
       ],
+      "interacts": [
+        {
+          "id": "tap",
+          "action": "dips"
+        }
+      ],
       "next": "beyond-2"
     },
     "beyond-2": {
@@ -3146,6 +3317,16 @@
           "delay": 1.2
         }
       ],
+      "anim": {
+        "type": "planetPops",
+        "avoid": false,
+        "box": {
+          "x": 50,
+          "y": 34,
+          "w": 96,
+          "h": 56
+        }
+      },
       "next": "beyond-4"
     },
     "beyond-4": {
@@ -3231,6 +3412,12 @@
           "tail": "none",
           "speaker": "Pioneer 10",
           "delay": 1.2
+        }
+      ],
+      "interacts": [
+        {
+          "id": "tap",
+          "action": "plaque"
         }
       ],
       "next": "beyond-5"
@@ -3588,7 +3775,8 @@
         "to": "finale-4",
         "placeholder": "Type a message for Voyager…",
         "submit": "Send",
-        "maxLength": 140
+        "maxLength": 140,
+        "action": "pulse"
       },
       "layers": [
         {
@@ -3644,6 +3832,13 @@
             "dots3"
           ],
           "emoteSpeed": 450
+        }
+      ],
+      "interacts": [
+        {
+          "id": "pulse",
+          "action": "pulse",
+          "hidden": true
         }
       ]
     },
@@ -3724,7 +3919,22 @@
             "flag": "message"
           }
         }
-      ]
+      ],
+      "anim": {
+        "type": "markers",
+        "box": {
+          "x": 40,
+          "y": 44,
+          "w": 68,
+          "h": 26
+        },
+        "mobile": {
+          "x": 50,
+          "y": 47,
+          "w": 90,
+          "h": 16
+        }
+      }
     },
     "hub": {
       "alt": "The cozy control hut at night. The console screen glows, ready for the next memory.",

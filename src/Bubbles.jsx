@@ -172,9 +172,12 @@ export default function Bubbles({ bubbles = [], quiet = false }) {
     const rects = getSpriteRects()
     const strict = rects.filter((r) => r.main)
     const soft = rects.filter((r) => r.soft && !r.main)
-    // Flowing bubbles also stop above any choice buttons.
-    const choicesEl = document.querySelector('.choices')
-    const bottomLimit = Math.min(vh - clear, choicesEl ? choicesEl.getBoundingClientRect().top - GAP : vh)
+    // Flowing bubbles also stop above any choice buttons and the tap-moment bar.
+    const tops = ['.choices', '.hotspots']
+      .map((sel) => document.querySelector(sel))
+      .filter(Boolean)
+      .map((el) => el.getBoundingClientRect().top - GAP)
+    const bottomLimit = Math.min(vh - clear, ...tops)
     // Each flowing bubble starts looking at the previous one's top, so it can sit beside
     // it or below it, but never above it (reading order). Placed bubbles are obstacles.
     let cursor = EDGE + LABEL_ROOM
