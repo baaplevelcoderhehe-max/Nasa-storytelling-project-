@@ -1067,3 +1067,219 @@ html[data-reduce='1'] .tap-btn.is-hinting {
     display: none;
   }
 }
+
+/* ---------- Phase E: screen-reader text, icon buttons, settings, credits ---------- */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+.controls__middle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  justify-content: center;
+}
+.icon-btn {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+  background: var(--cream);
+  color: var(--ink);
+  cursor: pointer;
+  box-shadow: 0 3px 0 rgba(43, 29, 20, 0.35);
+}
+.icon-btn[aria-pressed='true'] {
+  background: var(--crayon-yellow);
+}
+.icon-btn--space {
+  visibility: hidden;
+}
+.icon-btn__svg {
+  width: 24px;
+  height: 24px;
+}
+.panel {
+  width: min(94vw, 460px);
+}
+.panel--wide {
+  width: min(94vw, 640px);
+}
+.settings {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.setting {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.setting__label {
+  display: block;
+  margin-bottom: 6px;
+  font: 700 1.05rem/1.2 var(--font-book);
+}
+.setting__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.setting__option {
+  min-height: 44px;
+  min-width: 56px;
+  padding: 6px 14px;
+  border: 3px solid var(--ink);
+  border-radius: 14px 12px 15px 11px;
+  background: var(--paper);
+  color: var(--ink);
+  font: 600 1rem/1 var(--font-book);
+  cursor: pointer;
+}
+.setting__option.is-on {
+  background: var(--crayon-yellow);
+  box-shadow: inset 0 -3px 0 rgba(43, 29, 20, 0.25);
+}
+.setting__range {
+  width: 100%;
+  height: 44px;
+  accent-color: #c97a2a;
+}
+.settings__note {
+  margin: 4px 0 0;
+  font: 500 0.95rem/1.35 var(--font-book);
+}
+.credits {
+  font: 500 1rem/1.45 var(--font-book);
+}
+.credits ul {
+  margin: 4px 0 10px;
+  padding-left: 1.2em;
+}
+.credits__heading {
+  margin: 10px 0 4px;
+  font: 700 1.15rem/1.2 var(--font-book);
+}
+.credits__chapter {
+  margin: 8px 0 0;
+  font: 700 0.98rem/1.2 var(--font-book);
+}
+.credits__team {
+  list-style: none;
+  padding-left: 0 !important;
+}
+.credits__link {
+  display: inline-block;
+  padding: 4px 0;
+  color: #6b2f0a;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.credits__note {
+  margin: 12px 0 0;
+  font-weight: 700;
+}
+.panel {
+  max-height: calc(100dvh - 24px);
+  overflow: auto;
+}
+/* F.4 markers are buttons: a 44 px tap area around each small dot */
+.scene-anim--markers {
+  pointer-events: none;
+}
+.anim-markers__dot {
+  pointer-events: auto;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+}
+.anim-markers__dot::before {
+  content: '';
+  position: absolute;
+  inset: -17px;
+}
+.anim-markers__dot:focus-visible .anim-markers__name,
+.anim-markers__dot:active .anim-markers__name {
+  display: block;
+  opacity: 1;
+  z-index: 2;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: rgba(20, 16, 30, 0.85);
+}
+/* ---------- text size (Settings): story words, cards and notes grow ---------- */
+:root {
+  --text-scale: 1;
+}
+html[data-text-size='2'] {
+  --text-scale: 1.15;
+}
+html[data-text-size='3'] {
+  --text-scale: 1.3;
+}
+.bubbles .bubble {
+  font-size: calc(clamp(15px, 1.7vw, 20px) * var(--text-scale));
+}
+.bubbles .bubble.narration,
+.bubbles .bubble.speech,
+.bubbles .bubble.voyager {
+  font-size: calc(clamp(15px, 1.7vw, 20px) * var(--text-scale));
+}
+.bubbles .bubble.spark {
+  font-size: calc(clamp(19px, 2.5vw, 30px) * var(--text-scale));
+}
+.moment__status,
+.moment__hint,
+.note-card__facts,
+.note-card__text,
+.credits,
+.settings__note {
+  font-size: calc(1rem * var(--text-scale));
+}
+/* Text over the picture gets its own dark pill, so it passes WCAG AA on any scene
+   (light Mars skies included): cream #fff3d1 on rgba(28,20,14,.82) is about 13:1. */
+.progress__count,
+.hotspots__hint,
+.cover__hint {
+  padding: 2px 8px 3px;
+  border-radius: 999px;
+  background: rgba(28, 20, 14, 0.82);
+  text-shadow: none;
+}
+.hotspots__hint {
+  flex-basis: auto;
+}
+/* Phones: Back / Next show only their arrows (their names are still read out), so
+   the speaker, the progress line and the gear fit between them. */
+@media (max-width: 479px) {
+  .controls__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .controls__btn {
+    min-width: 58px;
+  }
+  .controls {
+    gap: 6px;
+  }
+}
+.credits__link {
+  display: inline;
+  line-height: 1.7;
+}

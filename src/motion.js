@@ -1,7 +1,8 @@
 import { useSyncExternalStore } from 'react'
+import { useBook } from './store'
 
-// Reduced motion: the reader's OS setting (prefers-reduced-motion), or ?reduce=1 in
-// the URL for testing. Phase E adds the in-app setting on top of this.
+// Reduced motion: the in-app setting ('reduce' / 'full'), or when it is 'device', the
+// reader's OS setting (prefers-reduced-motion). ?reduce=1 in the URL forces it (tests).
 
 const QUERY = '(prefers-reduced-motion: reduce)'
 
@@ -16,14 +17,22 @@ function osAsks() {
 }
 
 export function prefersReducedMotion() {
-  return urlAsks() || osAsks()
+  if (urlAsks()) return true
+  const motion = useBook.getState().settings?.motion ?? 'device'
+  if (motion === 'reduce') return true
+  if (motion === 'full') return false
+  return osAsks()
 }
 
 function subscribe(onChange) {
-  if (typeof window === 'undefined' || !window.matchMedia) return () => {}
+  const unsub = useBook.subscribe(onChange)
+  if (typeof window === 'undefined' || !window.matchMedia) return unsub
   const mq = window.matchMedia(QUERY)
   mq.addEventListener?.('change', onChange)
-  return () => mq.removeEventListener?.('change', onChange)
+  return () => {
+    unsub()
+    mq.removeEventListener?.('change', onChange)
+  }
 }
 
 /** True when scenes should stay still: no parallax, boil, bob, fireflies or blur animation. */

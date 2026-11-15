@@ -83,8 +83,11 @@ try {
             for (let j = i + 1; j < parts.length; j++)
               if (overlap(parts[i], parts[j]) > 0) out.push('bottom controls overlap each other')
           if (parts.some((p) => p.right > vw + 1 || p.left < -1)) out.push('bottom controls go off-screen')
-          const buttons = [...controls.querySelectorAll('button')].map((b) => b.getBoundingClientRect())
-          if (buttons.some((b) => b.height < 48)) out.push('a control button is under 48 px tall')
+          // Back / Next are at least 48 px tall; every other control at least 44 px (touch target).
+          const big = [...controls.querySelectorAll('.controls__btn')].map((b) => b.getBoundingClientRect())
+          if (big.some((b) => b.height < 48)) out.push('Back or Next is under 48 px tall')
+          const small = [...controls.querySelectorAll('button')].map((b) => b.getBoundingClientRect())
+          if (small.some((b) => b.height < 44 || b.width < 44)) out.push('a control is smaller than 44 px')
         }
         return out
       })

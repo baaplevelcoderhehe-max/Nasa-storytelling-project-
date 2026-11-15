@@ -4,7 +4,9 @@
 //   node scripts/qa-shots.mjs 02-phaseB-scenes title test-moon test-mars test-space
 //
 // Page ids: "title" is the title screen; anything else is a state id from
-// public/story.json. The story's first page is reached by pressing Begin on the
+// public/story.json. Extras: "title-continue" (cover with a saved place), "settings"
+// and "credits" (the cards, opened from the cover), and suffixes on a page id:
+// "@text2" / "@text3" (text size), "@reduce" (reduced motion), e.g. moon-1@text3. The story's first page is reached by pressing Begin on the
 // title screen; every other page opens with ?page=<id>.
 //
 // Writes qa/screenshots/<folder>/:
@@ -116,15 +118,17 @@ async function shoot(browser, size, id, { start, reduced, file, errors }) {
     let seed = 42
     Math.random = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646
   })
+  const [base, mod] = id.split('@')
+  const onCover = ['title', 'title-continue', 'settings', 'credits'].includes(base)
   const query = new URLSearchParams()
-  if (id !== 'title' && id !== start) query.set('page', id)
-  if (reduced) query.set('reduce', '1')
+  if (!onCover && base !== start) query.set('page', base)
+  if (reduced || mod === 'reduce') query.set('reduce', '1')
   query.set('freeze', String(SETTLE_MS / 1000))
   const qs = query.toString()
   await page.goto(qs ? `${URL_BASE}?${qs}` : URL_BASE)
   await page.waitForLoadState('networkidle')
 
-  if (id !== 'title' && id === start) {
+  if (!onCover && base === start) {
     // The first page: press Begin like a reader does.
     await page.getByRole('button', { name: /begin/i }).click()
     // Make sure the title screen has really gone before going on.
@@ -142,13 +146,27 @@ async function shoot(browser, size, id, { start, reduced, file, errors }) {
   await page.waitForTimeout(300)
 
   // Wait for the frozen frame (the scene marks itself), then the 2 seconds.
-  const expected = id === 'title' ? 'title' : id
+  const expected = onCover ? 'title' : base
   const frozen = await page
     .waitForFunction((name) => document.body.dataset.qaFrozen === name, expected, { timeout: 15000 })
     .then(() => true)
     .catch(() => false)
   if (!frozen) unfrozen.add(id)
   await page.waitForTimeout(SETTLE_MS)
+
+  const book = (fn, arg) => page.evaluate(([f, a]) => window.__book?.getState()[f](a), [fn, arg])
+  if (base === 'title-continue') {
+    await book('setNav', { id: 'moon-3', flags: {}, counters: {}, visited: ['prologue-1', 'moon-3'], history: ['prologue-1'] })
+    await page.waitForTimeout(600)
+  }
+  if (base === 'settings' || base === 'credits') {
+    await page.getByRole('button', { name: base === 'settings' ? 'Settings' : 'Credits' }).click()
+    await page.waitForTimeout(600)
+  }
+  if (mod === 'text2' || mod === 'text3') {
+    await book('updateSettings', { textSize: Number(mod.slice(4)) })
+    await page.waitForTimeout(800)
+  }
 
   await page.screenshot({ path: file, animations: 'disabled' })
   await context.close()

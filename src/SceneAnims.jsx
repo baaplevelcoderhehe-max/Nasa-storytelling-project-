@@ -157,9 +157,18 @@ function Markers({ t }) {
       {EXPLORERS.map((name, i) => {
         const [x, y] = pos(i)
         return (
-          <span key={name} className={`anim-markers__dot${i < shown ? ' is-lit' : ''}${i % 2 ? '' : ' is-above'}`} style={{ left: `${x}%`, top: `${y}%` }}>
-            <span className="anim-markers__name">{name}</span>
-          </span>
+          // A button, so on phones and tablets tapping or focusing a dot shows its name.
+          <button
+            key={name}
+            type="button"
+            className={`anim-markers__dot${i < shown ? ' is-lit' : ''}${i % 2 ? '' : ' is-above'}`}
+            style={{ left: `${x}%`, top: `${y}%` }}
+            aria-label={name}
+          >
+            <span className="anim-markers__name" aria-hidden="true">
+              {name}
+            </span>
+          </button>
         )
       })}
     </div>

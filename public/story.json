@@ -299,7 +299,7 @@
           "style": "spark"
         },
         {
-          "text": "I am almost one light-day from home. Before you answer me, visit my friends. They went first. Wake their memories, and you'll understand why I'm still out here.",
+          "text": "I am {voyagerHome}. Before you answer me, visit my friends. They went first. Wake their memories, and you'll understand why I'm still out here.",
           "style": "voyager",
           "speaker": "Voyager 1",
           "delay": 1.2,
@@ -3824,7 +3824,7 @@
           "style": "spark"
         },
         {
-          "text": "On November 18, 2026, I reach one light-day from Earth, about 25.9 billion km. Your message will take a whole day to reach me. Send me one, Keeper.",
+          "text": "On November 18, 2026, {voyagerReach} one light-day from Earth, about 25.9 billion km. Your message will take a whole day to reach me. Send me one, Keeper.",
           "style": "voyager",
           "speaker": "Voyager 1",
           "delay": 1.2,
@@ -3861,6 +3861,10 @@
           "text": "Read again",
           "to": "prologue-1",
           "reset": true
+        },
+        {
+          "text": "Credits",
+          "open": "credits"
         }
       ],
       "layers": [

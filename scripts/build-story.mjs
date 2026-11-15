@@ -169,7 +169,8 @@ const spreads = [
     bubbles: [
       spark('Hello, Keeper.'),
       voyager(
-        "I am almost one light-day from home. Before you answer me, visit my friends. They went first. Wake their memories, and you'll understand why I'm still out here.",
+        // {voyagerHome} changes on November 18, 2026 (src/lightDay.js): "almost" before, "more than" after.
+        "I am {voyagerHome}. Before you answer me, visit my friends. They went first. Wake their memories, and you'll understand why I'm still out here.",
       ),
     ],
   },
@@ -748,7 +749,8 @@ const spreads = [
     layers: [hilltop(), kit('kit_typing', 'left', { x: -14, y: -32, height: 32, main: true, m: { x: -12, y: -27, height: 21 } }), echo('echo_excited', 'left', { x: 4, y: -33, height: 12, m: { x: 14, y: -28, height: 8.5 } })],
     bubbles: [
       spark('Now you can answer me.'),
-      voyager('On November 18, 2026, I reach one light-day from Earth, about 25.9 billion km. Your message will take a whole day to reach me. Send me one, Keeper.'),
+      // {voyagerReach}: "I will reach" before November 18, 2026, "I reached" from that day (src/lightDay.js).
+      voyager('On November 18, 2026, {voyagerReach} one light-day from Earth, about 25.9 billion km. Your message will take a whole day to reach me. Send me one, Keeper.'),
     ],
   },
   {
@@ -757,7 +759,10 @@ const spreads = [
     alt: 'Kit and Echo sitting on the hill under a sky full of stars. Small glowing markers appear across the sky for every explorer they met. Echo leans against Kit.',
     fireflies: { count: 30, radius: 80, colors: ['yellow', 'orange'] },
     next: null,
-    choices: [{ text: 'Read again', to: 'prologue-1', reset: true }],
+    choices: [
+      { text: 'Read again', to: 'prologue-1', reset: true },
+      { text: 'Credits', open: 'credits' },
+    ],
     layers: [hilltop(), kit('kit_sad', 'left', { x: 14, y: -26, height: 24, main: true, m: { x: -12, y: -27, height: 16 } }), echo('echo_happy', 'left', { x: 26, y: -26, height: 11, m: { x: 4, y: -27.5, height: 8 } })],
     bubbles: [
       spark("They're quiet now. But they're still out there."),

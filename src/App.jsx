@@ -5,9 +5,13 @@ import TitleScreen from './TitleScreen'
 import Choices from './Choices'
 import Interacts from './Interacts'
 import SceneAnim from './SceneAnims'
-import { play as sfx } from './sound'
+import { play as sfx, setMusicVolume, setSoundEnabled } from './sound'
 import PageControls from './ui/PageControls'
+import Settings from './ui/Settings'
+import Credits from './ui/Credits'
 import { useReducedMotion } from './motion'
+import { lightDayWords } from './lightDay'
+import { selectHasSave, useBook } from './store'
 import {
   applyEffects,
   derivedCounters,
@@ -19,23 +23,42 @@ import {
 
 // Story navigation is a small state machine over story.json's state graph:
 //   { id, flags, counters, visited[], history[] }
+// It lives in the saved store (src/store.js), so a refresh keeps the reader's place.
 // `flags` drive conditions/interpolation, `counters` track progress, `history`
 // powers the Back button.
 export default function App() {
   const [story, setStory] = useState(null)
   const [error, setError] = useState(null)
   const [play, setPlay] = useState(false)
-  const [nav, setNav] = useState(null)
+  const [panel, setPanel] = useState(null) // 'settings' | 'credits' | null
   const [autoOpen, setAutoOpen] = useState(null)
   const [pendingTo, setPendingTo] = useState(null)
+
+  const nav = useBook((s) => s.nav)
+  const setNav = useBook((s) => s.setNav)
+  const startAt = useBook((s) => s.start)
+  const clearProgress = useBook((s) => s.clearProgress)
+  const hasSave = useBook(selectHasSave)
+  const sound = useBook((s) => s.settings.sound)
+  const musicVolume = useBook((s) => s.settings.musicVolume)
+  const textSize = useBook((s) => s.settings.textSize)
+  const readAloud = useBook((s) => s.settings.readAloud)
+
   useEffect(() => {
     setAutoOpen(null)
     setPendingTo(null)
   }, [nav?.id])
+
+  // Settings take effect everywhere.
   const reduced = useReducedMotion()
   useEffect(() => {
     document.documentElement.dataset.reduce = reduced ? '1' : '0'
   }, [reduced])
+  useEffect(() => {
+    document.documentElement.dataset.textSize = String(textSize)
+  }, [textSize])
+  useEffect(() => setSoundEnabled(sound), [sound])
+  useEffect(() => setMusicVolume(musicVolume / 100), [musicVolume])
 
   useEffect(() => {
     fetch('/story.json')
@@ -45,11 +68,13 @@ export default function App() {
       })
       .then((s) => {
         setStory(s)
-        // ?page=<state id> opens that page straight away (for testing and screenshots).
+        // ?page=<state id> opens that page straight away (tests and screenshots;
+        // such links never touch the reader's save).
         const jump = new URLSearchParams(window.location.search).get('page')
-        const first = jump && s.states[jump] ? jump : s.start
-        setNav({ id: first, flags: {}, counters: {}, visited: [first], history: [] })
-        if (jump && s.states[jump]) setPlay(true)
+        if (jump && s.states[jump]) {
+          useBook.getState().start(jump)
+          setPlay(true)
+        }
       })
       .catch((e) => setError(e.message))
   }, [])
@@ -59,7 +84,7 @@ export default function App() {
   // test pages are not in it). Without it, every non-test state counts.
   const order = story?.order ?? Object.keys(states).filter((id) => !states[id]._test)
   const total = order.length
-  const current = nav ? states[nav.id] : null
+  const current = nav && play ? states[nav.id] : null
 
   // Quiet pages: a class on <body> lets the CSS calm things down.
   const quietPage = play && !!current?.quiet
@@ -90,7 +115,7 @@ export default function App() {
         history: [...nav.history, nav.id],
       })
     },
-    [nav, states, counters],
+    [nav, states, counters, setNav],
   )
 
   const back = useCallback(() => {
@@ -98,15 +123,19 @@ export default function App() {
     sfx('back', { gain: 0.45, jitter: 0.12 })
     const prev = nav.history[nav.history.length - 1]
     setNav({ ...nav, id: prev, history: nav.history.slice(0, -1) })
-  }, [nav])
+  }, [nav, setNav])
 
-  // Choice / input submit. `reset` restarts the book from the first state.
+  // Choice / input submit. `reset` restarts the book (settings stay); `open` opens a panel.
   const choose = useCallback(
     (choice) => {
       if (!choice || !nav) return
+      if (choice.open) {
+        setPanel(choice.open)
+        return
+      }
       if (choice.reset) {
         sfx('confirm', { gain: 0.4, jitter: 0.08 })
-        setNav({ id: story.start, flags: {}, counters: {}, visited: [story.start], history: [] })
+        startAt(story.start)
         return
       }
       sfx('click', { gain: 0.25 })
@@ -120,16 +149,19 @@ export default function App() {
       }
       go(choice.to, choice.set)
     },
-    [nav, story, go],
+    [nav, story, go, setNav, startAt],
   )
 
   useEffect(() => {
-    if (!play) return // arrows/space do nothing on the title screen
+    if (!play) return undefined // arrows/space do nothing on the title screen
     const onKey = (e) => {
-      if (e.target instanceof HTMLElement && /^(INPUT|TEXTAREA|BUTTON|SELECT)$/.test(e.target.tagName)) return
-      // While a tap moment or a note is open, its own keys win (arrows steer, Space holds).
+      if (e.target instanceof HTMLElement && /^(INPUT|TEXTAREA|BUTTON|SELECT|A)$/.test(e.target.tagName)) return
+      // While a card (tap moment, note, settings, credits) is open, its own keys win.
       if (document.querySelector('.moment-backdrop')) return
-      if (e.key === 'ArrowRight' || e.key === ' ') current?.next && go(current.next)
+      if (e.key === 'ArrowRight' || e.key === ' ') {
+        e.preventDefault()
+        if (current?.next) go(current.next)
+      }
       if (e.key === 'ArrowLeft') back()
     }
     window.addEventListener('keydown', onKey)
@@ -137,8 +169,10 @@ export default function App() {
   }, [play, current, go, back])
 
   if (error) return <div className="status">Could not load story: {error}</div>
-  if (!story || !nav) return <div className="status">Opening book…</div>
+  if (!story) return <div className="status">Opening book…</div>
 
+  // Words that change with the date ({voyagerHome}, {voyagerReach}), plus the flags.
+  const vars = { ...(nav?.flags ?? {}), ...lightDayWords() }
   // States are keyed by id in the JSON but the objects themselves don't carry
   // one; Scene keys its renderer on page.id, so attach it here.
   const scene = current ? { ...current, id: nav.id } : null
@@ -147,14 +181,23 @@ export default function App() {
   const bubbles = current
     ? filterBubbles(current.bubbles, nav.flags, counters).map((b) => ({
         ...b,
-        text: formatText(b.text, nav.flags, counters),
+        text: formatText(b.text, vars, counters),
         delay: (b.delay ?? 0) + chapterDelay,
       }))
     : []
+  const pageText = bubbles
+    .map((b) => (b.speaker ? `${b.speaker}: ${b.text}` : b.text))
+    .filter(Boolean)
+    .join(' ')
+  // Read aloud: the Spark and the Story (and Voyager's lines), in reading order.
+  const readText = bubbles
+    .map((b) => b.text)
+    .filter(Boolean)
+    .join(' ')
   const choices = current ? visibleChoices(current, nav.flags, counters) : []
   // Page number in the book: this spread's place in story.order (on the hub, the
   // last spread read before it).
-  const lastInBook = [nav.id, ...nav.history.slice().reverse()].find((id) => order.includes(id))
+  const lastInBook = nav ? [nav.id, ...nav.history.slice().reverse()].find((id) => order.includes(id)) : null
   const position = lastInBook ? order.indexOf(lastInBook) + 1 : 1
   const nextId = current?.next ?? null
   // The pages a reader can turn to next, so their images load ahead of time.
@@ -163,6 +206,12 @@ export default function App() {
         .filter((id) => id && states[id])
         .map((id) => states[id])
     : []
+  const sceneAlt = current?.alt ?? story.cover?.alt ?? story.title
+
+  const openBook = (id) => {
+    startAt(id)
+    setPlay(true)
+  }
 
   return (
     <>
@@ -170,27 +219,41 @@ export default function App() {
         <TitleScreen
           title={story.title}
           subtitle={story.subtitle}
-          onStart={() => setPlay(true)}
+          hasSave={hasSave}
+          panelOpen={!!panel}
+          onStart={() => openBook(story.start)}
+          onContinue={() => {
+            if (nav && states[nav.id]) setPlay(true)
+            else openBook(story.start)
+          }}
+          onStartOver={() => {
+            clearProgress()
+            openBook(story.start)
+          }}
+          onSettings={() => setPanel('settings')}
+          onCredits={() => setPanel('credits')}
         />
       )}
 
-      <div className="scene">
+      {/* The picture: described in words for screen readers ("alt" on every page). */}
+      <div className="scene" role="img" aria-label={sceneAlt}>
         <Suspense fallback={<div className="status">Turning page…</div>}>
-          <Scene page={scene} cover={story.cover} isPlaying={play} upcoming={upcoming} />
+          <Scene page={scene} cover={story.cover} isPlaying={play && !!current} upcoming={upcoming} />
         </Suspense>
       </div>
 
-      {play && (
-        <Bubbles
-          key={`${nav.id}:${nav.history.length}`}
-          quiet={!!current?.quiet}
-          bubbles={bubbles}
-        />
+      {/* Each page's words, announced in reading order. */}
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
+        {play && current ? pageText : ''}
+      </div>
+
+      {play && current && (
+        <Bubbles key={`${nav.id}:${nav.history.length}`} quiet={!!current?.quiet} bubbles={bubbles} />
       )}
 
       {play && current?.anim && <SceneAnim key={`anim:${nav.id}`} anim={current.anim} pageKey={nav.id} />}
 
-      {play && (current?.interacts?.length > 0) && (
+      {play && current?.interacts?.length > 0 && (
         <Interacts
           interacts={current.interacts}
           pageKey={nav.id}
@@ -209,11 +272,11 @@ export default function App() {
         </div>
       )}
 
-      {play && (choices.length > 0 || current?.input) && (
+      {play && current && (choices.length > 0 || current?.input) && (
         <Choices key={nav.id} state={{ ...current, choices }} onChoose={choose} />
       )}
 
-      {play && (
+      {play && current && (
         <PageControls
           position={position}
           total={total}
@@ -221,8 +284,15 @@ export default function App() {
           canNext={!!nextId}
           onBack={back}
           onNext={() => go(nextId)}
+          onSettings={() => setPanel('settings')}
+          readText={readText}
+          readAloud={readAloud}
+          pageKey={nav.id}
         />
       )}
+
+      {panel === 'settings' && <Settings onClose={() => setPanel(null)} />}
+      {panel === 'credits' && <Credits onClose={() => setPanel(null)} />}
     </>
   )
 }

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { initSound, play, startMusic, stopMusic } from './sound'
+import Panel from './ui/Panel'
 
 // The book's cover. The picture behind it is the opening scene (the hill, the dish,
 // Kit and Echo), the same scene prologue-1 uses, so pressing Begin only fades the
@@ -18,38 +19,31 @@ const TITLE_STARS = [
   [101, 48, 8, 1.1],
 ]
 
-function PaperPanel({ title, onClose }) {
-  return (
-    <div className="paper-panel" role="dialog" aria-modal="true" aria-label={title}>
-      <div className="paper-panel__card">
-        <h2 className="paper-panel__title">{title}</h2>
-        <p className="paper-panel__text">Coming soon.</p>
-        <button type="button" className="crayon-btn paper-panel__close" onClick={onClose} autoFocus>
-          Close
-        </button>
-      </div>
-    </div>
-  )
-}
-
 export default function TitleScreen({
   title,
   subtitle = "NASA's explorers, still out there",
   hasSave = false,
   onStart,
   onContinue,
+  onStartOver,
+  onSettings,
+  onCredits,
+  panelOpen = false,
 }) {
   const [leaving, setLeaving] = useState(false)
-  const [panel, setPanel] = useState(null)
+  const [confirm, setConfirm] = useState(false)
 
-  const start = (resume) => {
+  /** mode: 'begin' | 'continue' | 'over' */
+  const start = (mode) => {
     if (leaving) return
     setLeaving(true)
+    setConfirm(false)
     initSound() // browser requires audio to start from a user gesture
     stopMusic(2.5)
     play('click', { gain: 0.25 })
     // The words fade out first; then the story begins in the same scene.
-    setTimeout(resume && onContinue ? onContinue : onStart, FADE_MS)
+    const next = mode === 'continue' ? onContinue : mode === 'over' ? onStartOver : onStart
+    setTimeout(next, FADE_MS)
   }
 
   // Browsers block audio before a gesture: the ambience starts on the first
@@ -68,11 +62,11 @@ export default function TitleScreen({
   // Enter opens the book from anywhere on the cover. (Space only works on the
   // focused button, so it never fires twice.)
   useEffect(() => {
-    if (panel) return undefined
+    if (panelOpen || confirm) return undefined
     const onKey = (e) => {
-      if (e.key === 'Enter' && !(e.target instanceof HTMLButtonElement)) {
+      if (e.key === 'Enter' && !(e.target instanceof HTMLElement && /^(BUTTON|INPUT|A)$/.test(e.target.tagName))) {
         e.preventDefault()
-        start(false)
+        start(hasSave ? 'continue' : 'begin')
       }
     }
     window.addEventListener('keydown', onKey)
@@ -82,10 +76,10 @@ export default function TitleScreen({
   return (
     <div className={`cover ${leaving ? 'cover--leaving' : ''}`}>
       <nav className="cover__tags" aria-label="More">
-        <button type="button" className="paper-tag" onClick={() => setPanel('Settings')}>
+        <button type="button" className="paper-tag" onClick={onSettings}>
           Settings
         </button>
-        <button type="button" className="paper-tag paper-tag--b" onClick={() => setPanel('Credits')}>
+        <button type="button" className="paper-tag paper-tag--b" onClick={onCredits}>
           Credits
         </button>
       </nav>
@@ -124,21 +118,33 @@ export default function TitleScreen({
 
       <div className="cover__middle">
         {hasSave && (
-          <button type="button" className="crayon-btn cover__begin" onClick={() => start(true)}>
+          <button type="button" className="crayon-btn cover__begin" onClick={() => start('continue')}>
             Continue
           </button>
         )}
         <button
           type="button"
           className={`crayon-btn cover__begin${hasSave ? ' cover__begin--second' : ''}`}
-          onClick={() => start(false)}
+          onClick={() => (hasSave ? setConfirm(true) : start('begin'))}
         >
           {hasSave ? 'Start over' : 'Begin'}
         </button>
         <p className="cover__hint">tap or press Enter</p>
       </div>
 
-      {panel && <PaperPanel title={panel} onClose={() => setPanel(null)} />}
+      {confirm && (
+        <Panel title="Are you sure?" onClose={() => setConfirm(false)}>
+          <p className="note-card__text">Starting over clears your place in the book. Your settings stay the same.</p>
+          <div className="moment__row">
+            <button type="button" className="crayon-btn moment__btn" onClick={() => setConfirm(false)}>
+              Keep my place
+            </button>
+            <button type="button" className="crayon-btn moment__btn" onClick={() => start('over')}>
+              Start over
+            </button>
+          </div>
+        </Panel>
+      )}
     </div>
   )
 }

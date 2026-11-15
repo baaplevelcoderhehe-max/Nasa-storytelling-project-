@@ -58,6 +58,7 @@ export function initSound() {
     master = ctx.createGain()
     master.gain.value = enabled ? volume : 0
     master.connect(ctx.destination)
+    if (musicWanted) startMusic()
   } catch {
     // No audio on this device: every play() stays a silent no-op.
     ctx = null
@@ -144,9 +145,10 @@ export function play(name, { gain = 1, rate = 1, jitter = 0, delay = 0 } = {}) {
 // ---------- ambient music (title screen) ----------
 
 const MUSIC_URL = '/ambient-music.ogg'
-const MUSIC_VOLUME = 0.6
+let musicVolume = 0.6 // set from the Settings screen (setMusicVolume)
 
 let musicSrc = null
+let musicLoading = false
 let musicGain = null
 let musicWanted = false
 let musicStopTimer = null
@@ -155,10 +157,15 @@ let musicStopTimer = null
 // block audio before a gesture, so if the context is still suspended the loop
 // starts silently and fades in as soon as the first gesture resumes it.
 export function startMusic({ fadeInSeconds = 3 } = {}) {
-  if (!ctx) initSound()
-  if (musicSrc || musicWanted) return
+  if (musicSrc) return
   musicWanted = true
+  // No audio before the reader's first tap or key press (browsers block it and warn):
+  // initSound() starts the music then.
+  if (!ctx) return
+  if (musicLoading) return
+  musicLoading = true
   loadFile(MUSIC_URL).then((buf) => {
+    musicLoading = false
     if (!buf || !ctx || !musicWanted || musicSrc) return
     musicGain = ctx.createGain()
     musicGain.gain.value = 0
@@ -171,7 +178,7 @@ export function startMusic({ fadeInSeconds = 3 } = {}) {
     const t = ctx.currentTime
     musicGain.gain.cancelScheduledValues(t)
     musicGain.gain.setValueAtTime(0, t)
-    musicGain.gain.linearRampToValueAtTime(MUSIC_VOLUME, t + fadeInSeconds)
+    musicGain.gain.linearRampToValueAtTime(musicVolume, t + fadeInSeconds)
   })
 }
 
@@ -197,4 +204,10 @@ export function stopMusic(fadeSeconds = 2.5) {
     src.disconnect()
     g.disconnect()
   }, fadeSeconds * 1000 + 300)
+}
+
+/** Music volume, 0-1 (Settings). Applies straight away if the music is playing. */
+export function setMusicVolume(value) {
+  musicVolume = Math.max(0, Math.min(1, value))
+  if (ctx && musicGain) musicGain.gain.setTargetAtTime(musicVolume, ctx.currentTime, 0.1)
 }
