@@ -382,7 +382,11 @@ async function makeVariant(variant, outDir) {
 // ---------- main ----------
 
 async function main() {
-  await rm(OUT, { recursive: true, force: true })
+  // Clear only the folders this script writes; the still cover pictures in public/art
+  // (cover-landscape.webp, cover-portrait.webp) are made by hand and stay.
+  for (const group of new Set([...Object.values(GROUPS), 'backgrounds'])) {
+    await rm(path.join(OUT, group), { recursive: true, force: true })
+  }
   const art = {}
   const report = []
   let total = 0
